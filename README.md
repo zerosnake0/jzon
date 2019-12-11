@@ -1,5 +1,7 @@
 # jzon
 
+![](https://github.com/zerosnake0/jzon/workflows/Test/badge.svg)
+
 ## Why another jsoniter?
 
 The code I write here is very similar to [github.com/json-iterator/go](https://github.com/json-iterator/go),
