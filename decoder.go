@@ -7,9 +7,7 @@ import (
 )
 
 var (
-	DefaultDecoder = NewDecoder(&DecoderOption{
-		//
-	})
+	DefaultDecoder = NewDecoder(nil)
 )
 
 type DecoderOption struct {
@@ -36,20 +34,21 @@ type Decoder struct {
 }
 
 func NewDecoder(opt *DecoderOption) *Decoder {
-	var dec Decoder
+	dec := Decoder{
+		tag: "json",
+	}
 	// add decoders to cache
-	m := decoderCache{}
+	cache := decoderCache{}
 	if opt != nil {
 		for elemTyp, valDec := range opt.ValDecoders {
-			m[rtypeOfType(reflect.PtrTo(elemTyp))] = valDec
+			cache[rtypeOfType(reflect.PtrTo(elemTyp))] = valDec
 		}
 		dec.caseSensitive = opt.CaseSensitive
-		dec.tag = opt.Tag
+		if opt.Tag != "" {
+			dec.tag = opt.Tag
+		}
 	}
-	if dec.tag == "" {
-		dec.tag = "json"
-	}
-	dec.decoderCache.Store(m)
+	dec.decoderCache.Store(cache)
 	return &dec
 }
 

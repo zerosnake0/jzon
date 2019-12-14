@@ -21,9 +21,9 @@ func (w *badWriter) Write(data []byte) (int, error) {
 	return n, nil
 }
 
-func testStreamer(t *testing.T, exp string, cb func(s *Streamer)) {
-	streamer := NewStreamer()
-	defer ReturnStreamer(streamer)
+func testStreamerWithEncoder(t *testing.T, enc *Encoder, exp string, cb func(s *Streamer)) {
+	streamer := enc.NewStreamer()
+	defer enc.ReturnStreamer(streamer)
 	b := bytes.NewBuffer(nil)
 	streamer.Reset(b)
 	cb(streamer)
@@ -32,6 +32,10 @@ func testStreamer(t *testing.T, exp string, cb func(s *Streamer)) {
 	s := b.String()
 	require.Equalf(t, exp, s, "expect %q but got %q", exp, s)
 	t.Logf("got %q", s)
+}
+
+func testStreamer(t *testing.T, exp string, cb func(s *Streamer)) {
+	testStreamerWithEncoder(t, DefaultEncoder, exp, cb)
 }
 
 func TestStreamer_Flush(t *testing.T) {
