@@ -96,6 +96,13 @@ func (s *Streamer) ObjectStart() *Streamer {
 	return s
 }
 
+func (s *Streamer) Field(field string) *Streamer {
+	s.onVal()
+	s.string(field)
+	s.buffer = append(s.buffer, ':')
+	return s
+}
+
 func (s *Streamer) ObjectEnd() *Streamer {
 	s.buffer = append(s.buffer, '}')
 	s.poped = true

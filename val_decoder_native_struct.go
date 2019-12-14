@@ -90,7 +90,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator) (err error) {
 		if err != nil {
 			return err
 		}
-		stField := dec.fields[*(*string)(unsafe.Pointer(&field))]
+		stField := dec.fields[localByteToString(field)]
 		if stField != nil {
 			fieldPtr := add(ptr, stField.offset, "struct field")
 			if err = stField.decoder.Decode(fieldPtr, it); err != nil {

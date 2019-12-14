@@ -2,10 +2,10 @@ package jzon
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"strings"
 )
 
 func TestStreamer(t *testing.T) {

@@ -56,7 +56,7 @@ func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		}
 		it.capture = oldCapture
 		buf := it.buffer[begin : it.head-1]
-		data, err := base64.StdEncoding.DecodeString(*(*string)(unsafe.Pointer(&buf)))
+		data, err := base64.StdEncoding.DecodeString(localByteToString(buf))
 		if err != nil {
 			return err
 		}

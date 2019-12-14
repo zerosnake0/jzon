@@ -3,7 +3,6 @@ package jzon
 import (
 	"io"
 	"strconv"
-	"unsafe"
 )
 
 func (it *Iterator) readFloat64(c byte) (float64, error) {
@@ -32,7 +31,7 @@ func (it *Iterator) ReadFloat64() (float64, error) {
 }
 
 func (it *Iterator) parseFloat64(buf []byte) (ret float64, err error) {
-	return strconv.ParseFloat(*(*string)(unsafe.Pointer(&buf)), 64)
+	return strconv.ParseFloat(localByteToString(buf), 64)
 }
 
 func (it *Iterator) readFloat64ExponentPart(buf []byte) (ret float64, _ []byte, err error) {
