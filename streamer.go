@@ -21,6 +21,10 @@ func ReturnStreamer(s *Streamer) {
 	DefaultEncoder.ReturnStreamer(s)
 }
 
+func (s *Streamer) reset() {
+	s.writer = nil
+}
+
 func (s *Streamer) Reset(w io.Writer) {
 	s.writer = w
 }
@@ -100,6 +104,7 @@ func (s *Streamer) Field(field string) *Streamer {
 	s.onVal()
 	s.string(field)
 	s.buffer = append(s.buffer, ':')
+	s.poped = false
 	return s
 }
 
