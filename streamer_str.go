@@ -4,6 +4,12 @@ var (
 	hex = "0123456789abcdef"
 )
 
+func (s *Streamer) String(str string) *Streamer {
+	s.onVal()
+	s.string(str)
+	return s
+}
+
 func (s *Streamer) string(str string) {
 	s.buffer = append(s.buffer, '"') // leading quote
 	l := len(str)
