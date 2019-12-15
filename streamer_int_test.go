@@ -156,3 +156,29 @@ func TestStreamer_Uint64(t *testing.T) {
 		f(t, 1023045067089000)
 	})
 }
+
+func TestStreamer_Int(t *testing.T) {
+	f := func(t *testing.T, i int) {
+		exp, err := json.Marshal(i)
+		require.NoError(t, err)
+		testStreamer(t, string(exp), func(s *Streamer) {
+			s.Int(i)
+		})
+	}
+	t.Run("test", func(t *testing.T) {
+		f(t, math.MaxInt32)
+	})
+}
+
+func TestStreamer_Uint(t *testing.T) {
+	f := func(t *testing.T, i uint) {
+		exp, err := json.Marshal(i)
+		require.NoError(t, err)
+		testStreamer(t, string(exp), func(s *Streamer) {
+			s.Uint(i)
+		})
+	}
+	t.Run("test", func(t *testing.T) {
+		f(t, math.MaxUint32)
+	})
+}

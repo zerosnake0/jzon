@@ -190,3 +190,11 @@ func (s *Streamer) Uint64(v uint64) *Streamer {
 	s.uint64(v)
 	return s
 }
+
+func (s *Streamer) Int(v int) *Streamer {
+	return s.Int64(int64(v))
+}
+
+func (s *Streamer) Uint(v uint) *Streamer {
+	return s.Uint64(uint64(v))
+}
