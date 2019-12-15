@@ -1,19 +1,41 @@
 package jzon
 
 import (
+	"bytes"
 	"encoding/json"
+	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
-func testStreamerString(t *testing.T, s string) {
-	v, err := json.Marshal(s)
-	require.NoError(t, err)
+var (
+	noEscapeEncoder = NewEncoder(&EncoderOption{
+		EscapeHTML: false,
+	})
+)
 
-	testStreamer(t, string(v), func(streamer *Streamer) {
+func testStreamerStringEscape(t *testing.T, s string, escape bool) {
+	var (
+		enc *Encoder
+		b   bytes.Buffer
+	)
+	jsEnc := json.NewEncoder(&b)
+	jsEnc.SetEscapeHTML(escape)
+	jsEnc.Encode(s)
+	if escape {
+		enc = DefaultEncoder
+	} else {
+		enc = noEscapeEncoder
+	}
+	// json.Encoder will add a newline at the end
+	exp := strings.TrimSpace(b.String())
+	testStreamerWithEncoder(t, enc, exp, func(streamer *Streamer) {
 		streamer.String(s)
 	})
+}
+
+func testStreamerString(t *testing.T, s string) {
+	testStreamerStringEscape(t, s, true)
+	testStreamerStringEscape(t, s, false)
 }
 
 func TestStreamer_String(t *testing.T) {

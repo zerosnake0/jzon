@@ -97,8 +97,23 @@ func (s *Streamer) stringHtml(str string) {
 				offset = i
 			}
 		} else { // c >= 0x80
-			// TODO:
-			i++
+			s.buffer = append(s.buffer, str[offset:i]...)
+			r, size := utf8.DecodeRuneInString(str[i:])
+			if r == utf8.RuneError {
+				// we must have size == 1 here
+				// because the input is not empty
+				s.buffer = append(s.buffer, '\\', 'u',
+					'f', 'f', 'f', 'd')
+				i += 1
+				offset = i
+			} else if r == '\u2028' || r == '\u2029' {
+				s.buffer = append(s.buffer, '\\', 'u',
+					'2', '0', '2', hex[r&0xF])
+				i += size
+				offset = i
+			} else {
+				i += size
+			}
 		}
 	}
 	s.buffer = append(s.buffer, str[offset:i]...)
