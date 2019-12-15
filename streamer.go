@@ -10,7 +10,8 @@ type Streamer struct {
 	writer io.Writer
 	buffer []byte
 
-	poped bool
+	poped   bool
+	safeSet []string
 }
 
 func NewStreamer() *Streamer {

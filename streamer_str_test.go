@@ -75,4 +75,13 @@ func TestStreamer_String_Html(t *testing.T) {
 	t.Run("and", func(t *testing.T) {
 		testStreamerString(t, "&")
 	})
+	t.Run("rune error", func(t *testing.T) {
+		testStreamerString(t, "\xFF")
+	})
+	t.Run("2028", func(t *testing.T) {
+		testStreamerString(t, "\u2028")
+	})
+	t.Run("2029", func(t *testing.T) {
+		testStreamerString(t, "\u2029")
+	})
 }
