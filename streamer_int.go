@@ -40,6 +40,9 @@ func (s *Streamer) uint8(v uint8) {
 }
 
 func (s *Streamer) Int8(v int8) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	if v < 0 {
 		s.buffer = append(s.buffer, '-')
@@ -51,6 +54,9 @@ func (s *Streamer) Int8(v int8) *Streamer {
 }
 
 func (s *Streamer) Uint8(v uint8) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.uint8(v)
 	return s
@@ -68,6 +74,9 @@ func (s *Streamer) uint16(v uint16) {
 }
 
 func (s *Streamer) Int16(v int16) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	if v < 0 {
 		s.buffer = append(s.buffer, '-')
@@ -79,6 +88,9 @@ func (s *Streamer) Int16(v int16) *Streamer {
 }
 
 func (s *Streamer) Uint16(v uint16) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.uint16(v)
 	return s
@@ -112,6 +124,9 @@ func (s *Streamer) uint32(v uint32) {
 }
 
 func (s *Streamer) Int32(v int32) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	if v < 0 {
 		s.buffer = append(s.buffer, '-')
@@ -123,6 +138,9 @@ func (s *Streamer) Int32(v int32) *Streamer {
 }
 
 func (s *Streamer) Uint32(v uint32) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.uint32(v)
 	return s
@@ -175,6 +193,9 @@ func (s *Streamer) uint64(v uint64) {
 }
 
 func (s *Streamer) Int64(v int64) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	if v < 0 {
 		s.buffer = append(s.buffer, '-')
@@ -186,6 +207,9 @@ func (s *Streamer) Int64(v int64) *Streamer {
 }
 
 func (s *Streamer) Uint64(v uint64) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.uint64(v)
 	return s

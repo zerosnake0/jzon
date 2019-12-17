@@ -10,6 +10,7 @@ type Streamer struct {
 	writer io.Writer
 	buffer []byte
 
+	Error   error
 	poped   bool
 	safeSet []string
 }
@@ -24,6 +25,7 @@ func ReturnStreamer(s *Streamer) {
 
 func (s *Streamer) reset() {
 	s.writer = nil
+	s.Error = nil
 }
 
 func (s *Streamer) Reset(w io.Writer) {
@@ -31,6 +33,9 @@ func (s *Streamer) Reset(w io.Writer) {
 }
 
 func (s *Streamer) Flush() error {
+	if s.Error != nil {
+		return s.Error
+	}
 	if s.writer == nil {
 		return NoWriterAttachedError
 	}
@@ -57,30 +62,45 @@ func (s *Streamer) onVal() {
 }
 
 func (s *Streamer) RawString(raw string) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.buffer = append(s.buffer, raw...)
 	return s
 }
 
 func (s *Streamer) Raw(raw []byte) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.buffer = append(s.buffer, raw...)
 	return s
 }
 
 func (s *Streamer) Null() *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.buffer = append(s.buffer, 'n', 'u', 'l', 'l')
 	return s
 }
 
 func (s *Streamer) True() *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.buffer = append(s.buffer, 't', 'r', 'u', 'e')
 	return s
 }
 
 func (s *Streamer) False() *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.buffer = append(s.buffer, 'f', 'a', 'l', 's', 'e')
 	return s
@@ -95,6 +115,9 @@ func (s *Streamer) Bool(b bool) *Streamer {
 }
 
 func (s *Streamer) ObjectStart() *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.buffer = append(s.buffer, '{')
 	s.poped = false
@@ -102,6 +125,9 @@ func (s *Streamer) ObjectStart() *Streamer {
 }
 
 func (s *Streamer) Field(field string) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.string(field)
 	s.buffer = append(s.buffer, ':')
@@ -110,12 +136,18 @@ func (s *Streamer) Field(field string) *Streamer {
 }
 
 func (s *Streamer) ObjectEnd() *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.buffer = append(s.buffer, '}')
 	s.poped = true
 	return s
 }
 
 func (s *Streamer) ArrayStart() *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.buffer = append(s.buffer, '[')
 	s.poped = false
@@ -123,6 +155,9 @@ func (s *Streamer) ArrayStart() *Streamer {
 }
 
 func (s *Streamer) ArrayEnd() *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.buffer = append(s.buffer, ']')
 	s.poped = true
 	return s

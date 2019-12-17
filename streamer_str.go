@@ -30,6 +30,9 @@ var (
 )
 
 func (s *Streamer) String(str string) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	s.onVal()
 	s.string(str)
 	return s

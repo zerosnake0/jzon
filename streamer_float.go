@@ -5,22 +5,32 @@ import (
 )
 
 func (s *Streamer) Float32(f float32) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	if math.IsInf(float64(f), 0) {
-		panic(FloatIsInfinity)
+		s.Error = FloatIsInfinity
+		return s
 	}
 	if math.IsNaN(float64(f)) {
-		panic(FloatIsNan)
+		s.Error = FloatIsNan
+		return s
 	}
 	// TODO:
 	return s
 }
 
 func (s *Streamer) Float64(f float64) *Streamer {
+	if s.Error != nil {
+		return s
+	}
 	if math.IsInf(f, 0) {
-		panic(FloatIsInfinity)
+		s.Error = FloatIsInfinity
+		return s
 	}
 	if math.IsNaN(f) {
-		panic(FloatIsNan)
+		s.Error = FloatIsNan
+		return s
 	}
 	// TODO:
 	return s
