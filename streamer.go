@@ -79,12 +79,16 @@ func (s *Streamer) Raw(raw []byte) *Streamer {
 	return s
 }
 
+func (s *Streamer) null() {
+	s.onVal()
+	s.buffer = append(s.buffer, 'n', 'u', 'l', 'l')
+}
+
 func (s *Streamer) Null() *Streamer {
 	if s.Error != nil {
 		return s
 	}
-	s.onVal()
-	s.buffer = append(s.buffer, 'n', 'u', 'l', 'l')
+	s.null()
 	return s
 }
 

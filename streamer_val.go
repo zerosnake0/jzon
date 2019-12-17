@@ -5,7 +5,9 @@ func (s *Streamer) Value(o interface{}) *Streamer {
 		return s
 	}
 	if o == nil {
-		return s.Null()
+		s.null()
+		return s
 	}
+	// TODO:
 	return s
 }
