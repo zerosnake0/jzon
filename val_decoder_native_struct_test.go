@@ -231,3 +231,18 @@ func TestValDedocer_Native_Struct_Tag(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "c", p.A)
 }
+
+func TestValDecoder_Native_Struct_Embedded(t *testing.T) {
+	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
+		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+	}
+	t.Run("embedded pointer (nil)", func(t *testing.T) {
+		type inner struct {
+			A int `json:"a"`
+		}
+		type outer struct {
+			*inner
+		}
+		f(t, `{"a":1}`, nil, &outer{}, &outer{})
+	})
+}

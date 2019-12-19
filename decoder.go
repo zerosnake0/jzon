@@ -88,7 +88,7 @@ func (dec *Decoder) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder 
 }
 
 func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []reflect.Type) {
-	rebuildMap := decoderCache{}
+	rebuildMap := map[rtype]interface{}{}
 	idx := len(typesToCreate) - 1
 	for idx >= 0 {
 		// pop one
@@ -154,33 +154,33 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 		case reflect.Ptr:
 			typesToCreate = append(typesToCreate, elem)
 			idx += 1
-			vd := newPointerDecoder(elem)
-			cache[rType] = vd
-			rebuildMap[rType] = vd
+			w := newPointerDecoder(elem)
+			cache[rType] = w.decoder
+			rebuildMap[rType] = w
 		case reflect.Array:
 			elemPtrType := reflect.PtrTo(elem.Elem())
 			typesToCreate = append(typesToCreate, elemPtrType)
 			idx += 1
-			vd := newArrayDecoder(elem)
-			cache[rType] = vd
-			rebuildMap[rType] = vd
+			w := newArrayDecoder(elem)
+			cache[rType] = w.decoder
+			rebuildMap[rType] = w
 		case reflect.Slice:
 			elemPtrType := reflect.PtrTo(elem.Elem())
 			typesToCreate = append(typesToCreate, elemPtrType)
 			idx += 1
-			vd := newSliceDecoder(elem)
-			cache[rType] = vd
-			rebuildMap[rType] = vd
+			w := newSliceDecoder(elem)
+			cache[rType] = w.decoder
+			rebuildMap[rType] = w
 		case reflect.Map:
-			vd := newMapDecoder(elem)
-			if vd == nil {
+			w := newMapDecoder(elem)
+			if w == nil {
 				cache[rType] = notSupportedDecoder(ptrType.String())
 			} else {
 				valuePtrType := reflect.PtrTo(elem.Elem())
 				typesToCreate = append(typesToCreate, valuePtrType)
 				idx += 1
-				cache[rType] = vd
-				rebuildMap[rType] = vd
+				cache[rType] = w.decoder
+				rebuildMap[rType] = w
 			}
 		default:
 			cache[rType] = notSupportedDecoder(ptrType.String())
@@ -189,19 +189,19 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 	// rebuild some decoders
 	for _, vd := range rebuildMap {
 		switch x := vd.(type) {
-		case *pointerDecoder:
-			x.elemDec = cache[x.ptrRType]
+		case *pointerDecoderBuilder:
+			x.decoder.elemDec = cache[x.ptrRType]
 		case *structDecoder:
 			for i := range x.fields.list {
 				fi := &x.fields.list[i]
 				fi.decoder = cache[fi.rtype]
 			}
-		case *arrayDecoder:
-			x.elemDec = cache[x.elemPtrRType]
-		case *sliceDecoder:
-			x.elemDec = cache[x.elemPtrRType]
-		case *mapDecoder:
-			x.valDec = cache[x.valPtrRType]
+		case *arrayDecoderBuilder:
+			x.decoder.elemDec = cache[x.elemPtrRType]
+		case *sliceDecoderBuilder:
+			x.decoder.elemDec = cache[x.elemPtrRType]
+		case *mapDecoderBuilder:
+			x.decoder.valDec = cache[x.valPtrRType]
 		}
 	}
 }

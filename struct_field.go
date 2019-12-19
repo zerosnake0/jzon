@@ -8,9 +8,15 @@ import (
 	"reflect"
 )
 
+type fieldOffset struct {
+	offset uintptr
+	typ    reflect.Type
+}
+
 type field struct {
-	typ   reflect.Type
-	index []int
+	typ     reflect.Type
+	index   []int
+	offsets []fieldOffset
 
 	name      string
 	nameBytes []byte                 // []byte(name)
