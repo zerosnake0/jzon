@@ -243,6 +243,6 @@ func TestValDecoder_Native_Struct_Embedded(t *testing.T) {
 		type outer struct {
 			*inner
 		}
-		f(t, `{"a":1}`, nil, &outer{}, &outer{})
+		f(t, `{"a":1}`, NilEmbeddedPointerError, &outer{}, &outer{})
 	})
 }

@@ -142,8 +142,8 @@ func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) struct
 						typ:       ft,
 						omitEmpty: opts.Contains("omitempty"),
 
-						ptrType: reflect.PtrTo(f.typ),
-						rtype:   rtypeOfType(f.typ),
+						ptrType: reflect.PtrTo(sf.Type),
+						rtype:   rtypeOfType(sf.Type),
 					}
 
 					if name == "" {
@@ -228,9 +228,8 @@ func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) struct
 					 * in this case the name is the name of type (A)
 					 */
 					if sf.Type.Kind() == reflect.Ptr {
-						offsets = append(offsets, fieldOffset{
-							typ: sf.Type.Elem(),
-						})
+						offsets[l-1].typ = sf.Type.Elem()
+						offsets = append(offsets, fieldOffset{})
 					}
 					next = append(next, field{
 						name:    ft.Name(),
