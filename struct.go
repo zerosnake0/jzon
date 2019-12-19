@@ -136,14 +136,15 @@ func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) struct
 					 *     2. the field is not embedded
 					 *     3. the field type is not struct (or pointer of struct)
 					 */
+					ptrType := reflect.PtrTo(sf.Type)
 					field := field{
 						index:     index,
 						offsets:   offsets,
 						typ:       ft,
 						omitEmpty: opts.Contains("omitempty"),
 
-						ptrType: reflect.PtrTo(sf.Type),
-						rtype:   rtypeOfType(sf.Type),
+						ptrType: ptrType,
+						rtype:   rtypeOfType(ptrType),
 					}
 
 					if name == "" {
