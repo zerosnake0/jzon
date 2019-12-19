@@ -21,6 +21,8 @@ type DecoderOption struct {
 	// the tag name for structures
 	// `json` by default
 	Tag string
+
+	OnlyTaggedField bool
 }
 
 type decoderCache = map[rtype]ValDecoder
@@ -29,8 +31,9 @@ type Decoder struct {
 	cacheMu      sync.Mutex
 	decoderCache atomic.Value
 
-	caseSensitive bool
-	tag           string
+	caseSensitive   bool
+	tag             string
+	onlyTaggedField bool
 }
 
 func NewDecoder(opt *DecoderOption) *Decoder {
@@ -47,6 +50,7 @@ func NewDecoder(opt *DecoderOption) *Decoder {
 		if opt.Tag != "" {
 			dec.tag = opt.Tag
 		}
+		dec.onlyTaggedField = opt.OnlyTaggedField
 	}
 	dec.decoderCache.Store(cache)
 	return &dec
@@ -139,7 +143,8 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 				// no field to unmarshal
 				cache[rType] = (*skipDecoder)(nil)
 			} else {
-				for _, fi := range vd.fields {
+				for i := range vd.fields.list {
+					fi := &vd.fields.list[i]
 					typesToCreate = append(typesToCreate, fi.ptrType)
 					idx += 1
 				}
@@ -187,8 +192,9 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 		case *pointerDecoder:
 			x.elemDec = cache[x.ptrRType]
 		case *structDecoder:
-			for _, field := range x.fields {
-				field.decoder = cache[field.rtype]
+			for i := range x.fields.list {
+				fi := &x.fields.list[i]
+				fi.decoder = cache[fi.rtype]
 			}
 		case *arrayDecoder:
 			x.elemDec = cache[x.elemPtrRType]

@@ -127,7 +127,7 @@ func (it *Iterator) readEscapedChar(b []byte) ([]byte, error) {
 }
 
 // internal, call only after a '"' is consumed
-func (it *Iterator) readStringAsSlice(buf []byte, caseSensitive bool) (_ []byte, err error) {
+func (it *Iterator) readStringAsSlice(buf []byte) (_ []byte, err error) {
 	for {
 		i := it.head
 		for i < it.tail {
@@ -147,13 +147,6 @@ func (it *Iterator) readStringAsSlice(buf []byte, caseSensitive bool) (_ []byte,
 			} else if c < ' ' { // json.org
 				return buf, InvalidStringCharError{c: c}
 			} else {
-				if !caseSensitive {
-					if c >= 'A' && c <= 'Z' {
-						buf = append(buf, it.buffer[it.head:i]...)
-						it.head = i + 1
-						buf = append(buf, c-'A'+'a')
-					}
-				}
 				i++
 			}
 		}
@@ -182,12 +175,12 @@ func (it *Iterator) ReadStringAsSlice(buf []byte) (_ []byte, err error) {
 	if err = it.expectQuote(); err != nil {
 		return
 	}
-	return it.readStringAsSlice(buf, true)
+	return it.readStringAsSlice(buf)
 }
 
 // internal, call only after a '"' is consumed
 func (it *Iterator) readString() (ret string, err error) {
-	buf, err := it.readStringAsSlice(it.tmpBuffer[:0], true)
+	buf, err := it.readStringAsSlice(it.tmpBuffer[:0])
 	it.tmpBuffer = buf
 	if err == nil {
 		ret = string(buf)
