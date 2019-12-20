@@ -61,16 +61,13 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator) (err error) {
 		}
 		stField := dec.fields.find(field, it.decoder.caseSensitive)
 		if stField != nil {
-			curPtr := ptr
-			for _, offset := range stField.offsets {
-				curPtr = add(curPtr, offset.offset, "struct field")
-				if offset.typ == nil {
-					break
-				}
+			curPtr := add(ptr, stField.offsets[0], "struct field")
+			for _, offset := range stField.offsets[1:] {
 				curPtr = *(*unsafe.Pointer)(curPtr)
 				if curPtr == nil {
 					return NilEmbeddedPointerError
 				}
+				curPtr = add(curPtr, offset, "struct field")
 			}
 			if err = stField.decoder.Decode(curPtr, it); err != nil {
 				return err

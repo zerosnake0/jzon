@@ -13,11 +13,8 @@ func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) struct
 	// Anonymous fields to explore at the current level and the next.
 	var current []field
 	next := []field{{
-		typ: st,
-		offsets: []fieldOffset{{
-			offset: 0,
-			typ:    nil,
-		}},
+		typ:     st,
+		offsets: []uintptr{0},
 	}}
 
 	// Count of queued names for current level and the next.
@@ -125,9 +122,9 @@ func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) struct
 				}
 
 				l := len(f.offsets)
-				offsets := make([]fieldOffset, l, l+1)
+				offsets := make([]uintptr, l, l+1)
 				copy(offsets, f.offsets)
-				offsets[l-1].offset += sf.Offset
+				offsets[l-1] += sf.Offset
 
 				// Record found field and index sequence.
 				if name != "" || !sf.Anonymous || ft.Kind() != reflect.Struct {
@@ -229,8 +226,7 @@ func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) struct
 					 * in this case the name is the name of type (A)
 					 */
 					if sf.Type.Kind() == reflect.Ptr {
-						offsets[l-1].typ = sf.Type.Elem()
-						offsets = append(offsets, fieldOffset{})
+						offsets = append(offsets, 0)
 					}
 					next = append(next, field{
 						name:    ft.Name(),
