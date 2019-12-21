@@ -98,7 +98,7 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 		idx -= 1
 
 		rType := rtypeOfType(ptrType)
-		if _, ok := cache[rType]; ok { // double check
+		if _, ok := cache[rType]; ok { // check if visited
 			continue
 		}
 		// check global decoders
@@ -188,8 +188,8 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 		}
 	}
 	// rebuild some decoders
-	for _, vd := range rebuildMap {
-		switch x := vd.(type) {
+	for _, builder := range rebuildMap {
+		switch x := builder.(type) {
 		case *pointerDecoderBuilder:
 			x.decoder.elemDec = cache[x.ptrRType]
 		case *structDecoderBuilder:

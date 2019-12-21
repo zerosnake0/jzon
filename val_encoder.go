@@ -5,5 +5,5 @@ import (
 )
 
 type ValEncoder interface {
-	Encode(ptr unsafe.Pointer, s *Streamer) error
+	Encode(ptr unsafe.Pointer, s *Streamer)
 }
