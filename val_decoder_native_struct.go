@@ -10,7 +10,7 @@ type structDecoderBuilder struct {
 	fields  structFields
 }
 
-type fieldInfo struct {
+type decoderFieldInfo struct {
 	offsets   []uintptr
 	nameBytes []byte                 // []byte(name)
 	equalFold func(s, t []byte) bool // bytes.EqualFold or equivalent
@@ -19,18 +19,18 @@ type fieldInfo struct {
 }
 
 type decoderFields struct {
-	list      []fieldInfo
+	list      []decoderFieldInfo
 	nameIndex map[string]int
 }
 
 func (df *decoderFields) init(size int) {
-	df.list = make([]fieldInfo, 0, size)
+	df.list = make([]decoderFieldInfo, 0, size)
 	df.nameIndex = make(map[string]int, size)
 }
 
 func (df *decoderFields) add(f *field, dec ValDecoder) {
 	df.nameIndex[f.name] = len(df.list)
-	df.list = append(df.list, fieldInfo{
+	df.list = append(df.list, decoderFieldInfo{
 		offsets:   f.offsets,
 		nameBytes: f.nameBytes,
 		equalFold: f.equalFold,
@@ -39,7 +39,7 @@ func (df *decoderFields) add(f *field, dec ValDecoder) {
 	})
 }
 
-func (df *decoderFields) find(key []byte, caseSensitive bool) *fieldInfo {
+func (df *decoderFields) find(key []byte, caseSensitive bool) *decoderFieldInfo {
 	if i, ok := df.nameIndex[localByteToString(key)]; ok {
 		return &df.list[i]
 	}
