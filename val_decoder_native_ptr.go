@@ -5,17 +5,24 @@ import (
 	"unsafe"
 )
 
-type pointerDecoder struct {
-	elemDec   ValDecoder
-	ptrRType  rtype
-	elemRType rtype
+type pointerDecoderBuilder struct {
+	decoder  *pointerDecoder
+	ptrRType rtype
 }
 
-func newPointerDecoder(typ reflect.Type) *pointerDecoder {
-	return &pointerDecoder{
-		ptrRType:  rtypeOfType(typ),
-		elemRType: rtypeOfType(typ.Elem()),
+func newPointerDecoder(typ reflect.Type) *pointerDecoderBuilder {
+	return &pointerDecoderBuilder{
+		decoder: &pointerDecoder{
+			elemRType: rtypeOfType(typ.Elem()),
+		},
+		ptrRType: rtypeOfType(typ),
 	}
+}
+
+type pointerDecoder struct {
+	elemRType rtype
+
+	elemDec ValDecoder
 }
 
 func (dec *pointerDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {

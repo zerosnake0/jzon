@@ -111,20 +111,20 @@ func TestValDecoder_Native_Map_KeyDecoder_TextUnmarshaler(t *testing.T) {
 	}
 	t.Run("not supported", func(t *testing.T) {
 		type key testTextUnmarshaler
-		m1 := map[key]int{key{
+		m1 := map[key]int{{
 			data: "a",
 		}: 1}
-		m2 := map[key]int{key{
+		m2 := map[key]int{{
 			data: "a",
 		}: 1}
 		f(t, ` { "b" : 2 } `, TypeNotSupportedError(""), &m1, &m2)
 	})
 	t.Run("string", func(t *testing.T) {
 		type key = testTextUnmarshaler
-		m1 := map[key]int{key{
+		m1 := map[key]int{{
 			data: "a",
 		}: 1}
-		m2 := map[key]int{key{
+		m2 := map[key]int{{
 			data: "a",
 		}: 1}
 		f(t, ` { "b" : 2 } `, nil, &m1, &m2)

@@ -6,24 +6,31 @@ import (
 	"unsafe"
 )
 
-type sliceDecoder struct {
-	rtype        rtype
-	elemKind     reflect.Kind
-	elemDec      ValDecoder
-	elemRType    rtype
+type sliceDecoderBuilder struct {
+	decoder      *sliceDecoder
 	elemPtrRType rtype
-	elemSize     uintptr
 }
 
-func newSliceDecoder(sliceType reflect.Type) *sliceDecoder {
+func newSliceDecoder(sliceType reflect.Type) *sliceDecoderBuilder {
 	elem := sliceType.Elem()
-	return &sliceDecoder{
-		rtype:        rtypeOfType(sliceType),
-		elemKind:     elem.Kind(),
-		elemRType:    rtypeOfType(elem),
+	return &sliceDecoderBuilder{
+		decoder: &sliceDecoder{
+			rtype:     rtypeOfType(sliceType),
+			elemKind:  elem.Kind(),
+			elemRType: rtypeOfType(elem),
+			elemSize:  elem.Size(),
+		},
 		elemPtrRType: rtypeOfType(reflect.PtrTo(elem)),
-		elemSize:     elem.Size(),
 	}
+}
+
+type sliceDecoder struct {
+	rtype     rtype
+	elemKind  reflect.Kind
+	elemRType rtype
+	elemSize  uintptr
+
+	elemDec ValDecoder
 }
 
 func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
@@ -56,7 +63,7 @@ func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		}
 		it.capture = oldCapture
 		buf := it.buffer[begin : it.head-1]
-		data, err := base64.StdEncoding.DecodeString(*(*string)(unsafe.Pointer(&buf)))
+		data, err := base64.StdEncoding.DecodeString(localByteToString(buf))
 		if err != nil {
 			return err
 		}

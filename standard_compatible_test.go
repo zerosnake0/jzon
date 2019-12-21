@@ -72,12 +72,12 @@ func checkStandard(t *testing.T, decoder *Decoder, data string, ex error, exp, g
 	}
 	require.Equal(t, noError, gotErr == nil,
 		"exp %+v\ngot %+v", expErr, gotErr)
-	require.Equalf(t, noError, ex == nil, "exp:%v\ngot:%v", ex, gotErr)
+	require.Equalf(t, noError, ex == nil, "exp err: %v\ngot err: %v", ex, gotErr)
 	if ex != nil {
 		if assert.ObjectsAreEqual(reflect.TypeOf(errors.New("")), reflect.TypeOf(ex)) {
-			require.Equalf(t, ex, gotErr, "exp:%v\ngot:%v", ex, gotErr)
+			require.Equalf(t, ex, gotErr, "exp err:%v\ngot err:%v", ex, gotErr)
 		} else {
-			require.IsTypef(t, ex, gotErr, "exp:%v\ngot:%v", ex, gotErr)
+			require.IsTypef(t, ex, gotErr, "exp err:%v\ngot err:%v", ex, gotErr)
 		}
 	}
 	if !noError && !compatibleOnError {

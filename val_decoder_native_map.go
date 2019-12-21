@@ -5,18 +5,12 @@ import (
 	"unsafe"
 )
 
-type mapDecoder struct {
-	rtype rtype
-
-	keyRType rtype
-	keyDec   ValDecoder
-
-	valRType    rtype
+type mapDecoderBuilder struct {
+	decoder     *mapDecoder
 	valPtrRType rtype
-	valDec      ValDecoder
 }
 
-func newMapDecoder(mapType reflect.Type) *mapDecoder {
+func newMapDecoder(mapType reflect.Type) *mapDecoderBuilder {
 	// Compatible with standard lib
 	// Map key must either have string kind, have an integer kind,
 	// or be an encoding.TextUnmarshaler.
@@ -33,13 +27,25 @@ func newMapDecoder(mapType reflect.Type) *mapDecoder {
 	} else if keyDecoder = keyDecoders[keyType.Kind()]; keyDecoder == nil {
 		return nil
 	}
-	return &mapDecoder{
-		rtype:       rtypeOfType(mapType),
-		keyRType:    rtypeOfType(keyType),
-		keyDec:      keyDecoder,
-		valRType:    rtypeOfType(mapType.Elem()),
+	return &mapDecoderBuilder{
+		decoder: &mapDecoder{
+			rtype:    rtypeOfType(mapType),
+			keyRType: rtypeOfType(keyType),
+			keyDec:   keyDecoder,
+			valRType: rtypeOfType(mapType.Elem()),
+		},
 		valPtrRType: rtypeOfType(reflect.PtrTo(mapType.Elem())),
 	}
+}
+
+type mapDecoder struct {
+	rtype rtype
+
+	keyRType rtype
+	keyDec   ValDecoder
+
+	valRType rtype
+	valDec   ValDecoder
 }
 
 func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {

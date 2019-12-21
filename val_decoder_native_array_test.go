@@ -103,7 +103,7 @@ func TestValDecoder_Native_Array_Memory(t *testing.T) {
 			runtime.SetFinalizer(pi, func(_ *int) {
 				t.Logf("finalizing")
 			})
-			return [1]*st{&st{p: pi}}
+			return [1]*st{{p: pi}}
 		}
 		arr := f(1)
 		err := Unmarshal([]byte(`[]`), &arr)

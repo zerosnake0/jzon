@@ -127,7 +127,7 @@ func (it *Iterator) readEscapedChar(b []byte) ([]byte, error) {
 }
 
 // internal, call only after a '"' is consumed
-func (it *Iterator) readStringAsSlice(buf []byte, caseSensitive bool) (_ []byte, err error) {
+func (it *Iterator) readStringAsSlice(buf []byte) (_ []byte, err error) {
 	for {
 		i := it.head
 		for i < it.tail {
@@ -147,13 +147,6 @@ func (it *Iterator) readStringAsSlice(buf []byte, caseSensitive bool) (_ []byte,
 			} else if c < ' ' { // json.org
 				return buf, InvalidStringCharError{c: c}
 			} else {
-				if !caseSensitive {
-					if c >= 'A' && c <= 'Z' {
-						buf = append(buf, it.buffer[it.head:i]...)
-						it.head = i + 1
-						buf = append(buf, c-'A'+'a')
-					}
-				}
 				i++
 			}
 		}
@@ -182,12 +175,12 @@ func (it *Iterator) ReadStringAsSlice(buf []byte) (_ []byte, err error) {
 	if err = it.expectQuote(); err != nil {
 		return
 	}
-	return it.readStringAsSlice(buf, true)
+	return it.readStringAsSlice(buf)
 }
 
 // internal, call only after a '"' is consumed
 func (it *Iterator) readString() (ret string, err error) {
-	buf, err := it.readStringAsSlice(it.tmpBuffer[:0], true)
+	buf, err := it.readStringAsSlice(it.tmpBuffer[:0])
 	it.tmpBuffer = buf
 	if err == nil {
 		ret = string(buf)
@@ -231,25 +224,17 @@ func appendRune(p []byte, r rune) []byte {
 	// Negative values are erroneous. Making it unsigned addresses the problem.
 	switch i := uint32(r); {
 	case i <= rune1Max:
-		p = append(p, byte(r))
-		return p
+		return append(p, byte(r))
 	case i <= rune2Max:
-		p = append(p, t2|byte(r>>6))
-		p = append(p, tx|byte(r)&maskx)
-		return p
+		return append(p, t2|byte(r>>6), tx|byte(r)&maskx)
 	case i > maxRune, surrogateMin <= i && i <= surrogateMax:
 		r = runeError
 		fallthrough
 	case i <= rune3Max:
-		p = append(p, t3|byte(r>>12))
-		p = append(p, tx|byte(r>>6)&maskx)
-		p = append(p, tx|byte(r)&maskx)
-		return p
+		return append(p, t3|byte(r>>12), tx|byte(r>>6)&maskx,
+			tx|byte(r)&maskx)
 	default:
-		p = append(p, t4|byte(r>>18))
-		p = append(p, tx|byte(r>>12)&maskx)
-		p = append(p, tx|byte(r>>6)&maskx)
-		p = append(p, tx|byte(r)&maskx)
-		return p
+		return append(p, t4|byte(r>>18), tx|byte(r>>12)&maskx,
+			tx|byte(r>>6)&maskx, tx|byte(r)&maskx)
 	}
 }

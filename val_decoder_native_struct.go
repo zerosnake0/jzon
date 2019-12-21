@@ -2,7 +2,6 @@ package jzon
 
 import (
 	"reflect"
-	"strings"
 	"unsafe"
 )
 
@@ -14,42 +13,13 @@ type fieldInfo struct {
 }
 
 type structDecoder struct {
-	fields map[string]*fieldInfo
+	// fields map[string]*fieldInfo
+	fields structFields
 }
 
 func (dec *Decoder) newStructDecoder(typ reflect.Type) *structDecoder {
-	var key string
-	var fields map[string]*fieldInfo
-	for i := 0; i < typ.NumField(); i++ {
-		stField := typ.Field(i)
-		// field name cannot be empty (?)
-		if stField.Name[0] < 'A' || stField.Name[0] > 'Z' {
-			continue
-		}
-		tagV, ok := stField.Tag.Lookup(dec.tag)
-		if ok {
-			if tagV == "-" {
-				continue
-			}
-			// TODO: complete this
-			key = tagV
-		} else {
-			key = stField.Name
-		}
-		if !dec.caseSensitive {
-			key = strings.ToLower(key)
-		}
-		if fields == nil {
-			fields = map[string]*fieldInfo{}
-		}
-		fieldPtrType := reflect.PtrTo(stField.Type)
-		fields[key] = &fieldInfo{
-			offset:  stField.Offset,
-			ptrType: fieldPtrType,
-			rtype:   rtypeOfType(fieldPtrType),
-		}
-	}
-	if len(fields) == 0 {
+	fields := describeStruct(typ, dec.tag, dec.onlyTaggedField)
+	if fields.count() == 0 {
 		return nil
 	}
 	return &structDecoder{
@@ -84,16 +54,22 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator) (err error) {
 	}
 	it.head += 1
 	for {
-		_, field, err := it.readObjectFieldAsSlice(it.tmpBuffer[:0],
-			it.decoder.caseSensitive)
+		_, field, err := it.readObjectFieldAsSlice(it.tmpBuffer[:0])
 		it.tmpBuffer = field
 		if err != nil {
 			return err
 		}
-		stField := dec.fields[*(*string)(unsafe.Pointer(&field))]
+		stField := dec.fields.find(field, it.decoder.caseSensitive)
 		if stField != nil {
-			fieldPtr := add(ptr, stField.offset, "struct field")
-			if err = stField.decoder.Decode(fieldPtr, it); err != nil {
+			curPtr := add(ptr, stField.offsets[0], "struct field")
+			for _, offset := range stField.offsets[1:] {
+				curPtr = *(*unsafe.Pointer)(curPtr)
+				if curPtr == nil {
+					return NilEmbeddedPointerError
+				}
+				curPtr = add(curPtr, offset, "struct field")
+			}
+			if err = stField.decoder.Decode(curPtr, it); err != nil {
 				return err
 			}
 		} else {

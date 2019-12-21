@@ -5,24 +5,32 @@ import (
 	"unsafe"
 )
 
-type arrayDecoder struct {
-	rtype        rtype
-	elemDec      ValDecoder
-	elemRType    rtype
+type arrayDecoderBuilder struct {
+	decoder      *arrayDecoder
 	elemPtrRType rtype
-	elemSize     uintptr
-	length       int
 }
 
-func newArrayDecoder(arrType reflect.Type) *arrayDecoder {
+func newArrayDecoder(arrType reflect.Type) *arrayDecoderBuilder {
 	elem := arrType.Elem()
-	return &arrayDecoder{
-		rtype:        rtypeOfType(arrType),
-		elemRType:    rtypeOfType(elem),
+	return &arrayDecoderBuilder{
+		decoder: &arrayDecoder{
+			rtype:    rtypeOfType(arrType),
+			elemSize: elem.Size(),
+			length:   arrType.Len(),
+			// 	elemRType:    rtypeOfType(elem),
+		},
 		elemPtrRType: rtypeOfType(reflect.PtrTo(elem)),
-		elemSize:     elem.Size(),
-		length:       arrType.Len(),
 	}
+
+}
+
+type arrayDecoder struct {
+	rtype    rtype
+	elemSize uintptr
+	length   int
+	// elemRType    rtype
+
+	elemDec ValDecoder
 }
 
 func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {

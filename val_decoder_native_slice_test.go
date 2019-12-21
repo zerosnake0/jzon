@@ -108,7 +108,7 @@ func TestValDecoder_Native_Slice_Memory(t *testing.T) {
 			runtime.SetFinalizer(pi, func(_ *int) {
 				t.Logf("finalizing")
 			})
-			return []*st{&st{p: pi}}
+			return []*st{{p: pi}}
 		}
 		arr := f(1)
 		err := Unmarshal([]byte(`[]`), &arr)
