@@ -8,6 +8,49 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestStreamer_Int_ChainError(t *testing.T) {
+	t.Run("int8", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Int8(1)
+		})
+	})
+	t.Run("int16", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Int16(1)
+		})
+	})
+	t.Run("int32", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Int32(1)
+		})
+	})
+	t.Run("int64", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Int64(1)
+		})
+	})
+	t.Run("uint8", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Uint8(1)
+		})
+	})
+	t.Run("uint16", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Uint16(1)
+		})
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Uint32(1)
+		})
+	})
+	t.Run("uint64", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Uint64(1)
+		})
+	})
+}
+
 func TestStreamer_Int8(t *testing.T) {
 	f := func(t *testing.T, i int8) {
 		exp, err := json.Marshal(i)

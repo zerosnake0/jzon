@@ -13,6 +13,12 @@ var (
 	})
 )
 
+func TestStreamer_String_ChainError(t *testing.T) {
+	testStreamerChainError(t, func(s *Streamer) {
+		s.String("test")
+	})
+}
+
 func testStreamerStringEscape(t *testing.T, s string, escape bool) {
 	var (
 		enc *Encoder

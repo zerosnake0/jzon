@@ -2,6 +2,7 @@ package jzon
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"testing"
 
@@ -38,6 +39,23 @@ func testStreamerWithEncoder(t *testing.T, enc *Encoder, exp string, cb func(s *
 
 func testStreamer(t *testing.T, exp string, cb func(s *Streamer)) {
 	testStreamerWithEncoder(t, DefaultEncoder, exp, cb)
+}
+
+func testStreamerChainError(t *testing.T, cb func(s *Streamer)) {
+	s := DefaultEncoder.NewStreamer()
+	defer DefaultEncoder.ReturnStreamer(s)
+
+	var b bytes.Buffer
+	s.Reset(&b)
+
+	e := errors.New("test")
+	s.Error = e
+	cb(s)
+
+	require.Equal(t, e, s.Error)
+	require.Equal(t, e, s.Flush())
+	require.Len(t, s.buffer, 0)
+	require.Equal(t, 0, b.Len())
 }
 
 func TestStreamer_Flush(t *testing.T) {
@@ -178,6 +196,59 @@ func TestStreamer(t *testing.T) {
 			for i := 0; i < count; i++ {
 				s.ObjectEnd()
 			}
+		})
+	})
+}
+
+func TestStreamer_ChainError(t *testing.T) {
+	t.Run("raw string", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.RawString(`"test"`)
+		})
+	})
+	t.Run("raw", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Raw([]byte(`"test"`))
+		})
+	})
+	t.Run("null", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Null()
+		})
+	})
+	t.Run("true", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.True()
+		})
+	})
+	t.Run("false", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.False()
+		})
+	})
+	t.Run("object start", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.ObjectStart()
+		})
+	})
+	t.Run("object end", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.ObjectEnd()
+		})
+	})
+	t.Run("field", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Field("test")
+		})
+	})
+	t.Run("array start", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.ArrayStart()
+		})
+	})
+	t.Run("array end", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.ArrayEnd()
 		})
 	})
 }
