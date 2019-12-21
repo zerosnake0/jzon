@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/zerosnake0/jzon)](https://goreportcard.com/report/github.com/zerosnake0/jzon)
+
 # jzon
 
 ![](https://github.com/zerosnake0/jzon/workflows/Test/badge.svg)
