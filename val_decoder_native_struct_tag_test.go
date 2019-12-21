@@ -40,9 +40,9 @@ func TestValDecoder_Native_Struct_Tag(t *testing.T) {
 	})
 	t.Run("equal fold right", func(t *testing.T) {
 		type st struct {
-			A int `json:"ſK"`
-			B int `json:"SK"`
+			A int `json:"b"`
+			B int `json:"ask"`
 		}
-		f(t, `{"sk":1}`, nil, &st{}, &st{})
+		f(t, `{"AſK":1}`, nil, &st{}, &st{})
 	})
 }

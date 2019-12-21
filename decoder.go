@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	// default decoder is compatible with standard lib
 	DefaultDecoder = NewDecoder(nil)
 )
 
