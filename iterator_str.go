@@ -224,25 +224,17 @@ func appendRune(p []byte, r rune) []byte {
 	// Negative values are erroneous. Making it unsigned addresses the problem.
 	switch i := uint32(r); {
 	case i <= rune1Max:
-		p = append(p, byte(r))
-		return p
+		return append(p, byte(r))
 	case i <= rune2Max:
-		p = append(p, t2|byte(r>>6))
-		p = append(p, tx|byte(r)&maskx)
-		return p
+		return append(p, t2|byte(r>>6), tx|byte(r)&maskx)
 	case i > maxRune, surrogateMin <= i && i <= surrogateMax:
 		r = runeError
 		fallthrough
 	case i <= rune3Max:
-		p = append(p, t3|byte(r>>12))
-		p = append(p, tx|byte(r>>6)&maskx)
-		p = append(p, tx|byte(r)&maskx)
-		return p
+		return append(p, t3|byte(r>>12), tx|byte(r>>6)&maskx,
+			tx|byte(r)&maskx)
 	default:
-		p = append(p, t4|byte(r>>18))
-		p = append(p, tx|byte(r>>12)&maskx)
-		p = append(p, tx|byte(r>>6)&maskx)
-		p = append(p, tx|byte(r)&maskx)
-		return p
+		return append(p, t4|byte(r>>18), tx|byte(r>>12)&maskx,
+			tx|byte(r>>6)&maskx, tx|byte(r)&maskx)
 	}
 }

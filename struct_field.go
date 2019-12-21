@@ -39,6 +39,7 @@ func (sf *structFields) find(key []byte, caseSensitive bool) *field {
 	if i, ok := sf.nameIndex[localByteToString(key)]; ok {
 		return &sf.list[i]
 	} else {
+		// TODO: performance of this?
 		for i := range sf.list {
 			ff := &sf.list[i]
 			if ff.equalFold(ff.nameBytes, key) {
