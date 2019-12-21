@@ -139,18 +139,18 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 				cache[rType] = (*ifaceDecoder)(nil)
 			}
 		case reflect.Struct:
-			vd := dec.newStructDecoder(elem)
-			if vd == nil {
+			w := dec.newStructDecoder(elem)
+			if w == nil {
 				// no field to unmarshal
 				cache[rType] = (*skipDecoder)(nil)
 			} else {
-				for i := range vd.fields.list {
-					fi := &vd.fields.list[i]
+				for i := range w.fields.list {
+					fi := &w.fields.list[i]
 					typesToCreate = append(typesToCreate, fi.ptrType)
 					idx += 1
 				}
-				cache[rType] = vd
-				rebuildMap[rType] = vd
+				cache[rType] = w.decoder
+				rebuildMap[rType] = w
 			}
 		case reflect.Ptr:
 			typesToCreate = append(typesToCreate, elem)
@@ -192,10 +192,11 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 		switch x := vd.(type) {
 		case *pointerDecoderBuilder:
 			x.decoder.elemDec = cache[x.ptrRType]
-		case *structDecoder:
+		case *structDecoderBuilder:
+			x.decoder.fields.init(len(x.fields.list))
 			for i := range x.fields.list {
 				fi := &x.fields.list[i]
-				fi.decoder = cache[fi.rtype]
+				x.decoder.fields.add(fi, cache[fi.rtype])
 			}
 		case *arrayDecoderBuilder:
 			x.decoder.elemDec = cache[x.elemPtrRType]

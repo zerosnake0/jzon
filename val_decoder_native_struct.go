@@ -5,25 +5,69 @@ import (
 	"unsafe"
 )
 
+type structDecoderBuilder struct {
+	decoder *structDecoder
+	fields  structFields
+}
+
 type fieldInfo struct {
-	offset  uintptr
-	ptrType reflect.Type
-	rtype   rtype
-	decoder ValDecoder
+	offsets   []uintptr
+	nameBytes []byte                 // []byte(name)
+	equalFold func(s, t []byte) bool // bytes.EqualFold or equivalent
+	quoted    bool
+	decoder   ValDecoder
+}
+
+type decoderFields struct {
+	list      []fieldInfo
+	nameIndex map[string]int
+}
+
+func (df *decoderFields) init(size int) {
+	df.list = make([]fieldInfo, 0, size)
+	df.nameIndex = make(map[string]int, size)
+}
+
+func (df *decoderFields) add(f *field, dec ValDecoder) {
+	df.nameIndex[f.name] = len(df.list)
+	df.list = append(df.list, fieldInfo{
+		offsets:   f.offsets,
+		nameBytes: f.nameBytes,
+		equalFold: f.equalFold,
+		quoted:    f.quoted,
+		decoder:   dec,
+	})
+}
+
+func (df *decoderFields) find(key []byte, caseSensitive bool) *fieldInfo {
+	if i, ok := df.nameIndex[localByteToString(key)]; ok {
+		return &df.list[i]
+	}
+	if caseSensitive {
+		return nil
+	}
+	// TODO: performance of this?
+	for i := range df.list {
+		ff := &df.list[i]
+		if ff.equalFold(ff.nameBytes, key) {
+			return ff
+		}
+	}
+	return nil
 }
 
 type structDecoder struct {
-	// fields map[string]*fieldInfo
-	fields structFields
+	fields decoderFields
 }
 
-func (dec *Decoder) newStructDecoder(typ reflect.Type) *structDecoder {
+func (dec *Decoder) newStructDecoder(typ reflect.Type) *structDecoderBuilder {
 	fields := describeStruct(typ, dec.tag, dec.onlyTaggedField)
 	if fields.count() == 0 {
 		return nil
 	}
-	return &structDecoder{
-		fields: fields,
+	return &structDecoderBuilder{
+		decoder: &structDecoder{},
+		fields:  fields,
 	}
 }
 
