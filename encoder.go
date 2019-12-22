@@ -98,6 +98,14 @@ func (enc *Encoder) createEncoderInternal(cache encoderCache, typesToCreate []re
 			cache[rType] = jsonMarshalerEncoder(rType)
 			continue
 		}
+		// TODO: ptr to json.Marshaler
+
+		// check text.Marshaler interface
+		if typ.Implements(textMarshalerType) {
+			cache[rType] = textMarshalerEncoder(rType)
+			continue
+		}
+		// TODO: ptr to text.Marshaler
 
 	}
 	// rebuild some encoders

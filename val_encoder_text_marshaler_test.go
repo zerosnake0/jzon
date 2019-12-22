@@ -4,29 +4,30 @@ import (
 	"encoding/json"
 	"testing"
 
+	"encoding"
 	"github.com/stretchr/testify/require"
 )
 
-type testJsonMarshaler struct {
+type testTextMarshaler struct {
 	data []byte
 	err  error
 }
 
-func (m testJsonMarshaler) MarshalJSON() ([]byte, error) {
+func (m testTextMarshaler) MarshalText() ([]byte, error) {
 	return m.data, m.err
 }
 
-type testJsonMarshaler2 struct {
+type testTextMarshaler2 struct {
 	data []byte
 	err  error
 }
 
-func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
+func (m *testTextMarshaler2) MarshalText() ([]byte, error) {
 	return m.data, m.err
 }
 
-func TestValEncoder_JsonMarshaler(t *testing.T) {
-	f := func(t *testing.T, m json.Marshaler) {
+func TestValEncoder_TextMarshaler(t *testing.T) {
+	f := func(t *testing.T, m encoding.TextMarshaler) {
 		b, err := json.Marshal(m)
 		require.NoError(t, err)
 		testStreamer(t, string(b), func(s *Streamer) {
@@ -35,27 +36,27 @@ func TestValEncoder_JsonMarshaler(t *testing.T) {
 	}
 	t.Run("non pointer receiver", func(t *testing.T) {
 		t.Run("non pointer", func(t *testing.T) {
-			f(t, testJsonMarshaler{
+			f(t, testTextMarshaler{
 				data: []byte(`{"a":1}`),
 			})
 		})
 		t.Run("pointer", func(t *testing.T) {
-			f(t, &testJsonMarshaler{
+			f(t, &testTextMarshaler{
 				data: []byte(`{"a":2}`),
 			})
 		})
 		t.Run("nil pointer", func(t *testing.T) {
-			f(t, (*testJsonMarshaler)(nil))
+			f(t, (*testTextMarshaler)(nil))
 		})
 	})
 	t.Run("pointer receiver", func(t *testing.T) {
 		t.Run("pointer", func(t *testing.T) {
-			f(t, &testJsonMarshaler2{
+			f(t, &testTextMarshaler2{
 				data: []byte(`{"b":1}`),
 			})
 		})
 		t.Run("nil pointer", func(t *testing.T) {
-			f(t, (*testJsonMarshaler2)(nil))
+			f(t, (*testTextMarshaler2)(nil))
 		})
 	})
 }
