@@ -107,6 +107,21 @@ func (enc *Encoder) createEncoderInternal(cache encoderCache, typesToCreate []re
 		}
 		// TODO: ptr to text.Marshaler
 
+		kind := typ.Kind()
+		if kindRType := encoderKindMap[kind]; kindRType != 0 {
+			// TODO: shall we make this an option?
+			// TODO: so that only the native type is affected?
+			// check if the native type has a custom encoder
+			if v, ok := cache[kindRType]; ok {
+				cache[rType] = v
+				continue
+			}
+
+			if v := kindEncoders[kind]; v != nil {
+				cache[rType] = v
+				continue
+			}
+		}
 	}
 	// rebuild some encoders
 	// for _, builder := range rebuildMap {

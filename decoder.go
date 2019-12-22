@@ -117,7 +117,7 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 		}
 		elem := ptrType.Elem()
 		elemKind := elem.Kind()
-		if elemNativeRType := kindMap[elemKind]; elemNativeRType != 0 {
+		if elemNativeRType := decoderKindMap[elemKind]; elemNativeRType != 0 {
 			// TODO: shall we make this an option?
 			// TODO: so that only the native type is affected?
 			// check if the native type has a custom decoder
