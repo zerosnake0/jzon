@@ -72,7 +72,7 @@ func (enc *Encoder) createEncoder(rtype rtype, typ reflect.Type) ValEncoder {
 }
 
 func (enc *Encoder) createEncoderInternal(cache encoderCache, typesToCreate []reflect.Type) {
-	rebuildMap := map[rtype]interface{}{}
+	// rebuildMap := map[rtype]interface{}{}
 	idx := len(typesToCreate) - 1
 	for idx >= 0 {
 		typ := typesToCreate[idx]
@@ -83,11 +83,17 @@ func (enc *Encoder) createEncoderInternal(cache encoderCache, typesToCreate []re
 		if _, ok := cache[rType]; ok { // check if visited
 			continue
 		}
-	}
-	// rebuild some encoders
-	for _, builder := range rebuildMap {
-		switch x := builder.(type) {
 
+		// check global encoders
+		if v, ok := globalValEncoders[rType]; ok {
+			cache[rType] = v
+			continue
 		}
 	}
+	// rebuild some encoders
+	// for _, builder := range rebuildMap {
+	// 	switch x := builder.(type) {
+	//
+	// 	}
+	// }
 }

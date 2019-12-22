@@ -7,8 +7,6 @@ import (
 	"unsafe"
 )
 
-const numKinds = reflect.UnsafePointer + 1
-
 var (
 	globalValDecoders = map[rtype]ValDecoder{}
 	kindMap           = [numKinds]rtype{}
@@ -35,7 +33,7 @@ func mapKeyDecoder(ptr interface{}, dec ValDecoder) {
 }
 
 func init() {
-	// json lib types
+	// standard json library types
 	createGlobalValDecoder((*json.Number)(nil), (*jsonNumberDecoder)(nil))
 	createGlobalValDecoder((*json.RawMessage)(nil), (*jsonRawMessageDecoder)(nil))
 
