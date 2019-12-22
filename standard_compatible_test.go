@@ -61,7 +61,7 @@ func printValue(t *testing.T, prefix string, o interface{}) {
 	}
 }
 
-func checkStandard(t *testing.T, decoder *Decoder, data string, ex error, exp, got interface{}) {
+func checkDecodeWithStandard(t *testing.T, decoder *Decoder, data string, ex error, exp, got interface{}) {
 	b := []byte(data)
 	expErr := json.Unmarshal(b, exp)
 	gotErr := decoder.Unmarshal(b, got)

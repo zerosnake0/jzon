@@ -8,7 +8,7 @@ import (
 
 func TestValDecoder_Native_Map(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("nil pointer", func(t *testing.T) {
 		f(t, "null", NilPointerReceiverError, nil, nil)
@@ -107,7 +107,7 @@ func (k *testMapStringKey) UnmarshalText(data []byte) error {
 
 func TestValDecoder_Native_Map_KeyDecoder_TextUnmarshaler(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("not supported", func(t *testing.T) {
 		type key testTextUnmarshaler
@@ -143,7 +143,7 @@ func TestValDecoder_Native_Map_KeyDecoder_TextUnmarshaler(t *testing.T) {
 
 func TestValDecoder_Native_Map_KeyDecoder_String(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("string", func(t *testing.T) {
 		type key string
@@ -155,7 +155,7 @@ func TestValDecoder_Native_Map_KeyDecoder_String(t *testing.T) {
 
 func TestValDecoder_Native_Map_KeyDecoder_Int(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	// int8
 	t.Run("int8 invalid", func(t *testing.T) {
@@ -285,7 +285,7 @@ func TestValDecoder_Native_Map_KeyDecoder_Int(t *testing.T) {
 
 func TestValDecoder_Native_Map_KeyDecoder_Uint(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	// uint8
 	t.Run("uint8 invalid", func(t *testing.T) {

@@ -98,7 +98,7 @@ func TestValDecoder_Native_Interface(t *testing.T) {
 		printValue(t, "p1", p1)
 		printValue(t, "p2", p2)
 		t.Log(">>>>>>>>>>>>>>>>>>>>>>")
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 		t.Log("<<<<< initValues <<<<<")
 		printValue(t, "p1", p1)
 		printValue(t, "p2", p2)

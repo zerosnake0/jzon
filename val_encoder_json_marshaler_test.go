@@ -3,8 +3,6 @@ package jzon
 import (
 	"encoding/json"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 type testJsonMarshaler struct {
@@ -27,11 +25,7 @@ func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
 
 func TestValEncoder_JsonMarshaler(t *testing.T) {
 	f := func(t *testing.T, m json.Marshaler) {
-		b, err := json.Marshal(m)
-		require.NoError(t, err)
-		testStreamer(t, string(b), func(s *Streamer) {
-			s.Value(m)
-		})
+		checkEncodeValueWithStandard(t, DefaultEncoder, m)
 	}
 	t.Run("non pointer receiver", func(t *testing.T) {
 		t.Run("non pointer", func(t *testing.T) {

@@ -5,12 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
-)
 
-var (
-	noEscapeEncoder = NewEncoder(&EncoderOption{
-		EscapeHTML: false,
-	})
+	"github.com/stretchr/testify/require"
 )
 
 func TestStreamer_String_ChainError(t *testing.T) {
@@ -30,13 +26,18 @@ func testStreamerStringEscape(t *testing.T, s string, escape bool) {
 	if escape {
 		enc = DefaultEncoder
 	} else {
-		enc = noEscapeEncoder
+		enc = NewEncoder(&EncoderOption{
+			EscapeHTML: false,
+		})
 	}
 	// json.Encoder will add a newline at the end
 	exp := strings.TrimSpace(b.String())
-	testStreamerWithEncoder(t, enc, exp, func(streamer *Streamer) {
-		streamer.String(s)
-	})
+
+	streamer := enc.NewStreamer()
+	defer enc.ReturnStreamer(streamer)
+	streamer.String(s)
+	require.NoError(t, streamer.Error)
+	require.Equal(t, exp, string(streamer.buffer))
 }
 
 func testStreamerString(t *testing.T, s string) {

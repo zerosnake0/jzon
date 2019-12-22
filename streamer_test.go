@@ -2,6 +2,7 @@ package jzon
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"strings"
 	"testing"
@@ -39,6 +40,28 @@ func testStreamerWithEncoder(t *testing.T, enc *Encoder, exp string, cb func(s *
 
 func testStreamer(t *testing.T, exp string, cb func(s *Streamer)) {
 	testStreamerWithEncoder(t, DefaultEncoder, exp, cb)
+}
+
+func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb func(s *Streamer)) {
+	buf, err := json.Marshal(obj)
+
+	streamer := enc.NewStreamer()
+	defer enc.ReturnStreamer(streamer)
+	cb(streamer)
+
+	if err != nil {
+		require.Error(t, streamer.Error)
+	} else {
+		require.NoError(t, streamer.Error)
+		require.Equal(t, buf, streamer.buffer, "expecting %s but got %s",
+			buf, streamer.buffer)
+	}
+}
+
+func checkEncodeValueWithStandard(t *testing.T, enc *Encoder, obj interface{}) {
+	checkEncodeWithStandard(t, enc, obj, func(s *Streamer) {
+		s.Value(obj)
+	})
 }
 
 func testStreamerChainError(t *testing.T, cb func(s *Streamer)) {

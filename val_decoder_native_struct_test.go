@@ -10,7 +10,7 @@ import (
 
 func TestValDecoder_Native_Struct_Zero_Field(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("nil receiver", func(t *testing.T) {
 		f(t, "null", NilPointerReceiverError, nil, nil)
@@ -29,7 +29,7 @@ func TestValDecoder_Native_Struct_Zero_Field(t *testing.T) {
 
 func TestValDecoder_Native_Struct_Mapping(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("unexported field", func(t *testing.T) {
 		f(t, ` { "a" : "abc" } `, nil, &struct {
@@ -80,7 +80,7 @@ func TestValDecoder_Native_Struct_Mapping(t *testing.T) {
 
 func TestValDecoder_Native_Struct(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("nil receiver", func(t *testing.T) {
 		f(t, "null", NilPointerReceiverError, nil, nil)
@@ -208,7 +208,7 @@ type testStruct struct {
 
 func TestValDecoder_Native_Struct_Nested(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("nested", func(t *testing.T) {
 		f(t, `{"a":null,"c":1,"b":{}}`, nil, &testStruct{
@@ -234,7 +234,7 @@ func TestValDedocer_Native_Struct_Tag(t *testing.T) {
 
 func TestValDecoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("not embedded", func(t *testing.T) {
 		type inner struct{}

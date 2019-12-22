@@ -1,11 +1,8 @@
 package jzon
 
 import (
-	"encoding/json"
-	"testing"
-
 	"encoding"
-	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 type testTextMarshaler struct {
@@ -28,11 +25,7 @@ func (m *testTextMarshaler2) MarshalText() ([]byte, error) {
 
 func TestValEncoder_TextMarshaler(t *testing.T) {
 	f := func(t *testing.T, m encoding.TextMarshaler) {
-		b, err := json.Marshal(m)
-		require.NoError(t, err)
-		testStreamer(t, string(b), func(s *Streamer) {
-			s.Value(m)
-		})
+		checkEncodeValueWithStandard(t, DefaultEncoder, m)
 	}
 	t.Run("non pointer receiver", func(t *testing.T) {
 		t.Run("non pointer", func(t *testing.T) {

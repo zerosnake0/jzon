@@ -16,7 +16,7 @@ func TestValDecoder_Native_Base64(t *testing.T) {
 			b2 := append([]byte(nil), initValue...)
 			p2 = &b2
 		}
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	f2 := func(t *testing.T, data string, ex error) {
 		f(t, data, ex, "dummy")
@@ -69,7 +69,7 @@ func (tb *testByte) UnmarshalJSON(data []byte) error {
 
 func TestValDecoder_Native_Base64_Override(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("array", func(t *testing.T) {
 		arr1 := [...]testByte{'d', 'u', 'm', 'm', 'y'}

@@ -1,11 +1,8 @@
 package jzon
 
 import (
-	"encoding/json"
 	"math"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestStreamer_Int_ChainError(t *testing.T) {
@@ -53,9 +50,7 @@ func TestStreamer_Int_ChainError(t *testing.T) {
 
 func TestStreamer_Int8(t *testing.T) {
 	f := func(t *testing.T, i int8) {
-		exp, err := json.Marshal(i)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
 			s.Int8(i)
 		})
 	}
@@ -69,9 +64,7 @@ func TestStreamer_Int8(t *testing.T) {
 
 func TestStreamer_Uint8(t *testing.T) {
 	f := func(t *testing.T, i uint8) {
-		exp, err := json.Marshal(i)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
 			s.Uint8(i)
 		})
 	}
@@ -85,9 +78,7 @@ func TestStreamer_Uint8(t *testing.T) {
 
 func TestStreamer_Int16(t *testing.T) {
 	f := func(t *testing.T, i int16) {
-		exp, err := json.Marshal(i)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
 			s.Int16(i)
 		})
 	}
@@ -101,9 +92,7 @@ func TestStreamer_Int16(t *testing.T) {
 
 func TestStreamer_Uint16(t *testing.T) {
 	f := func(t *testing.T, i uint16) {
-		exp, err := json.Marshal(i)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
 			s.Uint16(i)
 		})
 	}
@@ -117,9 +106,7 @@ func TestStreamer_Uint16(t *testing.T) {
 
 func TestStreamer_Int32(t *testing.T) {
 	f := func(t *testing.T, i int32) {
-		exp, err := json.Marshal(i)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
 			s.Int32(i)
 		})
 	}
@@ -133,9 +120,7 @@ func TestStreamer_Int32(t *testing.T) {
 
 func TestStreamer_Uint32(t *testing.T) {
 	f := func(t *testing.T, i uint32) {
-		exp, err := json.Marshal(i)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
 			s.Uint32(i)
 		})
 	}
@@ -155,9 +140,7 @@ func TestStreamer_Uint32(t *testing.T) {
 
 func TestStreamer_Int64(t *testing.T) {
 	f := func(t *testing.T, i int64) {
-		exp, err := json.Marshal(i)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
 			s.Int64(i)
 		})
 	}
@@ -171,9 +154,7 @@ func TestStreamer_Int64(t *testing.T) {
 
 func TestStreamer_Uint64(t *testing.T) {
 	f := func(t *testing.T, i uint64) {
-		exp, err := json.Marshal(i)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
 			s.Uint64(i)
 		})
 	}
@@ -202,9 +183,7 @@ func TestStreamer_Uint64(t *testing.T) {
 
 func TestStreamer_Int(t *testing.T) {
 	f := func(t *testing.T, i int) {
-		exp, err := json.Marshal(i)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
 			s.Int(i)
 		})
 	}
@@ -215,9 +194,7 @@ func TestStreamer_Int(t *testing.T) {
 
 func TestStreamer_Uint(t *testing.T) {
 	f := func(t *testing.T, i uint) {
-		exp, err := json.Marshal(i)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
 			s.Uint(i)
 		})
 	}

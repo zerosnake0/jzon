@@ -1,21 +1,14 @@
 package jzon
 
 import (
-	"encoding/json"
 	"reflect"
 	"testing"
 	"unsafe"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestValEncoder_Bool(t *testing.T) {
 	f := func(t *testing.T, b bool) {
-		buf, err := json.Marshal(b)
-		require.NoError(t, err)
-		testStreamer(t, string(buf), func(s *Streamer) {
-			s.Value(b)
-		})
+		checkEncodeValueWithStandard(t, DefaultEncoder, b)
 	}
 	t.Run("true", func(t *testing.T) {
 		f(t, true)
@@ -28,11 +21,7 @@ func TestValEncoder_Bool(t *testing.T) {
 func TestValEncoder_Bool_Kind(t *testing.T) {
 	type Bool bool
 	f := func(t *testing.T, b Bool) {
-		buf, err := json.Marshal(b)
-		require.NoError(t, err)
-		testStreamer(t, string(buf), func(s *Streamer) {
-			s.Value(b)
-		})
+		checkEncodeValueWithStandard(t, DefaultEncoder, b)
 	}
 	t.Run("true", func(t *testing.T) {
 		f(t, true)
@@ -78,11 +67,7 @@ func TestValEncoder_Bool_Kind_CustomEncoder(t *testing.T) {
 
 func TestValEncoder_String(t *testing.T) {
 	f := func(t *testing.T, str string) {
-		buf, err := json.Marshal(str)
-		require.NoError(t, err)
-		testStreamer(t, string(buf), func(s *Streamer) {
-			s.Value(str)
-		})
+		checkEncodeValueWithStandard(t, DefaultEncoder, str)
 	}
 	t.Run("test", func(t *testing.T) {
 		f(t, "test")

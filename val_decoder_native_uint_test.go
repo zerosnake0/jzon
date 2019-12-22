@@ -15,7 +15,7 @@ func TestValDecoder_Native_Uint(t *testing.T) {
 			b2 := initValue
 			p2 = &b2
 		}
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	f2 := func(t *testing.T, data string, ex error) {
 		f(t, data, ex, 1)
@@ -50,7 +50,7 @@ func TestValDecoder_Native_Uint8(t *testing.T) {
 			b2 := initValue
 			p2 = &b2
 		}
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	f2 := func(t *testing.T, data string, ex error) {
 		f(t, data, ex, 1)
@@ -85,7 +85,7 @@ func TestValDecoder_Native_Uint16(t *testing.T) {
 			b2 := initValue
 			p2 = &b2
 		}
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	f2 := func(t *testing.T, data string, ex error) {
 		f(t, data, ex, 1)
@@ -120,7 +120,7 @@ func TestValDecoder_Native_Uint32(t *testing.T) {
 			b2 := initValue
 			p2 = &b2
 		}
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	f2 := func(t *testing.T, data string, ex error) {
 		f(t, data, ex, 1)
@@ -155,7 +155,7 @@ func TestValDecoder_Native_Uint64(t *testing.T) {
 			b2 := initValue
 			p2 = &b2
 		}
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	f2 := func(t *testing.T, data string, ex error) {
 		f(t, data, ex, 1)
