@@ -75,3 +75,22 @@ func TestValEncoder_Bool_Kind_CustomEncoder(t *testing.T) {
 		s.Value(Bool(false))
 	})
 }
+
+func TestValEncoder_String(t *testing.T) {
+	f := func(t *testing.T, str string) {
+		buf, err := json.Marshal(str)
+		require.NoError(t, err)
+		testStreamer(t, string(buf), func(s *Streamer) {
+			s.Value(str)
+		})
+	}
+	t.Run("test", func(t *testing.T) {
+		f(t, "test")
+	})
+	t.Run("escape", func(t *testing.T) {
+		f(t, "\"\n\r\t\\")
+	})
+	t.Run("html escape", func(t *testing.T) {
+		f(t, "<>&")
+	})
+}

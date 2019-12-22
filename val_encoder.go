@@ -31,6 +31,7 @@ func init() {
 
 	// kind mapping
 	mapEncoderKind((*bool)(nil), (*boolEncoder)(nil))
+	mapEncoderKind((*string)(nil), (*stringEncoder)(nil))
 }
 
 type ValEncoder interface {
