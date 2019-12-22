@@ -18,6 +18,7 @@ func createGlobalValEncoder(ptr interface{}, enc ValEncoder) {
 func init() {
 	// standard json library types
 	createGlobalValEncoder((*json.Number)(nil), (*jsonNumberEncoder)(nil))
+	createGlobalValEncoder((*json.RawMessage)(nil), (*jsonRawMessageEncoder)(nil))
 }
 
 type ValEncoder interface {
