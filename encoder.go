@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"fmt"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -89,6 +90,15 @@ func (enc *Encoder) createEncoderInternal(cache encoderCache, typesToCreate []re
 			cache[rType] = v
 			continue
 		}
+
+		fmt.Println(typ == jsonMarshalerType)
+
+		// check json.Marshaler interface
+		if typ.Implements(jsonMarshalerType) {
+			cache[rType] = jsonMarshalerEncoder(rType)
+			continue
+		}
+
 	}
 	// rebuild some encoders
 	// for _, builder := range rebuildMap {
