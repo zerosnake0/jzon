@@ -22,7 +22,7 @@ import (
 // 	return &p
 // }
 //
-// func (p *ptrLike) ptrLike(rtype rtype, obj interface{}) bool {
+// func (p *ptrLike) ptrLike(rtype elemRType, obj interface{}) bool {
 // 	cache := p.v.Load().(ptrLikeMap)
 // 	like, ok := cache[rtype]
 // 	if ok {

@@ -82,13 +82,12 @@ func (dec *Decoder) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder 
 	for k, v := range cache {
 		newCache[k] = v
 	}
-	typesToCreate := []reflect.Type{ptrType}
-	dec.createDecoderInternal(newCache, typesToCreate)
+	dec.createDecoderInternal(newCache, ptrType)
 	dec.decoderCache.Store(newCache)
 	return newCache[rType]
 }
 
-func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []reflect.Type) {
+func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate ...reflect.Type) {
 	rebuildMap := map[rtype]interface{}{}
 	idx := len(typesToCreate) - 1
 	for idx >= 0 {
