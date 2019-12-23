@@ -141,6 +141,10 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			w := newPointerEncoder(rType, elemType)
 			internalCache[rType] = w.encoder
 			rebuildMap[rType] = w
+		default:
+			v := notSupportedEncoder(typ.String())
+			internalCache[rType] = v
+			cache[rType] = v
 		}
 	}
 	// rebuild some encoders

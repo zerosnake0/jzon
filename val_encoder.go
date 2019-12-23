@@ -60,3 +60,9 @@ func init() {
 type ValEncoder interface {
 	Encode(ptr unsafe.Pointer, s *Streamer)
 }
+
+type notSupportedEncoder string
+
+func (enc notSupportedEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	s.Error = TypeNotSupportedError(enc)
+}
