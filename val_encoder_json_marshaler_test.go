@@ -23,33 +23,35 @@ func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
 	return m.data, m.err
 }
 
-func TestValEncoder_JsonMarshaler(t *testing.T) {
+func TestValEncoder_JsonMarshaler_NonPointerReceiver(t *testing.T) {
 	f := func(t *testing.T, m json.Marshaler) {
 		checkEncodeValueWithStandard(t, DefaultEncoder, m)
 	}
-	t.Run("non pointer receiver", func(t *testing.T) {
-		t.Run("non pointer", func(t *testing.T) {
-			f(t, testJsonMarshaler{
-				data: []byte(`{"a":1}`),
-			})
-		})
-		t.Run("pointer", func(t *testing.T) {
-			f(t, &testJsonMarshaler{
-				data: []byte(`{"a":2}`),
-			})
-		})
-		t.Run("nil pointer", func(t *testing.T) {
-			f(t, (*testJsonMarshaler)(nil))
+	t.Run("non pointer", func(t *testing.T) {
+		f(t, testJsonMarshaler{
+			data: []byte(`{"a":1}`),
 		})
 	})
-	t.Run("pointer receiver", func(t *testing.T) {
-		t.Run("pointer", func(t *testing.T) {
-			f(t, &testJsonMarshaler2{
-				data: []byte(`{"b":1}`),
-			})
+	t.Run("pointer", func(t *testing.T) {
+		f(t, &testJsonMarshaler{
+			data: []byte(`{"a":2}`),
 		})
-		t.Run("nil pointer", func(t *testing.T) {
-			f(t, (*testJsonMarshaler2)(nil))
+	})
+	t.Run("nil pointer", func(t *testing.T) {
+		f(t, (*testJsonMarshaler)(nil))
+	})
+}
+
+func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
+	f := func(t *testing.T, m json.Marshaler) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, m)
+	}
+	t.Run("pointer", func(t *testing.T) {
+		f(t, &testJsonMarshaler2{
+			data: []byte(`{"b":1}`),
 		})
+	})
+	t.Run("nil pointer", func(t *testing.T) {
+		f(t, (*testJsonMarshaler2)(nil))
 	})
 }

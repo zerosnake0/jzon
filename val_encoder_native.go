@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"log"
 	"unsafe"
 )
 
@@ -12,6 +13,7 @@ func (*boolEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 		s.Null()
 		return
 	}
+	log.Printf("bool %x", ptr)
 	s.Bool(*(*bool)(ptr))
 }
 

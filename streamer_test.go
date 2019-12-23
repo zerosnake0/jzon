@@ -52,6 +52,7 @@ func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb fun
 	if err != nil {
 		require.Error(t, streamer.Error)
 	} else {
+		t.Logf("got %s", buf)
 		require.NoError(t, streamer.Error)
 		require.Equal(t, buf, streamer.buffer, "expecting %s but got %s",
 			buf, streamer.buffer)
