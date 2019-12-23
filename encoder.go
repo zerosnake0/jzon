@@ -21,8 +21,10 @@ type EncoderOption struct {
 type encoderCache = map[rtype]ValEncoder
 
 type Encoder struct {
-	cacheMu       sync.Mutex
-	encoderCache  atomic.Value
+	cacheMu sync.Mutex
+	// the encoder cache, or root encoder cache
+	encoderCache atomic.Value
+	// the internal cache
 	internalCache encoderCache
 
 	escapeHtml      bool
@@ -32,14 +34,16 @@ type Encoder struct {
 
 func NewEncoder(opt *EncoderOption) *Encoder {
 	enc := Encoder{
-		tag:           "json",
-		escapeHtml:    true,
-		internalCache: encoderCache{},
+		tag:        "json",
+		escapeHtml: true,
 	}
 	cache := encoderCache{}
+	internalCache := encoderCache{}
 	if opt != nil {
 		for typ, valEnc := range opt.ValEncoders {
-			cache[rtypeOfType(typ)] = valEnc
+			rtype := rtypeOfType(typ)
+			cache[rtype] = valEnc
+			internalCache[rtype] = valEnc
 		}
 		enc.escapeHtml = opt.EscapeHTML
 		if opt.Tag != "" {
@@ -48,6 +52,7 @@ func NewEncoder(opt *EncoderOption) *Encoder {
 		enc.onlyTaggedField = opt.OnlyTaggedField
 	}
 	enc.encoderCache.Store(cache)
+	enc.internalCache = internalCache
 	return &enc
 }
 
