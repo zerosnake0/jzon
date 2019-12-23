@@ -26,7 +26,7 @@ func TestValEncoder_Ptr(t *testing.T) {
 		f(t, &b)
 	})
 	t.Run("ptr", func(t *testing.T) {
-		pb := (*int)(nil)
+		pb := (*bool)(nil)
 		log.Printf("&pb %p", (unsafe.Pointer)(&pb))
 		log.Printf("*(&pb) %x", *(*unsafe.Pointer)((unsafe.Pointer)(&pb)))
 		f(t, &pb)

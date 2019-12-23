@@ -1,7 +1,6 @@
 package jzon
 
 import (
-	"log"
 	"reflect"
 	"unsafe"
 )
@@ -29,6 +28,5 @@ func (enc *pointerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 		s.Null()
 		return
 	}
-	log.Printf("ptr %x", ptr)
 	enc.encoder.Encode(*(*unsafe.Pointer)(ptr), s)
 }
