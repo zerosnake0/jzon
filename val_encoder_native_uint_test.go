@@ -10,7 +10,14 @@ func TestValEncoder_Uint(t *testing.T) {
 		checkEncodeValueWithStandard(t, DefaultEncoder, i)
 	}
 	t.Run("test", func(t *testing.T) {
-		f(t, math.MaxUint8)
+		f(t, math.MaxUint32)
+	})
+	t.Run("nil pointer", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint)(nil))
+	})
+	t.Run("pointer", func(t *testing.T) {
+		i := uint(math.MaxUint32)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
 	})
 }
 
@@ -21,6 +28,13 @@ func TestValEncoder_Uint8(t *testing.T) {
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxUint8)
 	})
+	t.Run("nil pointer", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint8)(nil))
+	})
+	t.Run("pointer", func(t *testing.T) {
+		i := uint8(math.MaxUint8)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+	})
 }
 
 func TestValEncoder_Uint16(t *testing.T) {
@@ -29,6 +43,13 @@ func TestValEncoder_Uint16(t *testing.T) {
 	}
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxUint16)
+	})
+	t.Run("nil pointer", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint16)(nil))
+	})
+	t.Run("pointer", func(t *testing.T) {
+		i := uint16(math.MaxUint16)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
 	})
 }
 
@@ -39,6 +60,13 @@ func TestValEncoder_Uint32(t *testing.T) {
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxUint32)
 	})
+	t.Run("nil pointer", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint32)(nil))
+	})
+	t.Run("pointer", func(t *testing.T) {
+		i := uint32(math.MaxUint32)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+	})
 }
 
 func TestValEncoder_Uint64(t *testing.T) {
@@ -47,5 +75,12 @@ func TestValEncoder_Uint64(t *testing.T) {
 	}
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxUint64)
+	})
+	t.Run("nil pointer", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint64)(nil))
+	})
+	t.Run("pointer", func(t *testing.T) {
+		i := uint64(math.MaxUint64)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
 	})
 }

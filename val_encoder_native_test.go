@@ -16,6 +16,13 @@ func TestValEncoder_Bool(t *testing.T) {
 	t.Run("false", func(t *testing.T) {
 		f(t, false)
 	})
+	t.Run("nil ptr", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*bool)(nil))
+	})
+	t.Run("ptr", func(t *testing.T) {
+		b := true
+		checkEncodeValueWithStandard(t, DefaultEncoder, &b)
+	})
 }
 
 func TestValEncoder_Bool_Kind(t *testing.T) {
@@ -28,6 +35,13 @@ func TestValEncoder_Bool_Kind(t *testing.T) {
 	})
 	t.Run("false", func(t *testing.T) {
 		f(t, false)
+	})
+	t.Run("nil ptr", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*Bool)(nil))
+	})
+	t.Run("ptr", func(t *testing.T) {
+		b := Bool(true)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &b)
 	})
 }
 
@@ -77,5 +91,12 @@ func TestValEncoder_String(t *testing.T) {
 	})
 	t.Run("html escape", func(t *testing.T) {
 		f(t, "<>&")
+	})
+	t.Run("nil ptr", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*string)(nil))
+	})
+	t.Run("ptr", func(t *testing.T) {
+		s := "test"
+		checkEncodeValueWithStandard(t, DefaultEncoder, &s)
 	})
 }

@@ -12,6 +12,13 @@ func TestValEncoder_Float32(t *testing.T) {
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxFloat32)
 	})
+	t.Run("nil pointer", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*float32)(nil))
+	})
+	t.Run("pointer", func(t *testing.T) {
+		f := float32(math.MaxFloat32)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &f)
+	})
 }
 
 func TestValEncoder_Float64(t *testing.T) {
@@ -20,5 +27,12 @@ func TestValEncoder_Float64(t *testing.T) {
 	}
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxFloat64)
+	})
+	t.Run("nil pointer", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*float64)(nil))
+	})
+	t.Run("pointer", func(t *testing.T) {
+		f := float64(math.MaxFloat64)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &f)
 	})
 }

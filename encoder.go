@@ -138,7 +138,14 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			elemType := typ.Elem()
 			typesToCreate = append(typesToCreate, elemType)
 			idx += 1
-			w := newPointerEncoder(rType, elemType)
+			w := newPointerEncoder(elemType)
+			internalCache[rType] = w.encoder
+			rebuildMap[rType] = w
+		case reflect.Array:
+			elemType := typ.Elem()
+			typesToCreate = append(typesToCreate, elemType)
+			idx += 1
+			w := newArrayEncoder(typ)
 			internalCache[rType] = w.encoder
 			rebuildMap[rType] = w
 		default:
@@ -148,12 +155,16 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		}
 	}
 	// rebuild some encoders
-	for _, builder := range rebuildMap {
+	for rType, builder := range rebuildMap {
 		switch x := builder.(type) {
 		case *pointerEncoderBuilder:
 			v := internalCache[x.elemRType]
 			x.encoder.encoder = v
-			cache[x.ptrRType] = v
+			cache[rType] = v
+		case *arrayEncoderBuilder:
+			v := internalCache[x.elemRType]
+			x.encoder.encoder = v
+			cache[rType] = x.encoder
 		}
 	}
 }

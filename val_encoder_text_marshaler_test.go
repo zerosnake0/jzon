@@ -2,6 +2,7 @@ package jzon
 
 import (
 	"encoding"
+	"errors"
 	"testing"
 )
 
@@ -33,9 +34,21 @@ func TestValEncoder_TextMarshaler(t *testing.T) {
 				data: []byte(`{"a":1}`),
 			})
 		})
+		t.Run("non pointer error", func(t *testing.T) {
+			f(t, testTextMarshaler{
+				data: []byte(`{"a":1}`),
+				err:  errors.New("test"),
+			})
+		})
 		t.Run("pointer", func(t *testing.T) {
 			f(t, &testTextMarshaler{
 				data: []byte(`{"a":2}`),
+			})
+		})
+		t.Run("pointer error", func(t *testing.T) {
+			f(t, &testTextMarshaler{
+				data: []byte(`{"a":2}`),
+				err:  errors.New("test"),
 			})
 		})
 		t.Run("nil pointer", func(t *testing.T) {
@@ -46,6 +59,12 @@ func TestValEncoder_TextMarshaler(t *testing.T) {
 		t.Run("pointer", func(t *testing.T) {
 			f(t, &testTextMarshaler2{
 				data: []byte(`{"b":1}`),
+			})
+		})
+		t.Run("pointer error", func(t *testing.T) {
+			f(t, &testTextMarshaler2{
+				data: []byte(`{"b":1}`),
+				err:  errors.New("test"),
 			})
 		})
 		t.Run("nil pointer", func(t *testing.T) {

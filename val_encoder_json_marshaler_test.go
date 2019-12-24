@@ -2,6 +2,7 @@ package jzon
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 )
 
@@ -32,9 +33,21 @@ func TestValEncoder_JsonMarshaler_NonPointerReceiver(t *testing.T) {
 			data: []byte(`{"a":1}`),
 		})
 	})
+	t.Run("non pointer error", func(t *testing.T) {
+		f(t, testJsonMarshaler{
+			data: []byte(`{"a":1}`),
+			err:  errors.New("test"),
+		})
+	})
 	t.Run("pointer", func(t *testing.T) {
 		f(t, &testJsonMarshaler{
 			data: []byte(`{"a":2}`),
+		})
+	})
+	t.Run("pointer error", func(t *testing.T) {
+		f(t, &testJsonMarshaler{
+			data: []byte(`{"a":2}`),
+			err:  errors.New("test"),
 		})
 	})
 	t.Run("nil pointer", func(t *testing.T) {
@@ -49,6 +62,12 @@ func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
 	t.Run("pointer", func(t *testing.T) {
 		f(t, &testJsonMarshaler2{
 			data: []byte(`{"b":1}`),
+		})
+	})
+	t.Run("pointer error", func(t *testing.T) {
+		f(t, &testJsonMarshaler2{
+			data: []byte(`{"b":1}`),
+			err:  errors.New("test"),
 		})
 	})
 	t.Run("nil pointer", func(t *testing.T) {

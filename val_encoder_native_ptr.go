@@ -7,14 +7,12 @@ import (
 
 type pointerEncoderBuilder struct {
 	encoder   *pointerEncoder
-	ptrRType  rtype
 	elemRType rtype
 }
 
-func newPointerEncoder(ptrRType rtype, elemType reflect.Type) *pointerEncoderBuilder {
+func newPointerEncoder(elemType reflect.Type) *pointerEncoderBuilder {
 	return &pointerEncoderBuilder{
 		encoder:   &pointerEncoder{},
-		ptrRType:  ptrRType,
 		elemRType: rtypeOfType(elemType),
 	}
 }
