@@ -32,6 +32,9 @@ func typedmemmove(rtype rtype, dst, src unsafe.Pointer)
 //go:noescape
 func mapassign(t rtype, m, key, val unsafe.Pointer)
 
+//go:linkname ifaceIndir reflect.ifaceIndir
+func ifaceIndir(t rtype) bool
+
 func unsafeMakeSlice(rtype rtype, length, cap int) unsafe.Pointer {
 	return unsafe.Pointer(&reflect.SliceHeader{
 		// TODO: is this safe?

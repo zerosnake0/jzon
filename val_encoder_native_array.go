@@ -1,10 +1,20 @@
 package jzon
 
 import (
-	"log"
 	"reflect"
 	"unsafe"
 )
+
+// special array (empty)
+type emptyArrayEncoder struct{}
+
+func (enc *emptyArrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if ptr == nil {
+		s.Null()
+		return
+	}
+	s.RawString("[]")
+}
 
 type arrayEncoderBuilder struct {
 	encoder   *arrayEncoder
@@ -33,12 +43,16 @@ func (enc *arrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 		s.Null()
 		return
 	}
-	log.Println(ptr)
 	s.ArrayStart()
-	for i := 0; i < enc.length; i++ {
+	i := 0
+	for {
 		enc.encoder.Encode(ptr, s)
 		if s.Error != nil {
 			return
+		}
+		i++
+		if i == enc.length {
+			break
 		}
 		ptr = add(ptr, enc.elemSize, "i < enc.length")
 	}

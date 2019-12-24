@@ -145,9 +145,15 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			elemType := typ.Elem()
 			typesToCreate = append(typesToCreate, elemType)
 			idx += 1
-			w := newArrayEncoder(typ)
-			internalCache[rType] = w.encoder
-			rebuildMap[rType] = w
+			if typ.Len() == 0 {
+				v := (*emptyArrayEncoder)(nil)
+				internalCache[rType] = v
+				cache[rType] = v
+			} else {
+				w := newArrayEncoder(typ)
+				internalCache[rType] = w.encoder
+				rebuildMap[rType] = w
+			}
 		default:
 			v := notSupportedEncoder(typ.String())
 			internalCache[rType] = v
@@ -164,7 +170,15 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		case *arrayEncoderBuilder:
 			v := internalCache[x.elemRType]
 			x.encoder.encoder = v
-			cache[rType] = x.encoder
+			if ifaceIndir(rType) {
+				cache[rType] = x.encoder
+			} else {
+				// (see reflect.ArrayOf)
+				// when the array is stored in interface directly, it means:
+				// 1. the length of array is 1
+				// 2. the element of the array is also directly saved
+				cache[rType] = &directEncoder{x.encoder}
+			}
 		}
 	}
 }
