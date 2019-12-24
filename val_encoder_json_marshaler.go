@@ -26,3 +26,19 @@ func (enc jsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	}
 	s.Raw(b)
 }
+
+type dynamicJsonMarshalerEncoder struct{}
+
+func (*dynamicJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	marshaler := *(*json.Marshaler)(ptr)
+	if marshaler == nil {
+		s.Null()
+		return
+	}
+	b, err := marshaler.MarshalJSON()
+	if err != nil {
+		s.Error = err
+		return
+	}
+	s.Raw(b)
+}

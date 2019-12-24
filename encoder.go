@@ -132,7 +132,6 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				continue
 			}
 		}
-
 		switch kind {
 		case reflect.Ptr:
 			elemType := typ.Elem()
@@ -154,6 +153,15 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				internalCache[rType] = w.encoder
 				rebuildMap[rType] = w
 			}
+		case reflect.Interface:
+			var v ValEncoder
+			if typ.NumMethod() == 0 {
+				v = (*efaceEncoder)(nil)
+			} else {
+				v = (*ifaceEncoder)(nil)
+			}
+			internalCache[rType] = v
+			cache[rType] = v
 		default:
 			v := notSupportedEncoder(typ.String())
 			internalCache[rType] = v

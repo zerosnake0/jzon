@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"encoding"
 	"encoding/json"
 	"reflect"
 	"strconv"
@@ -29,6 +30,8 @@ func init() {
 	// standard json library types
 	createGlobalValEncoder((*json.Number)(nil), (*jsonNumberEncoder)(nil))
 	createGlobalValEncoder((*json.RawMessage)(nil), (*jsonRawMessageEncoder)(nil))
+	createGlobalValEncoder((*json.Marshaler)(nil), (*dynamicJsonMarshalerEncoder)(nil))
+	createGlobalValEncoder((*encoding.TextMarshaler)(nil), (*dynamicTextMarshalerEncoder)(nil))
 
 	// kind mapping
 	mapEncoderKind((*bool)(nil), (*boolEncoder)(nil))
