@@ -72,3 +72,34 @@ func TestValEncoder_TextMarshaler(t *testing.T) {
 		})
 	})
 }
+
+func TestValEncoder_DynamicTextMarshaler(t *testing.T) {
+	t.Run("marshaler <nil>", func(t *testing.T) {
+		// TODO: This test should be automatically fixed in the future golang version
+		v := "go1.13.5"
+		if goVersion.LessEqual(v) {
+			t.Skipf("skipping this test for go version <= %s", v)
+		}
+		var i encoding.TextMarshaler
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+	})
+	t.Run("marshaler error", func(t *testing.T) {
+		var i encoding.TextMarshaler = testTextMarshaler{
+			data: []byte(`"test"`),
+			err:  errors.New("test"),
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+	})
+	t.Run("marshaler", func(t *testing.T) {
+		var i encoding.TextMarshaler = testTextMarshaler{
+			data: []byte(`"test"`),
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+	})
+	t.Run("marshaler 2", func(t *testing.T) {
+		var i encoding.TextMarshaler = &testTextMarshaler{
+			data: []byte(`"test 2"`),
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+	})
+}

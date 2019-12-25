@@ -1,13 +1,28 @@
 package jzon
 
 import (
+	"encoding/json"
+	"errors"
 	"testing"
 )
+
+func TestValEncoder_Array_Error(t *testing.T) {
+	t.Run("error", func(t *testing.T) {
+		arr := [...]json.Marshaler{testJsonMarshaler{
+			data: []byte(`"test"`),
+			err:  errors.New("test"),
+		}}
+		checkEncodeValueWithStandard(t, DefaultEncoder, arr)
+	})
+}
 
 func TestValEncoder_Array_Empty(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
 		arr := [...]int{}
 		checkEncodeValueWithStandard(t, DefaultEncoder, arr)
+	})
+	t.Run("nil pointer", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*[0]int)(nil))
 	})
 	t.Run("empty pointer", func(t *testing.T) {
 		arr := [...]int{}

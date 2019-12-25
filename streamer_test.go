@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -42,20 +43,34 @@ func testStreamer(t *testing.T, exp string, cb func(s *Streamer)) {
 	testStreamerWithEncoder(t, DefaultEncoder, exp, cb)
 }
 
+func jsonMarshal(o interface{}) (buf []byte, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			if err == nil {
+				err = fmt.Errorf("panic: %v", e)
+			}
+		}
+	}()
+	buf, err = json.Marshal(o)
+	return
+}
+
 func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb func(s *Streamer)) {
-	buf, err := json.Marshal(obj)
+	buf, err := jsonMarshal(obj)
 
 	streamer := enc.NewStreamer()
 	defer enc.ReturnStreamer(streamer)
 	cb(streamer)
 
 	if err != nil {
-		require.Error(t, streamer.Error)
+		require.Error(t, streamer.Error, "json.Marshal error: %v", err)
 	} else {
 		t.Logf("got %s", buf)
 		require.NoError(t, streamer.Error)
-		require.Equal(t, buf, streamer.buffer, "expecting %s but got %s",
-			buf, streamer.buffer)
+		exp := localByteToString(buf)
+		got := localByteToString(streamer.buffer)
+		require.Equal(t, exp, got, "expecting %s but got %s",
+			exp, got)
 	}
 }
 

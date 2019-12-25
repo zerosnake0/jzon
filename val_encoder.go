@@ -12,6 +12,7 @@ var (
 	globalValEncoders = map[rtype]ValEncoder{}
 	encoderKindMap    = [numKinds]rtype{}
 	kindEncoders      = [numKinds]ValEncoder{}
+	keyEncoders       = [numKinds]ValEncoder{}
 )
 
 func createGlobalValEncoder(ptr interface{}, enc ValEncoder) {
@@ -24,6 +25,12 @@ func mapEncoderKind(ptr interface{}, enc ValEncoder) {
 	kind := elem.Kind()
 	encoderKindMap[kind] = rtypeOfType(elem)
 	kindEncoders[kind] = enc
+}
+
+func mapKeyEncoder(ptr interface{}, enc ValEncoder) {
+	ptrType := reflect.TypeOf(ptr)
+	kind := ptrType.Elem().Kind()
+	keyEncoders[kind] = enc
 }
 
 func init() {
@@ -58,6 +65,9 @@ func init() {
 	mapEncoderKind((*uint64)(nil), (*uint64Encoder)(nil))
 	mapEncoderKind((*float32)(nil), (*float32Encoder)(nil))
 	mapEncoderKind((*float64)(nil), (*float64Encoder)(nil))
+
+	// object key encoders
+	mapKeyEncoder((*string)(nil), (*stringKeyEncoder)(nil))
 }
 
 type ValEncoder interface {

@@ -162,6 +162,21 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			}
 			internalCache[rType] = v
 			cache[rType] = v
+		case reflect.Map:
+			w := newMapEncoder(typ)
+			if w == nil {
+				v := notSupportedEncoder(typ.String())
+				internalCache[rType] = v
+				cache[rType] = v
+			} else {
+				typesToCreate = append(typesToCreate, typ.Elem())
+				idx += 1
+				// pointer decoder is a reverse of direct encoder
+				internalCache[rType] = &pointerEncoder{w.encoder}
+				rebuildMap[rType] = w
+			}
+		// case reflect.Struct:
+		// case reflect.Slice:
 		default:
 			v := notSupportedEncoder(typ.String())
 			internalCache[rType] = v
@@ -187,6 +202,10 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				// 2. the element of the array is also directly saved
 				cache[rType] = &directEncoder{x.encoder}
 			}
+		case *mapEncoderBuilder:
+			// TODO: key/value encoder
+			x.encoder.elemEncoder = internalCache[x.encoder.elemRType]
+			cache[rType] = x.encoder
 		}
 	}
 }

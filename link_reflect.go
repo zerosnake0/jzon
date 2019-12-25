@@ -35,6 +35,19 @@ func mapassign(t rtype, m, key, val unsafe.Pointer)
 //go:linkname ifaceIndir reflect.ifaceIndir
 func ifaceIndir(t rtype) bool
 
+type hiter struct {
+	key   unsafe.Pointer
+	value unsafe.Pointer
+}
+
+//go:noescape
+//go:linkname mapiterinit reflect.mapiterinit
+func mapiterinit(rtype rtype, m unsafe.Pointer) *hiter
+
+//go:noescape
+//go:linkname mapiternext reflect.mapiternext
+func mapiternext(it *hiter)
+
 func unsafeMakeSlice(rtype rtype, length, cap int) unsafe.Pointer {
 	return unsafe.Pointer(&reflect.SliceHeader{
 		// TODO: is this safe?

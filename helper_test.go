@@ -1,6 +1,8 @@
 package jzon
 
-import "io"
+import (
+	"io"
+)
 
 type oneByteReader struct {
 	b   []byte
