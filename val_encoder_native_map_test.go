@@ -18,13 +18,41 @@ func TestValEncoder_Map(t *testing.T) {
 }
 
 func TestValEncoder_Native_Map_KeyEncoder_TextMarshaler(t *testing.T) {
-	t.Run("", func(t *testing.T) {
+	t.Run("not supported", func(t *testing.T) {
 		type key testTextMarshaler
 		m := map[key]int{{
 			data: "a",
 		}: 1}
 		checkEncodeValueWithStandard(t, DefaultEncoder, m,
 			TypeNotSupportedError(""))
+	})
+	t.Run("marshaler 1-non pointer", func(t *testing.T) {
+		type key = testTextMarshaler
+		m := map[key]int{{
+			data: "a",
+		}: 1}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+	t.Run("marshaler 1-pointer", func(t *testing.T) {
+		type key = *testTextMarshaler
+		m := map[key]int{{
+			data: "a",
+		}: 1}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+	t.Run("marshaler 2-non pointer", func(t *testing.T) {
+		type key = testTextMarshaler2
+		m := map[key]int{{
+			data: "a",
+		}: 1}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, TypeNotSupportedError(""))
+	})
+	t.Run("marshaler 2-pointer", func(t *testing.T) {
+		type key = *testTextMarshaler2
+		m := map[key]int{{
+			data: "a",
+		}: 1}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
 	})
 }
 

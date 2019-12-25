@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"encoding"
 	"reflect"
 	"unsafe"
 )
@@ -19,7 +20,11 @@ func newMapEncoder(mapType reflect.Type) *mapEncoderBuilder {
 		if !keyType.Implements(textMarshalerType) {
 			return nil
 		}
-		keyEncoder = textMarshalerEncoder(keyRType)
+		if ifaceIndir(keyRType) {
+			keyEncoder = textMarshalerKeyEncoder(keyRType)
+		} else {
+			keyEncoder = directTextMarshalerKeyEncoder(keyRType)
+		}
 	}
 	return &mapEncoderBuilder{
 		encoder: &directMapEncoder{
@@ -54,6 +59,39 @@ func (enc *directMapEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 		mapiternext(iter)
 	}
 	s.ObjectEnd()
+}
+
+// text marshaler
+type textMarshalerKeyEncoder rtype
+
+func (enc textMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	rtype := rtype(enc)
+	obj := packEFace(rtype, ptr)
+	marshaler := obj.(encoding.TextMarshaler)
+	b, err := marshaler.MarshalText()
+	if err != nil {
+		s.Error = err
+		return
+	}
+	s.String(localByteToString(b))
+	s.buffer = append(s.buffer, ':')
+	s.poped = false
+}
+
+type directTextMarshalerKeyEncoder rtype
+
+func (enc directTextMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	rtype := rtype(enc)
+	obj := packEFace(rtype, *(*unsafe.Pointer)(ptr))
+	marshaler := obj.(encoding.TextMarshaler)
+	b, err := marshaler.MarshalText()
+	if err != nil {
+		s.Error = err
+		return
+	}
+	s.String(localByteToString(b))
+	s.buffer = append(s.buffer, ':')
+	s.poped = false
 }
 
 // key encoders
