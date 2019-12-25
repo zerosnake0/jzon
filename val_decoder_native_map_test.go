@@ -135,6 +135,7 @@ func TestValDecoder_Native_Map_KeyDecoder_TextUnmarshaler(t *testing.T) {
 		f(t, ` { "3" : "4" } `, nil, &m1, &m2)
 	})
 	t.Run("string key", func(t *testing.T) {
+		// the UnmarshalText of the key is ignored
 		m1 := map[testMapStringKey]testMapStringKey{testMapStringKey("1"): "2"}
 		m2 := map[testMapStringKey]testMapStringKey{testMapStringKey("1"): "2"}
 		f(t, ` { "3" : "4" } `, nil, &m1, &m2)

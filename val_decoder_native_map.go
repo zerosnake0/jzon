@@ -22,10 +22,15 @@ func newMapDecoder(mapType reflect.Type) *mapDecoderBuilder {
 	keyKind := keyType.Kind()
 	// the string type is specially treated in order to be
 	// compatible with the standard lib
-	if keyKind != reflect.String && keyPtrType.Implements(textUnmarshalerType) {
+	switch {
+	case keyKind == reflect.String:
+		keyDecoder = keyDecoders[keyKind]
+	case keyPtrType.Implements(textUnmarshalerType):
 		keyDecoder = textUnmarshalerDecoder(rtypeOfType(keyPtrType))
-	} else if keyDecoder = keyDecoders[keyType.Kind()]; keyDecoder == nil {
-		return nil
+	default:
+		if keyDecoder = keyDecoders[keyType.Kind()]; keyDecoder == nil {
+			return nil
+		}
 	}
 	return &mapDecoderBuilder{
 		decoder: &mapDecoder{

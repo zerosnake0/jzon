@@ -16,14 +16,19 @@ func newMapEncoder(mapType reflect.Type) *mapEncoderBuilder {
 		keyEncoder ValEncoder
 	)
 	keyRType := rtypeOfType(keyType)
-	if keyEncoder = keyEncoders[keyType.Kind()]; keyEncoder == nil {
-		if !keyType.Implements(textMarshalerType) {
-			return nil
-		}
+	keyKind := keyType.Kind()
+	switch {
+	case keyKind == reflect.String:
+		keyEncoder = keyEncoders[keyKind]
+	case keyType.Implements(textMarshalerType):
 		if ifaceIndir(keyRType) {
 			keyEncoder = textMarshalerKeyEncoder(keyRType)
 		} else {
 			keyEncoder = directTextMarshalerKeyEncoder(keyRType)
+		}
+	default:
+		if keyEncoder = keyEncoders[keyKind]; keyEncoder == nil {
+			return nil
 		}
 	}
 	return &mapEncoderBuilder{
