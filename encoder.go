@@ -175,8 +175,8 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				internalCache[rType] = &pointerEncoder{w.encoder}
 				rebuildMap[rType] = w
 			}
-		// case reflect.Struct:
-		// case reflect.Slice:
+			// case reflect.Struct:
+			// case reflect.Slice:
 		default:
 			v := notSupportedEncoder(typ.String())
 			internalCache[rType] = v

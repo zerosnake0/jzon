@@ -18,6 +18,14 @@ func TestValEncoder_Map(t *testing.T) {
 		m := map[string]int{"1": 2}
 		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
 	})
+	t.Run("pointer elem", func(t *testing.T) {
+		i := 3
+		m := map[string]*int{
+			"1": (*int)(nil),
+			"2": &i,
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
 }
 
 type testMapIntKey2 int
