@@ -35,8 +35,17 @@ func appendDigit(data []byte, v uint32) []byte {
 	return append(data, byte(v>>16), byte(v>>8), byte(v))
 }
 
-func (s *Streamer) uint8(v uint8) {
-	s.buffer = appendLeadingDigit(s.buffer, digits[v])
+func appendUint8(b []byte, v uint8) []byte {
+	return appendLeadingDigit(b, digits[v])
+}
+
+func appendInt8(b []byte, v int8) []byte {
+	if v < 0 {
+		b = append(b, '-')
+		return appendUint8(b, uint8(-v))
+	} else {
+		return appendUint8(b, uint8(v))
+	}
 }
 
 func (s *Streamer) Int8(v int8) *Streamer {
@@ -44,12 +53,7 @@ func (s *Streamer) Int8(v int8) *Streamer {
 		return s
 	}
 	s.onVal()
-	if v < 0 {
-		s.buffer = append(s.buffer, '-')
-		s.uint8(uint8(-v))
-	} else {
-		s.uint8(uint8(v))
-	}
+	s.buffer = appendInt8(s.buffer, v)
 	return s
 }
 
@@ -58,19 +62,27 @@ func (s *Streamer) Uint8(v uint8) *Streamer {
 		return s
 	}
 	s.onVal()
-	s.uint8(v)
+	s.buffer = appendUint8(s.buffer, v)
 	return s
 }
 
-func (s *Streamer) uint16(v uint16) {
+func appendUint16(b []byte, v uint16) []byte {
 	q1 := v / nSmalls
 	if q1 == 0 {
-		s.buffer = appendLeadingDigit(s.buffer, digits[v])
-		return
+		return appendLeadingDigit(b, digits[v])
 	}
 	r1 := v - q1*nSmalls
-	s.buffer = appendLeadingDigit(s.buffer, digits[q1])
-	s.buffer = appendDigit(s.buffer, digits[r1])
+	b = appendLeadingDigit(b, digits[q1])
+	return appendDigit(b, digits[r1])
+}
+
+func appendInt16(b []byte, v int16) []byte {
+	if v < 0 {
+		b = append(b, '-')
+		return appendUint16(b, uint16(-v))
+	} else {
+		return appendUint16(b, uint16(v))
+	}
 }
 
 func (s *Streamer) Int16(v int16) *Streamer {
@@ -78,12 +90,7 @@ func (s *Streamer) Int16(v int16) *Streamer {
 		return s
 	}
 	s.onVal()
-	if v < 0 {
-		s.buffer = append(s.buffer, '-')
-		s.uint16(uint16(-v))
-	} else {
-		s.uint16(uint16(v))
-	}
+	s.buffer = appendInt16(s.buffer, v)
 	return s
 }
 
@@ -92,35 +99,42 @@ func (s *Streamer) Uint16(v uint16) *Streamer {
 		return s
 	}
 	s.onVal()
-	s.uint16(v)
+	s.buffer = appendUint16(s.buffer, v)
 	return s
 }
 
-func (s *Streamer) uint32(v uint32) {
+func appendUint32(b []byte, v uint32) []byte {
 	q1 := v / nSmalls
 	if q1 == 0 {
-		s.buffer = appendLeadingDigit(s.buffer, digits[v])
-		return
+		return appendLeadingDigit(b, digits[v])
 	}
 	r1 := v - q1*nSmalls
 	q2 := q1 / nSmalls
 	if q2 == 0 {
-		s.buffer = appendLeadingDigit(s.buffer, digits[q1])
-		s.buffer = appendDigit(s.buffer, digits[r1])
-		return
+		b = appendLeadingDigit(b, digits[q1])
+		return appendDigit(b, digits[r1])
 	}
 	r2 := q1 - q2*nSmalls
 	q3 := q2 / nSmalls
 	if q3 == 0 {
-		s.buffer = appendLeadingDigit(s.buffer, digits[q2])
+		b = appendLeadingDigit(b, digits[q2])
 	} else {
 		r3 := q2 - q3*nSmalls
 		// max 10 digit for int32/uint32
-		s.buffer = append(s.buffer, byte(q3+'0'))
-		s.buffer = appendDigit(s.buffer, digits[r3])
+		b = append(b, byte(q3+'0'))
+		b = appendDigit(b, digits[r3])
 	}
-	s.buffer = appendDigit(s.buffer, digits[r2])
-	s.buffer = appendDigit(s.buffer, digits[r1])
+	b = appendDigit(b, digits[r2])
+	return appendDigit(b, digits[r1])
+}
+
+func appendInt32(b []byte, v int32) []byte {
+	if v < 0 {
+		b = append(b, '-')
+		return appendUint32(b, uint32(-v))
+	} else {
+		return appendUint32(b, uint32(v))
+	}
 }
 
 func (s *Streamer) Int32(v int32) *Streamer {
@@ -128,12 +142,7 @@ func (s *Streamer) Int32(v int32) *Streamer {
 		return s
 	}
 	s.onVal()
-	if v < 0 {
-		s.buffer = append(s.buffer, '-')
-		s.uint32(uint32(-v))
-	} else {
-		s.uint32(uint32(v))
-	}
+	s.buffer = appendInt32(s.buffer, v)
 	return s
 }
 
@@ -142,54 +151,63 @@ func (s *Streamer) Uint32(v uint32) *Streamer {
 		return s
 	}
 	s.onVal()
-	s.uint32(v)
+	s.buffer = appendUint32(s.buffer, v)
 	return s
 }
 
-func (s *Streamer) uint64(v uint64) {
+func appendUint64(b []byte, v uint64) []byte {
 	q1 := v / nSmalls
 	if q1 == 0 {
-		s.buffer = appendLeadingDigit(s.buffer, digits[v])
-		return
+		return appendLeadingDigit(b, digits[v])
 	}
 	r1 := v - q1*nSmalls
 	q2 := q1 / nSmalls
 	if q2 == 0 {
-		s.buffer = appendLeadingDigit(s.buffer, digits[q1])
+		b = appendLeadingDigit(b, digits[q1])
 	} else {
 		r2 := q1 - q2*nSmalls
 		q3 := q2 / nSmalls
 		if q3 == 0 {
-			s.buffer = appendLeadingDigit(s.buffer, digits[q2])
+			b = appendLeadingDigit(b, digits[q2])
 		} else {
 			r3 := q2 - q3*nSmalls
 			q4 := q3 / nSmalls
 			if q4 == 0 {
-				s.buffer = appendLeadingDigit(s.buffer, digits[q3])
+				b = appendLeadingDigit(b, digits[q3])
 			} else {
 				r4 := q3 - q4*nSmalls
 				q5 := q4 / nSmalls
 				if q5 == 0 {
-					s.buffer = appendLeadingDigit(s.buffer, digits[q4])
+					b = appendLeadingDigit(b, digits[q4])
 				} else {
 					r5 := q4 - q5*nSmalls
 					q6 := q5 / nSmalls
 					if q6 == 0 {
-						s.buffer = appendLeadingDigit(s.buffer, digits[q5])
+						b = appendLeadingDigit(b, digits[q5])
 					} else {
-						s.buffer = appendLeadingDigit(s.buffer, digits[q6])
+						b = appendLeadingDigit(b, digits[q6])
 						r6 := q5 - q6*nSmalls
-						s.buffer = appendDigit(s.buffer, digits[r6])
+						b = appendDigit(b, digits[r6])
 					}
-					s.buffer = appendDigit(s.buffer, digits[r5])
+					b = appendDigit(b, digits[r5])
 				}
-				s.buffer = appendDigit(s.buffer, digits[r4])
+				b = appendDigit(b, digits[r4])
 			}
-			s.buffer = appendDigit(s.buffer, digits[r3])
+			b = appendDigit(b, digits[r3])
 		}
-		s.buffer = appendDigit(s.buffer, digits[r2])
+		b = appendDigit(b, digits[r2])
 	}
-	s.buffer = appendDigit(s.buffer, digits[r1])
+	b = appendDigit(b, digits[r1])
+	return b
+}
+
+func appendInt64(b []byte, v int64) []byte {
+	if v < 0 {
+		b = append(b, '-')
+		return appendUint64(b, uint64(-v))
+	} else {
+		return appendUint64(b, uint64(v))
+	}
 }
 
 func (s *Streamer) Int64(v int64) *Streamer {
@@ -197,12 +215,7 @@ func (s *Streamer) Int64(v int64) *Streamer {
 		return s
 	}
 	s.onVal()
-	if v < 0 {
-		s.buffer = append(s.buffer, '-')
-		s.uint64(uint64(-v))
-	} else {
-		s.uint64(uint64(v))
-	}
+	s.buffer = appendInt64(s.buffer, v)
 	return s
 }
 
@@ -211,7 +224,7 @@ func (s *Streamer) Uint64(v uint64) *Streamer {
 		return s
 	}
 	s.onVal()
-	s.uint64(v)
+	s.buffer = appendUint64(s.buffer, v)
 	return s
 }
 

@@ -7,68 +7,71 @@ import (
 )
 
 type testTextMarshaler struct {
-	data []byte
+	data string
 	err  error
 }
 
 func (m testTextMarshaler) MarshalText() ([]byte, error) {
-	return m.data, m.err
+	return []byte(m.data), m.err
 }
 
 type testTextMarshaler2 struct {
-	data []byte
+	data string
 	err  error
 }
 
 func (m *testTextMarshaler2) MarshalText() ([]byte, error) {
-	return m.data, m.err
+	return []byte(m.data), m.err
 }
 
 func TestValEncoder_TextMarshaler(t *testing.T) {
-	f := func(t *testing.T, m encoding.TextMarshaler) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, m)
+	f := func(t *testing.T, m encoding.TextMarshaler, err error) {
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, err)
 	}
 	t.Run("non pointer receiver", func(t *testing.T) {
 		t.Run("non pointer", func(t *testing.T) {
 			f(t, testTextMarshaler{
-				data: []byte(`{"a":1}`),
-			})
+				data: `{"a":1}`,
+			}, nil)
 		})
 		t.Run("non pointer error", func(t *testing.T) {
+			e := errors.New("test")
 			f(t, testTextMarshaler{
-				data: []byte(`{"a":1}`),
-				err:  errors.New("test"),
-			})
+				data: `{"a":1}`,
+				err:  e,
+			}, e)
 		})
 		t.Run("pointer", func(t *testing.T) {
 			f(t, &testTextMarshaler{
-				data: []byte(`{"a":2}`),
-			})
+				data: `{"a":2}`,
+			}, nil)
 		})
 		t.Run("pointer error", func(t *testing.T) {
+			e := errors.New("test")
 			f(t, &testTextMarshaler{
-				data: []byte(`{"a":2}`),
-				err:  errors.New("test"),
-			})
+				data: `{"a":2}`,
+				err:  e,
+			}, e)
 		})
 		t.Run("nil pointer", func(t *testing.T) {
-			f(t, (*testTextMarshaler)(nil))
+			f(t, (*testTextMarshaler)(nil), nil)
 		})
 	})
 	t.Run("pointer receiver", func(t *testing.T) {
 		t.Run("pointer", func(t *testing.T) {
 			f(t, &testTextMarshaler2{
-				data: []byte(`{"b":1}`),
-			})
+				data: `{"b":1}`,
+			}, nil)
 		})
 		t.Run("pointer error", func(t *testing.T) {
+			e := errors.New("test")
 			f(t, &testTextMarshaler2{
-				data: []byte(`{"b":1}`),
-				err:  errors.New("test"),
-			})
+				data: `{"b":1}`,
+				err:  e,
+			}, e)
 		})
 		t.Run("nil pointer", func(t *testing.T) {
-			f(t, (*testTextMarshaler2)(nil))
+			f(t, (*testTextMarshaler2)(nil), nil)
 		})
 	})
 }
@@ -81,25 +84,26 @@ func TestValEncoder_DynamicTextMarshaler(t *testing.T) {
 			t.Skipf("skipping this test for go version <= %s", v)
 		}
 		var i encoding.TextMarshaler
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 	})
 	t.Run("marshaler error", func(t *testing.T) {
+		e := errors.New("test")
 		var i encoding.TextMarshaler = testTextMarshaler{
-			data: []byte(`"test"`),
-			err:  errors.New("test"),
+			data: `"test"`,
+			err:  e,
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i, e)
 	})
 	t.Run("marshaler", func(t *testing.T) {
 		var i encoding.TextMarshaler = testTextMarshaler{
-			data: []byte(`"test"`),
+			data: `"test"`,
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 	})
 	t.Run("marshaler 2", func(t *testing.T) {
 		var i encoding.TextMarshaler = &testTextMarshaler{
-			data: []byte(`"test 2"`),
+			data: `"test 2"`,
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 	})
 }

@@ -33,7 +33,7 @@ func TestStreamer_Float32(t *testing.T) {
 	f := func(t *testing.T, f float32) {
 		checkEncodeWithStandard(t, DefaultEncoder, f, func(s *Streamer) {
 			s.Float32(f)
-		})
+		}, nil)
 	}
 	t.Run("1.2e-3", func(t *testing.T) {
 		f(t, 1.2e-3)
@@ -78,7 +78,7 @@ func TestStreamer_Float64(t *testing.T) {
 	f := func(t *testing.T, f float64) {
 		checkEncodeWithStandard(t, DefaultEncoder, f, func(s *Streamer) {
 			s.Float64(f)
-		})
+		}, nil)
 	}
 	t.Run("1.2e-3", func(t *testing.T) {
 		f(t, 1.2e-3)

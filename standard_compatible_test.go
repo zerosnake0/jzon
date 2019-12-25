@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -74,7 +73,7 @@ func checkDecodeWithStandard(t *testing.T, decoder *Decoder, data string, ex err
 		"exp %+v\ngot %+v", expErr, gotErr)
 	require.Equalf(t, noError, ex == nil, "exp err: %v\ngot err: %v", ex, gotErr)
 	if ex != nil {
-		if assert.ObjectsAreEqual(reflect.TypeOf(errors.New("")), reflect.TypeOf(ex)) {
+		if reflect.TypeOf(errors.New("")) == reflect.TypeOf(ex) {
 			require.Equalf(t, ex, gotErr, "exp err:%v\ngot err:%v", ex, gotErr)
 		} else {
 			require.IsTypef(t, ex, gotErr, "exp err:%v\ngot err:%v", ex, gotErr)

@@ -68,6 +68,26 @@ func init() {
 
 	// object key encoders
 	mapKeyEncoder((*string)(nil), (*stringKeyEncoder)(nil))
+	if strconv.IntSize == 32 {
+		mapKeyEncoder((*int)(nil), (*int32KeyEncoder)(nil))
+		mapKeyEncoder((*uint)(nil), (*uint32KeyEncoder)(nil))
+	} else {
+		mapKeyEncoder((*int)(nil), (*int64KeyEncoder)(nil))
+		mapKeyEncoder((*uint)(nil), (*uint64KeyEncoder)(nil))
+	}
+	mapKeyEncoder((*int8)(nil), (*int8KeyEncoder)(nil))
+	mapKeyEncoder((*int16)(nil), (*int16KeyEncoder)(nil))
+	mapKeyEncoder((*int32)(nil), (*int32KeyEncoder)(nil))
+	mapKeyEncoder((*int64)(nil), (*int64KeyEncoder)(nil))
+	mapKeyEncoder((*uint8)(nil), (*uint8KeyEncoder)(nil))
+	mapKeyEncoder((*uint16)(nil), (*uint16KeyEncoder)(nil))
+	mapKeyEncoder((*uint32)(nil), (*uint32KeyEncoder)(nil))
+	mapKeyEncoder((*uint64)(nil), (*uint64KeyEncoder)(nil))
+	if unsafe.Sizeof(uintptr(0)) == 4 {
+		mapKeyEncoder((*uintptr)(nil), (*uint32KeyEncoder)(nil))
+	} else {
+		mapKeyEncoder((*uintptr)(nil), (*uint64KeyEncoder)(nil))
+	}
 }
 
 type ValEncoder interface {

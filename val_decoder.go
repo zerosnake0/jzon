@@ -67,8 +67,10 @@ func init() {
 	mapKeyDecoder((*string)(nil), (*stringKeyDecoder)(nil))
 	if strconv.IntSize == 32 {
 		mapKeyDecoder((*int)(nil), (*int32KeyDecoder)(nil))
+		mapKeyDecoder((*uint)(nil), (*uint32KeyDecoder)(nil))
 	} else {
 		mapKeyDecoder((*int)(nil), (*int64KeyDecoder)(nil))
+		mapKeyDecoder((*uint)(nil), (*uint64KeyDecoder)(nil))
 	}
 	mapKeyDecoder((*int8)(nil), (*int8KeyDecoder)(nil))
 	mapKeyDecoder((*int16)(nil), (*int16KeyDecoder)(nil))

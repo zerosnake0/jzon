@@ -8,7 +8,7 @@ import (
 
 func TestValEncoder_Bool(t *testing.T) {
 	f := func(t *testing.T, b bool) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, b)
+		checkEncodeValueWithStandard(t, DefaultEncoder, b, nil)
 	}
 	t.Run("true", func(t *testing.T) {
 		f(t, true)
@@ -17,18 +17,18 @@ func TestValEncoder_Bool(t *testing.T) {
 		f(t, false)
 	})
 	t.Run("nil ptr", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*bool)(nil))
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*bool)(nil), nil)
 	})
 	t.Run("ptr", func(t *testing.T) {
 		b := true
-		checkEncodeValueWithStandard(t, DefaultEncoder, &b)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &b, nil)
 	})
 }
 
 func TestValEncoder_Bool_Kind(t *testing.T) {
 	type Bool bool
 	f := func(t *testing.T, b Bool) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, b)
+		checkEncodeValueWithStandard(t, DefaultEncoder, b, nil)
 	}
 	t.Run("true", func(t *testing.T) {
 		f(t, true)
@@ -37,11 +37,11 @@ func TestValEncoder_Bool_Kind(t *testing.T) {
 		f(t, false)
 	})
 	t.Run("nil ptr", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*Bool)(nil))
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*Bool)(nil), nil)
 	})
 	t.Run("ptr", func(t *testing.T) {
 		b := Bool(true)
-		checkEncodeValueWithStandard(t, DefaultEncoder, &b)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &b, nil)
 	})
 }
 
@@ -81,7 +81,7 @@ func TestValEncoder_Bool_Kind_CustomEncoder(t *testing.T) {
 
 func TestValEncoder_String(t *testing.T) {
 	f := func(t *testing.T, str string) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, str)
+		checkEncodeValueWithStandard(t, DefaultEncoder, str, nil)
 	}
 	t.Run("test", func(t *testing.T) {
 		f(t, "test")
@@ -93,10 +93,10 @@ func TestValEncoder_String(t *testing.T) {
 		f(t, "<>&")
 	})
 	t.Run("nil ptr", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*string)(nil))
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*string)(nil), nil)
 	})
 	t.Run("ptr", func(t *testing.T) {
 		s := "test"
-		checkEncodeValueWithStandard(t, DefaultEncoder, &s)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &s, nil)
 	})
 }

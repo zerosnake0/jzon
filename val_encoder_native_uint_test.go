@@ -7,80 +7,80 @@ import (
 
 func TestValEncoder_Uint(t *testing.T) {
 	f := func(t *testing.T, i uint) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, i, nil)
 	}
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxUint32)
 	})
 	t.Run("nil pointer", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint)(nil))
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint)(nil), nil)
 	})
 	t.Run("pointer", func(t *testing.T) {
 		i := uint(math.MaxUint32)
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 	})
 }
 
 func TestValEncoder_Uint8(t *testing.T) {
 	f := func(t *testing.T, i uint8) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, i, nil)
 	}
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxUint8)
 	})
 	t.Run("nil pointer", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint8)(nil))
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint8)(nil), nil)
 	})
 	t.Run("pointer", func(t *testing.T) {
 		i := uint8(math.MaxUint8)
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 	})
 }
 
 func TestValEncoder_Uint16(t *testing.T) {
 	f := func(t *testing.T, i uint16) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, i, nil)
 	}
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxUint16)
 	})
 	t.Run("nil pointer", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint16)(nil))
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint16)(nil), nil)
 	})
 	t.Run("pointer", func(t *testing.T) {
 		i := uint16(math.MaxUint16)
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 	})
 }
 
 func TestValEncoder_Uint32(t *testing.T) {
 	f := func(t *testing.T, i uint32) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, i, nil)
 	}
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxUint32)
 	})
 	t.Run("nil pointer", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint32)(nil))
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint32)(nil), nil)
 	})
 	t.Run("pointer", func(t *testing.T) {
 		i := uint32(math.MaxUint32)
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 	})
 }
 
 func TestValEncoder_Uint64(t *testing.T) {
 	f := func(t *testing.T, i uint64) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, i, nil)
 	}
 	t.Run("test", func(t *testing.T) {
 		f(t, math.MaxUint64)
 	})
 	t.Run("nil pointer", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint64)(nil))
+		checkEncodeValueWithStandard(t, DefaultEncoder, (*uint64)(nil), nil)
 	})
 	t.Run("pointer", func(t *testing.T) {
 		i := uint64(math.MaxUint64)
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i)
+		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 	})
 }

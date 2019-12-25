@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -55,14 +56,26 @@ func jsonMarshal(o interface{}) (buf []byte, err error) {
 	return
 }
 
-func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb func(s *Streamer)) {
+func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb func(s *Streamer),
+	expErr error) {
 	buf, err := jsonMarshal(obj)
+	require.Equal(t, expErr == nil, err == nil, "\nexp: %v\ngot: %v",
+		expErr, err)
 
 	streamer := enc.NewStreamer()
 	defer enc.ReturnStreamer(streamer)
 	cb(streamer)
 
 	if err != nil {
+		t.Logf("json err: %s", err)
+		t.Logf("jzon err: %s", streamer.Error)
+		if reflect.TypeOf(errors.New("")) == reflect.TypeOf(expErr) {
+			require.Equalf(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
+				expErr, streamer.Error)
+		} else {
+			require.IsTypef(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
+				expErr, streamer.Error)
+		}
 		require.Error(t, streamer.Error, "json.Marshal error: %v", err)
 	} else {
 		t.Logf("got %s", buf)
@@ -74,10 +87,11 @@ func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb fun
 	}
 }
 
-func checkEncodeValueWithStandard(t *testing.T, enc *Encoder, obj interface{}) {
+func checkEncodeValueWithStandard(t *testing.T, enc *Encoder, obj interface{},
+	expErr error) {
 	checkEncodeWithStandard(t, enc, obj, func(s *Streamer) {
 		s.Value(obj)
-	})
+	}, expErr)
 }
 
 func testStreamerChainError(t *testing.T, cb func(s *Streamer)) {

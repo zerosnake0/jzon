@@ -139,6 +139,17 @@ func (s *Streamer) Field(field string) *Streamer {
 	return s
 }
 
+func (s *Streamer) RawField(b []byte) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	s.onVal()
+	s.buffer = append(s.buffer, b...)
+	s.buffer = append(s.buffer, ':')
+	s.poped = false
+	return s
+}
+
 func (s *Streamer) ObjectEnd() *Streamer {
 	if s.Error != nil {
 		return s
