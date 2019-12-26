@@ -135,7 +135,7 @@ func TestValDecoder_Native_Struct_Embedded_Complex(t *testing.T) {
 			"D3": 43, "D4": 44, "D5": 45,
 			"D6": 46, "D7": 47,
 			"ambigue": 50,
-			"E0": 60, "E1": 61 
+			"E0": 60, "E1": 61
 		}`, nil, &testComplexOuter{
 			testComplexInner: &testComplexInner{},
 		}, &testComplexOuter{
