@@ -1,6 +1,8 @@
 package jzon
 
 import (
+	"errors"
+	"math"
 	"strconv"
 	"testing"
 )
@@ -56,12 +58,30 @@ func TestValEncoder_Native_Map_KeyEncoder_TextMarshaler(t *testing.T) {
 		}: 1}
 		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
 	})
+	t.Run("marshaler 1-non pointer (err)", func(t *testing.T) {
+		type key = testTextMarshaler
+		e := errors.New("test")
+		m := map[key]int{{
+			data: "a",
+			err:  e,
+		}: 1}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, e)
+	})
 	t.Run("marshaler 1-pointer", func(t *testing.T) {
 		type key = *testTextMarshaler
 		m := map[key]int{{
 			data: "a",
 		}: 1}
 		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+	t.Run("marshaler 1-pointer (err)", func(t *testing.T) {
+		e := errors.New("test")
+		type key = *testTextMarshaler
+		m := map[key]int{{
+			data: "a",
+			err:  e,
+		}: 1}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, e)
 	})
 	t.Run("marshaler 2-non pointer", func(t *testing.T) {
 		type key = testTextMarshaler2
@@ -76,6 +96,15 @@ func TestValEncoder_Native_Map_KeyEncoder_TextMarshaler(t *testing.T) {
 			data: "a",
 		}: 1}
 		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+	t.Run("marshaler 2-pointer (err)", func(t *testing.T) {
+		e := errors.New("test")
+		type key = *testTextMarshaler2
+		m := map[key]int{{
+			data: "a",
+			err:  e,
+		}: 1}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, e)
 	})
 	t.Run("int key", func(t *testing.T) {
 		m := map[testMapIntKey2]testMapIntKey2{
@@ -96,6 +125,41 @@ func TestValEncoder_Native_Map_KeyEncoder_String(t *testing.T) {
 	t.Run("string", func(t *testing.T) {
 		type key string
 		m := map[key]int{"a": 1}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+}
+
+func TestValEncoder_Native_Map_KeyEncoder_Int(t *testing.T) {
+	t.Run("int8", func(t *testing.T) {
+		type key int8
+		m := map[key]key{
+			math.MaxInt8: math.MaxInt8,
+			math.MinInt8: math.MinInt8,
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+	t.Run("int16", func(t *testing.T) {
+		type key int16
+		m := map[key]key{
+			math.MaxInt16: math.MaxInt16,
+			math.MinInt16: math.MinInt16,
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+	t.Run("int32", func(t *testing.T) {
+		type key int32
+		m := map[key]key{
+			math.MaxInt32: math.MaxInt32,
+			math.MinInt32: math.MinInt32,
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+	t.Run("int64", func(t *testing.T) {
+		type key int64
+		m := map[key]key{
+			math.MaxInt64: math.MaxInt64,
+			math.MinInt64: math.MinInt64,
+		}
 		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
 	})
 }

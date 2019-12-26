@@ -13,6 +13,9 @@ var (
 type textMarshalerEncoder rtype
 
 func (enc textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	if ptr == nil {
 		s.Null()
 		return
@@ -30,6 +33,9 @@ func (enc textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type dynamicTextMarshalerEncoder struct{}
 
 func (*dynamicTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	marshaler := *(*encoding.TextMarshaler)(ptr)
 	if marshaler == nil {
 		s.Null()

@@ -28,7 +28,7 @@ func TestIterator_Bool_ReadBool(t *testing.T) {
 		_, err = it.NextValueType()
 		require.Equal(t, io.EOF, err)
 	})
-	t.Run("true", func(t *testing.T) {
+	t.Run("false", func(t *testing.T) {
 		it := NewIterator()
 		it.ResetBytes([]byte(" false "))
 		b, err := it.ReadBool()

@@ -60,7 +60,13 @@ func (enc *directMapEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	iter := mapiterinit(enc.mapRType, ptr)
 	for i := 0; iter.key != nil; i++ {
 		enc.keyEncoder.Encode(iter.key, s)
+		if s.Error != nil {
+			return
+		}
 		enc.elemEncoder.Encode(iter.value, s)
+		if s.Error != nil {
+			return
+		}
 		mapiternext(iter)
 	}
 	s.ObjectEnd()
@@ -70,6 +76,9 @@ func (enc *directMapEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type textMarshalerKeyEncoder rtype
 
 func (enc textMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	rtype := rtype(enc)
 	obj := packEFace(rtype, ptr)
 	marshaler := obj.(encoding.TextMarshaler)
@@ -86,6 +95,9 @@ func (enc textMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type directTextMarshalerKeyEncoder rtype
 
 func (enc directTextMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	rtype := rtype(enc)
 	obj := packEFace(rtype, *(*unsafe.Pointer)(ptr))
 	marshaler := obj.(encoding.TextMarshaler)
@@ -110,6 +122,9 @@ func (enc *stringKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type int8KeyEncoder struct{}
 
 func (enc *int8KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	var b [6]byte // `"-128"` max length is 6
 	b[0] = '"'
 	buf := appendInt8(b[:1], *(*int8)(ptr))
@@ -120,6 +135,9 @@ func (enc *int8KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type int16KeyEncoder struct{}
 
 func (enc *int16KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	var b [8]byte // `"-32768"` max length is 8
 	b[0] = '"'
 	buf := appendInt16(b[:1], *(*int16)(ptr))
@@ -130,6 +148,9 @@ func (enc *int16KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type int32KeyEncoder struct{}
 
 func (enc *int32KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	var b [13]byte // `"-2147483648"` max length is 13
 	b[0] = '"'
 	buf := appendInt32(b[:1], *(*int32)(ptr))
@@ -140,6 +161,9 @@ func (enc *int32KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type int64KeyEncoder struct{}
 
 func (enc *int64KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	var b [22]byte // `"-9223372036854775808"` max length is 22
 	b[0] = '"'
 	buf := appendInt64(b[:1], *(*int64)(ptr))
@@ -151,6 +175,9 @@ func (enc *int64KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type uint8KeyEncoder struct{}
 
 func (enc *uint8KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	var b [6]byte // `"-128"` max length is 6
 	b[0] = '"'
 	buf := appendUint8(b[:1], *(*uint8)(ptr))
@@ -161,6 +188,9 @@ func (enc *uint8KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type uint16KeyEncoder struct{}
 
 func (enc *uint16KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	var b [8]byte // `"-32768"` max length is 8
 	b[0] = '"'
 	buf := appendUint16(b[:1], *(*uint16)(ptr))
@@ -171,6 +201,9 @@ func (enc *uint16KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type uint32KeyEncoder struct{}
 
 func (enc *uint32KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	var b [13]byte // `"-2147483648"` max length is 13
 	b[0] = '"'
 	buf := appendUint32(b[:1], *(*uint32)(ptr))
@@ -181,6 +214,9 @@ func (enc *uint32KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type uint64KeyEncoder struct{}
 
 func (enc *uint64KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	var b [22]byte // `"-9223372036854775808"` max length is 22
 	b[0] = '"'
 	buf := appendUint64(b[:1], *(*uint64)(ptr))

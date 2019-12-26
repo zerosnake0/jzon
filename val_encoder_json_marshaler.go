@@ -13,6 +13,9 @@ var (
 type jsonMarshalerEncoder rtype
 
 func (enc jsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	if ptr == nil {
 		s.Null()
 		return
@@ -30,6 +33,9 @@ func (enc jsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type dynamicJsonMarshalerEncoder struct{}
 
 func (*dynamicJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	marshaler := *(*json.Marshaler)(ptr)
 	if marshaler == nil {
 		s.Null()

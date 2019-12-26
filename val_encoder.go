@@ -97,5 +97,8 @@ type ValEncoder interface {
 type notSupportedEncoder string
 
 func (enc notSupportedEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	s.Error = TypeNotSupportedError(enc)
 }
