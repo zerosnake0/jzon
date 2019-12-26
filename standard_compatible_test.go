@@ -3,10 +3,12 @@ package jzon
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
+	"unsafe"
 
 	"github.com/stretchr/testify/require"
 )
@@ -40,22 +42,44 @@ func nestedObjectWithArray(count int) string {
 		strings.Repeat("} ", count)
 }
 
+type printValueKey struct {
+	rtype rtype
+	ptr   uintptr
+}
+
+func (pk printValueKey) String() string {
+	return fmt.Sprintf("<%x %x>", pk.rtype, pk.ptr)
+}
+
 func printValue(t *testing.T, prefix string, o interface{}) {
 	prefix += " "
 	if o == nil {
 		t.Logf(prefix + "nil")
 		return
 	}
+	visited := map[printValueKey]bool{}
 	oV := reflect.ValueOf(o)
 	for indent := prefix; ; indent += "  " {
+		i := oV.Interface()
+		ef := (*eface)(unsafe.Pointer(&i))
+		vk := printValueKey{ef.rtype, uintptr(ef.data)}
+
 		k := oV.Kind()
-		t.Logf(indent+"%+v %+v", oV.Type(), oV)
+		t.Logf(indent+"%+v %+v %v", oV.Type(), oV, vk)
+
 		if k != reflect.Interface && k != reflect.Ptr {
 			break
 		}
 		if oV.IsNil() {
 			break
 		}
+
+		if visited[vk] {
+			t.Logf(indent + "  visited...")
+			break
+		}
+		visited[vk] = true
+
 		oV = oV.Elem()
 	}
 }

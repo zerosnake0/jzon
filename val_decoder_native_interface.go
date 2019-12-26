@@ -8,12 +8,39 @@ import (
 /*
  * Interface decoder is special, when the object is not nil,
  * the internal type cannot be analysed by reflect.TypeOf,
- * the value must be used
+ * the value must be used during runtime
  */
 type efaceDecoder struct {
 }
 
+func (dec *efaceDecoder) checkLoop(ptr unsafe.Pointer, it *Iterator) bool {
+	uptr := uintptr(ptr)
+	curOffset := it.offset + it.head
+	if it.lastEfacePtr == 0 || curOffset != it.lastEfaceOffset {
+		// - no eface has been recorded, or
+		// - the iterator moved
+		it.lastEfacePtr = uptr
+		it.lastEfaceOffset = curOffset
+		return true
+	}
+	// the iterator didn't move, check the pointer we first met
+	// at this location
+	return uptr != it.lastEfacePtr
+}
+
 func (dec *efaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+	// one risk here is that we may enter an infinite loop which
+	// will cause stack overflow:
+	//   var o interface{}
+	//   o = &o
+	// or cross nested interface{}
+	//   var o1, o2 interface{}
+	//   o1 = &o2
+	//   o2 = &o1
+	// so we have this looping check here
+	if !dec.checkLoop(ptr, it) {
+		return EfaceLoopingError
+	}
 	ef := (*eface)(ptr)
 	if ef.data == nil {
 		// the pointer is a nil pointer
@@ -75,8 +102,8 @@ func (dec *efaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		return nil
 	}
 	// when we arrive here, we have:
-	// 1 obj is pointer
-	// 2 obj != nil
+	//   1. obj is pointer
+	//   2. obj != nil
 	if err := it.ReadVal(obj); err != nil {
 		return err
 	}

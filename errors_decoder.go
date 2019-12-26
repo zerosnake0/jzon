@@ -20,6 +20,9 @@ var IFaceError = errors.New("cannot unmarshal on empty iface")
 // NilEmbeddedError
 var NilEmbeddedPointerError = errors.New("cannot unmarshal on nil embedded pointer")
 
+// EfaceLoopingError
+var EfaceLoopingError = errors.New("eface looping detected")
+
 // InvalidStringCharError
 type InvalidStringCharError struct {
 	c byte

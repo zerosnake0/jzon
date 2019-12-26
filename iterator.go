@@ -23,9 +23,9 @@ type Iterator struct {
 	head int
 	tail int
 
-	// path string
-
-	// Error error
+	// eface checkpoint
+	lastEfaceOffset int
+	lastEfacePtr    uintptr
 }
 
 func NewIterator() *Iterator {
@@ -44,6 +44,8 @@ func (it *Iterator) reset() {
 		releaseByteSlice(it.buffer)
 		it.buffer = nil
 	}
+	it.lastEfacePtr = 0
+	it.lastEfaceOffset = 0
 }
 
 /*
@@ -72,6 +74,8 @@ func (it *Iterator) Reset(r io.Reader) {
 	it.offset = 0
 	it.head = 0
 	it.tail = 0
+	it.lastEfacePtr = 0
+	it.lastEfaceOffset = 0
 }
 
 func (it *Iterator) ResetBytes(data []byte) {
@@ -83,6 +87,8 @@ func (it *Iterator) ResetBytes(data []byte) {
 	it.offset = 0
 	it.head = 0
 	it.tail = len(data)
+	it.lastEfacePtr = 0
+	it.lastEfaceOffset = 0
 }
 
 func (it *Iterator) Buffer() []byte {

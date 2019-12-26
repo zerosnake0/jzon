@@ -56,11 +56,11 @@ func jsonMarshal(o interface{}) (buf []byte, err error) {
 	return
 }
 
-func jsonEqual(t *testing.T, s1, s2 []byte) (bool, error) {
+func jsonEqual(t *testing.T, s1, s2 []byte) {
 	exp := localByteToString(s1)
 	got := localByteToString(s2)
 	if exp == got {
-		return true, nil
+		return
 	}
 	var (
 		o1, o2 interface{}
@@ -70,9 +70,8 @@ func jsonEqual(t *testing.T, s1, s2 []byte) (bool, error) {
 	require.NoError(t, err)
 	err = json.Unmarshal(s2, &o2)
 	require.NoError(t, err)
-	require.Equal(t, exp, got, "expecting %s but got %s",
+	require.Equal(t, o1, o2, "expecting %s but got %s",
 		exp, got)
-
 }
 
 func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb func(s *Streamer),
