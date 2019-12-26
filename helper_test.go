@@ -2,6 +2,12 @@ package jzon
 
 import (
 	"io"
+	"reflect"
+	"runtime"
+)
+
+var (
+	runtimeErrorType = reflect.TypeOf((*runtime.Error)(nil)).Elem()
 )
 
 type oneByteReader struct {

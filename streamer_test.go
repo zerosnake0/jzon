@@ -75,24 +75,50 @@ func jsonEqual(t *testing.T, s1, s2 []byte) {
 }
 
 func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb func(s *Streamer),
-	expErr error) {
+	expErr interface{}) {
 	buf, err := jsonMarshal(obj)
 	require.Equal(t, expErr == nil, err == nil, "\nexp: %v\ngot: %v",
 		expErr, err)
 
 	streamer := enc.NewStreamer()
 	defer enc.ReturnStreamer(streamer)
-	cb(streamer)
+	func() {
+		defer func() {
+			if e := recover(); e != nil {
+				if streamer.Error != nil {
+					panic(e)
+				}
+				ex, ok := e.(error)
+				if !ok {
+					panic(e)
+				}
+				streamer.Error = ex
+			}
+		}()
+		cb(streamer)
+	}()
 
 	if err != nil {
 		t.Logf("json err: %s", err)
 		t.Logf("jzon err: %s", streamer.Error)
-		if reflect.TypeOf(errors.New("")) == reflect.TypeOf(expErr) {
-			require.Equalf(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
-				expErr, streamer.Error)
+		expErrType, ok := expErr.(reflect.Type)
+		if ok {
+			gotErrType := reflect.TypeOf(streamer.Error)
+			if expErrType.Kind() == reflect.Interface {
+				require.True(t, gotErrType.Implements(expErrType), "exp err:%v\ngot err:%v",
+					expErrType, streamer.Error)
+			} else {
+				require.Equal(t, expErrType, gotErrType, "exp err:%v\ngot err:%v",
+					expErrType, streamer.Error)
+			}
 		} else {
-			require.IsTypef(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
-				expErr, streamer.Error)
+			if reflect.TypeOf(errors.New("")) == reflect.TypeOf(expErr) {
+				require.Equalf(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
+					expErr, streamer.Error)
+			} else {
+				require.IsTypef(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
+					expErr, streamer.Error)
+			}
 		}
 		require.Error(t, streamer.Error, "json.Marshal error: %v", err)
 	} else {
@@ -103,7 +129,7 @@ func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb fun
 }
 
 func checkEncodeValueWithStandard(t *testing.T, enc *Encoder, obj interface{},
-	expErr error) {
+	expErr interface{}) {
 	checkEncodeWithStandard(t, enc, obj, func(s *Streamer) {
 		s.Value(obj)
 	}, expErr)
