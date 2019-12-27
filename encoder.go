@@ -175,8 +175,14 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				internalCache[rType] = &pointerEncoder{w.encoder}
 				rebuildMap[rType] = w
 			}
-			// case reflect.Struct:
-			// case reflect.Slice:
+		case reflect.Slice:
+			w := newSliceEncoder(typ)
+			typesToCreate = append(typesToCreate, typ.Elem())
+			idx += 1
+			internalCache[rType] = w.encoder
+			rebuildMap[rType] = w
+		case reflect.Struct:
+			fallthrough
 		default:
 			v := notSupportedEncoder(typ.String())
 			internalCache[rType] = v
@@ -204,7 +210,10 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			}
 		case *mapEncoderBuilder:
 			// TODO: key/value encoder
-			x.encoder.elemEncoder = internalCache[x.encoder.elemRType]
+			x.encoder.elemEncoder = internalCache[x.elemRType]
+			cache[rType] = x.encoder
+		case *sliceEncoderBuilder:
+			x.encoder.elemEncoder = internalCache[x.elemRType]
 			cache[rType] = x.encoder
 		}
 	}

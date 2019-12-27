@@ -7,7 +7,8 @@ import (
 )
 
 type mapEncoderBuilder struct {
-	encoder *directMapEncoder
+	encoder   *directMapEncoder
+	elemRType rtype
 }
 
 func newMapEncoder(mapType reflect.Type) *mapEncoderBuilder {
@@ -33,25 +34,27 @@ func newMapEncoder(mapType reflect.Type) *mapEncoderBuilder {
 	}
 	return &mapEncoderBuilder{
 		encoder: &directMapEncoder{
-			mapRType:   rtypeOfType(mapType),
-			keyRType:   keyRType,
+			mapRType: rtypeOfType(mapType),
+			// keyRType:   keyRType,
 			keyEncoder: keyEncoder,
-			elemRType:  rtypeOfType(mapType.Elem()),
 		},
+		elemRType: rtypeOfType(mapType.Elem()),
 	}
 }
 
 type directMapEncoder struct {
 	mapRType rtype
 
-	keyRType   rtype
+	// keyRType   rtype
 	keyEncoder ValEncoder
 
-	elemRType   rtype
 	elemEncoder ValEncoder
 }
 
 func (enc *directMapEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+	if s.Error != nil {
+		return
+	}
 	if ptr == nil {
 		s.Null()
 		return

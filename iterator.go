@@ -44,6 +44,10 @@ func (it *Iterator) reset() {
 		releaseByteSlice(it.buffer)
 		it.buffer = nil
 	}
+	it.capture = false
+	it.offset = 0
+	it.head = 0
+	it.tail = 0
 	it.lastEfacePtr = 0
 	it.lastEfaceOffset = 0
 }
@@ -71,6 +75,7 @@ func (it *Iterator) Reset(r io.Reader) {
 	}
 	it.reader = r
 	it.buffer = b
+	it.capture = false
 	it.offset = 0
 	it.head = 0
 	it.tail = 0
@@ -84,6 +89,7 @@ func (it *Iterator) ResetBytes(data []byte) {
 	}
 	it.reader = nil
 	it.buffer = data
+	it.capture = false
 	it.offset = 0
 	it.head = 0
 	it.tail = len(data)

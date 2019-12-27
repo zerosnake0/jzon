@@ -24,6 +24,19 @@ func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
 	return m.data, m.err
 }
 
+func TestValEncoder_JsonMarshaler_Error(t *testing.T) {
+	t.Run("chain error", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			jsonMarshalerEncoder(0).Encode(nil, s)
+		})
+	})
+	t.Run("chain error (dynamic)", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			(*dynamicJsonMarshalerEncoder)(nil).Encode(nil, s)
+		})
+	})
+}
+
 func TestValEncoder_JsonMarshaler_NonPointerReceiver(t *testing.T) {
 	f := func(t *testing.T, m json.Marshaler, err error) {
 		checkEncodeValueWithStandard(t, DefaultEncoder, m, err)

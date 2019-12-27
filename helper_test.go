@@ -10,6 +10,15 @@ var (
 	runtimeErrorType = reflect.TypeOf((*runtime.Error)(nil)).Elem()
 )
 
+func withIterator(data string, cb func(it *Iterator)) {
+	it := NewIterator()
+	defer ReturnIterator(it)
+	if data != "" {
+		it.ResetBytes(localStringToBytes(data))
+	}
+	cb(it)
+}
+
 type oneByteReader struct {
 	b   []byte
 	err error

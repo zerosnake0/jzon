@@ -1,11 +1,28 @@
 package jzon
 
 import (
+	"encoding/json"
 	"errors"
 	"math"
 	"strconv"
 	"testing"
 )
+
+func TestValEncoder_Map_Error(t *testing.T) {
+	t.Run("chain error", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			(*directMapEncoder)(nil).Encode(nil, s)
+		})
+	})
+	t.Run("element error", func(t *testing.T) {
+		e := errors.New("test")
+		checkEncodeValueWithStandard(t, DefaultEncoder, map[string]json.Marshaler{
+			"key": testJsonMarshaler{
+				err: e,
+			},
+		}, e)
+	})
+}
 
 func TestValEncoder_Map(t *testing.T) {
 	t.Run("nil", func(t *testing.T) {
@@ -169,6 +186,37 @@ func TestValEncoder_Native_Map_KeyEncoder_Int(t *testing.T) {
 		m := map[key]key{
 			math.MaxInt64: math.MaxInt64,
 			math.MinInt64: math.MinInt64,
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+}
+
+func TestValEncoder_Native_Map_KeyEncoder_Uint(t *testing.T) {
+	t.Run("uint8", func(t *testing.T) {
+		type key uint8
+		m := map[key]key{
+			math.MaxUint8: math.MaxUint8,
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+	t.Run("uint16", func(t *testing.T) {
+		type key uint16
+		m := map[key]key{
+			math.MaxUint16: math.MaxUint16,
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+	t.Run("uint32", func(t *testing.T) {
+		type key uint32
+		m := map[key]key{
+			math.MaxUint32: math.MaxUint32,
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
+	})
+	t.Run("uint64", func(t *testing.T) {
+		type key uint64
+		m := map[key]key{
+			math.MaxUint64: math.MaxUint64,
 		}
 		checkEncodeValueWithStandard(t, DefaultEncoder, m, nil)
 	})
