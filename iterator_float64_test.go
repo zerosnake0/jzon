@@ -69,7 +69,7 @@ func TestIterator_Float_ReadFloat64_LeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte{'0'},
+				b:   "0",
 				err: e,
 			})
 			_, err := it.ReadFloat64()
@@ -106,7 +106,7 @@ func TestIterator_Float_ReadFloat64_LeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte("0."),
+				b:   "0.",
 				err: e,
 			})
 			_, err := it.ReadFloat64()
@@ -117,7 +117,7 @@ func TestIterator_Float_ReadFloat64_LeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte("0.1"),
+				b:   "0.1",
 				err: e,
 			})
 			_, err := it.ReadFloat64()
@@ -160,7 +160,7 @@ func TestIterator_Float_ReadFloat64_LeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte("0.1e+1"),
+				b:   "0.1e+1",
 				err: e,
 			})
 			_, err := it.ReadFloat64()
@@ -216,7 +216,7 @@ func TestIterator_Float_ReadFloat64_NonLeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte("10"),
+				b:   "10",
 				err: e,
 			})
 			_, err := it.ReadFloat64()

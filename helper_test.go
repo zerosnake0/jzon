@@ -20,7 +20,7 @@ func withIterator(data string, cb func(it *Iterator)) {
 }
 
 type oneByteReader struct {
-	b   []byte
+	b   string
 	err error
 }
 

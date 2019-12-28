@@ -48,7 +48,7 @@ func TestIterator_Number_ReadNumber_LeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte(" 0"),
+				b:   " 0",
 				err: e,
 			})
 			_, err := it.ReadNumber()
@@ -92,7 +92,7 @@ func TestIterator_Number_ReadNumber_LeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte(" 0.12"),
+				b:   " 0.12",
 				err: e,
 			})
 			_, err := it.ReadNumber()
@@ -135,7 +135,7 @@ func TestIterator_Number_ReadNumber_LeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte(" 0.1e+2"),
+				b:   " 0.1e+2",
 				err: e,
 			})
 			_, err := it.ReadNumber()
@@ -163,7 +163,7 @@ func TestIterator_Number_ReadNumber_NonLeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte(" 1"),
+				b:   " 1",
 				err: e,
 			})
 			_, err := it.ReadNumber()
@@ -214,7 +214,7 @@ func TestIterator_Number_ReadNumber_NonLeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte(" 1.23"),
+				b:   " 1.23",
 				err: e,
 			})
 			_, err := it.ReadNumber()
@@ -257,7 +257,7 @@ func TestIterator_Number_ReadNumber_NonLeadingZero(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
 			it.Reset(&oneByteReader{
-				b:   []byte(" 1.2e+3"),
+				b:   " 1.2e+3",
 				err: e,
 			})
 			_, err := it.ReadNumber()
