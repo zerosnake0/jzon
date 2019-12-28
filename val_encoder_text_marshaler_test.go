@@ -97,7 +97,7 @@ func TestValEncoder_DynamicTextMarshaler(t *testing.T) {
 		v := "go1.13.5"
 		if goVersion.LessEqual(v) {
 			var i encoding.TextMarshaler
-			b, err := DefaultEncoder.Marshal(&i)
+			b, err := Marshal(&i)
 			require.NoError(t, err)
 			require.Equal(t, "null", string(b))
 		} else {

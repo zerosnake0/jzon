@@ -195,7 +195,8 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate ...r
 			x.decoder.fields.init(len(x.fields.list))
 			for i := range x.fields.list {
 				fi := &x.fields.list[i]
-				x.decoder.fields.add(fi, cache[fi.rtype])
+				fiPtrRType := rtypeOfType(fi.ptrType)
+				x.decoder.fields.add(fi, cache[fiPtrRType])
 			}
 		case *arrayDecoderBuilder:
 			x.decoder.elemDec = cache[x.elemPtrRType]

@@ -133,7 +133,7 @@ func (s *Streamer) Field(field string) *Streamer {
 		return s
 	}
 	s.onVal()
-	s.string(field)
+	s.buffer = encodeString(s.buffer, field, s.safeSet)
 	s.buffer = append(s.buffer, ':')
 	s.poped = false
 	return s

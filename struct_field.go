@@ -22,7 +22,7 @@ type field struct {
 	omitEmpty bool
 
 	ptrType reflect.Type
-	rtype   rtype
+	// rtype   rtype
 }
 
 type structFields struct {

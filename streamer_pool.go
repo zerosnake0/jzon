@@ -26,6 +26,7 @@ func (p *StreamerPool) BorrowStreamer() *Streamer {
 	s := p.pool.Get().(*Streamer)
 	s.buffer = getEmptyByteSlice()
 	s.poped = false
+	s.safeSet = htmlSafeSet[:]
 	return s
 }
 

@@ -34,12 +34,12 @@ func (s *Streamer) String(str string) *Streamer {
 		return s
 	}
 	s.onVal()
-	s.string(str)
+	s.buffer = encodeString(s.buffer, str, s.safeSet)
 	return s
 }
 
-func (s *Streamer) string(str string) {
-	s.buffer = append(s.buffer, '"') // leading quote
+func encodeString(buffer []byte, str string, safeSet []string) []byte {
+	buffer = append(buffer, '"') // leading quote
 	l := len(str)
 	offset := 0
 	i := 0
@@ -47,37 +47,37 @@ func (s *Streamer) string(str string) {
 		c := str[i]
 		if c < utf8.RuneSelf {
 			if c >= ' ' {
-				if hs := s.safeSet[c]; hs != "" {
-					s.buffer = append(s.buffer, str[offset:i]...)
-					s.buffer = append(s.buffer, hs...)
+				if hs := safeSet[c]; hs != "" {
+					buffer = append(buffer, str[offset:i]...)
+					buffer = append(buffer, hs...)
 					i++
 					offset = i
 				} else {
 					i++
 				}
 			} else {
-				s.buffer = append(s.buffer, str[offset:i]...)
+				buffer = append(buffer, str[offset:i]...)
 				if hs := htmlSafeSet[c]; hs != "" {
-					s.buffer = append(s.buffer, hs...)
+					buffer = append(buffer, hs...)
 				} else {
-					s.buffer = append(s.buffer, '\\', 'u', '0', '0',
+					buffer = append(buffer, '\\', 'u', '0', '0',
 						hex[c>>4], hex[c&0xF])
 				}
 				i++
 				offset = i
 			}
 		} else { // c >= 0x80
-			s.buffer = append(s.buffer, str[offset:i]...)
+			buffer = append(buffer, str[offset:i]...)
 			r, size := utf8.DecodeRuneInString(str[i:])
 			if r == utf8.RuneError {
 				// we must have size == 1 here
 				// because the input is not empty
-				s.buffer = append(s.buffer, '\\', 'u',
+				buffer = append(buffer, '\\', 'u',
 					'f', 'f', 'f', 'd')
 				i += 1
 				offset = i
 			} else if r == '\u2028' || r == '\u2029' {
-				s.buffer = append(s.buffer, '\\', 'u',
+				buffer = append(buffer, '\\', 'u',
 					'2', '0', '2', hex[r&0xF])
 				i += size
 				offset = i
@@ -86,6 +86,7 @@ func (s *Streamer) string(str string) {
 			}
 		}
 	}
-	s.buffer = append(s.buffer, str[offset:i]...)
-	s.buffer = append(s.buffer, '"') // trailing quote
+	buffer = append(buffer, str[offset:i]...)
+	buffer = append(buffer, '"') // trailing quote
+	return buffer
 }

@@ -141,7 +141,7 @@ func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) struct
 						omitEmpty: opts.Contains("omitempty"),
 
 						ptrType: ptrType,
-						rtype:   rtypeOfType(ptrType),
+						// rtype:   rtypeOfType(ptrType),
 					}
 
 					if name == "" {

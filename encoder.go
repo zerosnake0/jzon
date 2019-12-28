@@ -194,7 +194,21 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			internalCache[rType] = w.encoder
 			rebuildMap[rType] = w
 		case reflect.Struct:
-			fallthrough
+			w := enc.newStructEncoder(typ)
+			if w == nil {
+				// no fields to marshal
+				v := (*emptyStructEncoder)(nil)
+				internalCache[rType] = v
+				cache[rType] = v
+			} else {
+				for i := range w.fields.list {
+					fi := &w.fields.list[i]
+					typesToCreate = append(typesToCreate, fi.ptrType.Elem())
+					idx += 1
+				}
+				internalCache[rType] = w.encoder
+				rebuildMap[rType] = w
+			}
 		default:
 			v := notSupportedEncoder(typ.String())
 			internalCache[rType] = v
@@ -226,6 +240,14 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			cache[rType] = x.encoder
 		case *sliceEncoderBuilder:
 			x.encoder.elemEncoder = internalCache[x.elemRType]
+			cache[rType] = x.encoder
+		case *structEncoderBuilder:
+			x.encoder.fields.init(len(x.fields.list))
+			for i := range x.fields.list {
+				fi := &x.fields.list[i]
+				fiRType := rtypeOfType(fi.ptrType.Elem())
+				x.encoder.fields.add(fi, enc.escapeHtml, internalCache[fiRType])
+			}
 			cache[rType] = x.encoder
 		}
 	}
