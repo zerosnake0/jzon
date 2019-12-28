@@ -56,6 +56,18 @@ func NewEncoder(opt *EncoderOption) *Encoder {
 	return &enc
 }
 
+func (enc *Encoder) Marshal(obj interface{}) ([]byte, error) {
+	s := enc.NewStreamer()
+	defer enc.ReturnStreamer(s)
+	s.Value(obj)
+	if s.Error != nil {
+		return nil, s.Error
+	}
+	b := s.buffer
+	s.buffer = nil
+	return b, nil
+}
+
 func (enc *Encoder) getEncoderFromCache(rtype rtype) ValEncoder {
 	return enc.encoderCache.Load().(encoderCache)[rtype]
 }

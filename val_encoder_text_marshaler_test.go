@@ -4,7 +4,22 @@ import (
 	"encoding"
 	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
+
+func TestValEncoder_TextMarshaler_ChainError(t *testing.T) {
+	t.Run("direct", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			textMarshalerEncoder(0).Encode(nil, s)
+		})
+	})
+	t.Run("dynamic", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			(*dynamicTextMarshalerEncoder)(nil).Encode(nil, s)
+		})
+	})
+}
 
 type testTextMarshaler struct {
 	data string
@@ -77,14 +92,18 @@ func TestValEncoder_TextMarshaler(t *testing.T) {
 }
 
 func TestValEncoder_DynamicTextMarshaler(t *testing.T) {
-	t.Run("marshaler <nil>", func(t *testing.T) {
+	t.Run("marshaler (nil)", func(t *testing.T) {
 		// TODO: This test should be automatically fixed in the future golang version
 		v := "go1.13.5"
 		if goVersion.LessEqual(v) {
-			t.Skipf("skipping this test for go version <= %s", v)
+			var i encoding.TextMarshaler
+			b, err := DefaultEncoder.Marshal(&i)
+			require.NoError(t, err)
+			require.Equal(t, "null", string(b))
+		} else {
+			var i encoding.TextMarshaler
+			checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 		}
-		var i encoding.TextMarshaler
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 	})
 	t.Run("marshaler error", func(t *testing.T) {
 		e := errors.New("test")

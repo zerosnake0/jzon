@@ -61,7 +61,7 @@ func TestValDecoder_Native_Slice(t *testing.T) {
 		arr2 := []int{1, 2}
 		f(t, ` [ 3 ] `, nil, &arr1, &arr2)
 	})
-	t.Run("bad item", func(t *testing.T) {
+	t.Run("bad item 2", func(t *testing.T) {
 		arr1 := []int{1, 2}
 		arr2 := []int{1, 2}
 		f(t, ` [ "test" ] `, InvalidDigitError{}, &arr1, &arr2)

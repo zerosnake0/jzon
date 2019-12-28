@@ -92,7 +92,7 @@ func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
 }
 
 func TestValEncoder_DynamicJsonMarshaler(t *testing.T) {
-	t.Run("marshaler <nil>", func(t *testing.T) {
+	t.Run("marshaler (nil)", func(t *testing.T) {
 		var i json.Marshaler
 		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
 	})

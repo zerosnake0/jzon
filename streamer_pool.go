@@ -31,7 +31,9 @@ func (p *StreamerPool) BorrowStreamer() *Streamer {
 
 func (p *StreamerPool) ReturnStreamer(s *Streamer) {
 	s.reset()
-	releaseByteSlice(s.buffer)
-	s.buffer = nil
+	if s.buffer != nil {
+		releaseByteSlice(s.buffer)
+		s.buffer = nil
+	}
 	p.pool.Put(s)
 }
