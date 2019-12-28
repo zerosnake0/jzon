@@ -121,3 +121,19 @@ func checkDecodeWithStandard(t *testing.T, decoder *Decoder, data string, ex err
 	printValue(t, "got", gotI)
 	require.Equalf(t, expI, gotI, "exp %+v\ngot %+v", expI, gotI)
 }
+
+func TestValid(t *testing.T) {
+	f := func(t *testing.T, s string) {
+		data := localStringToBytes(s)
+		require.Equal(t, json.Valid(data), Valid(data))
+	}
+	t.Run("empty", func(t *testing.T) {
+		f(t, "")
+	})
+	t.Run("empty object", func(t *testing.T) {
+		f(t, "{}")
+	})
+	t.Run("data remained", func(t *testing.T) {
+		f(t, "{}1")
+	})
+}
