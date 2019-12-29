@@ -1,5 +1,9 @@
 package jzon
 
+import (
+	"encoding/json"
+)
+
 var (
 	readFunctions [charNum]func(it *Iterator, c byte) (interface{}, error)
 )
@@ -22,7 +26,8 @@ func init() {
 	for _, c := range []byte("-0123456789") {
 		readFunctions[c] = func(it *Iterator, c byte) (interface{}, error) {
 			if it.decoder.useNumber {
-				return it.readNumberAsString(c)
+				s, err := it.readNumberAsString(c)
+				return json.Number(s), err
 			} else {
 				return it.readFloat64(c)
 			}

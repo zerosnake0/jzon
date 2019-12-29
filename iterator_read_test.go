@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"encoding/json"
 	"io"
 	"testing"
 
@@ -348,7 +349,7 @@ func TestIterator_Read_UseNumber(t *testing.T) {
 	it.ResetBytes([]byte(" 123 "))
 	o, err := it.Read()
 	require.NoError(t, err)
-	require.Equal(t, "123", o)
+	require.Equal(t, json.Number("123"), o)
 	t.Log(o)
 	_, err = it.NextValueType()
 	require.Equal(t, io.EOF, err)
