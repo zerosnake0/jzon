@@ -67,9 +67,9 @@ func encodeString(buffer []byte, str string, safeSet []string) []byte {
 				offset = i
 			}
 		} else { // c >= 0x80
-			buffer = append(buffer, str[offset:i]...)
 			r, size := utf8.DecodeRuneInString(str[i:])
 			if r == utf8.RuneError {
+				buffer = append(buffer, str[offset:i]...)
 				// we must have size == 1 here
 				// because the input is not empty
 				buffer = append(buffer, '\\', 'u',
@@ -77,6 +77,7 @@ func encodeString(buffer []byte, str string, safeSet []string) []byte {
 				i += 1
 				offset = i
 			} else if r == '\u2028' || r == '\u2029' {
+				buffer = append(buffer, str[offset:i]...)
 				buffer = append(buffer, '\\', 'u',
 					'2', '0', '2', hex[r&0xF])
 				i += size

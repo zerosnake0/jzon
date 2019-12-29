@@ -99,4 +99,8 @@ func TestValEncoder_String(t *testing.T) {
 		s := "test"
 		checkEncodeValueWithStandard(t, &s, nil)
 	})
+	t.Run("unicode", func(t *testing.T) {
+		s := "\xe6\x97\xa5\xe6\x9c\xac\xff\xaa\x9e"
+		checkEncodeValueWithStandard(t, s, nil)
+	})
 }
