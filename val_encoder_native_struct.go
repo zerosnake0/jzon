@@ -68,25 +68,22 @@ func (enc *structEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	s.ObjectStart()
 	for i := range enc.fields.list {
 		fi := &enc.fields.list[i]
-		s.RawField(fi.rawField)
 		curPtr := add(ptr, fi.offsets[0], "struct field")
-		if curPtr == nil {
-			s.Null()
-		} else {
-			for _, offset := range fi.offsets[1:] {
-				curPtr = *(*unsafe.Pointer)(curPtr)
-				if curPtr == nil {
-					break
-				}
-				curPtr = add(curPtr, offset, "struct field")
-			}
+		// ptr != nil => curPtr != nil
+		broken := false
+		for _, offset := range fi.offsets[1:] {
+			curPtr = *(*unsafe.Pointer)(curPtr)
 			if curPtr == nil {
-				s.Null()
-			} else {
-				fi.encoder.Encode(curPtr, s)
-				if s.Error != nil {
-					return
-				}
+				broken = true // the embedded field is nil
+				break
+			}
+			curPtr = add(curPtr, offset, "struct field")
+		}
+		if !broken {
+			s.RawField(fi.rawField)
+			fi.encoder.Encode(curPtr, s)
+			if s.Error != nil {
+				return
 			}
 		}
 	}
