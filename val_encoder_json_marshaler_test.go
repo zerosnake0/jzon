@@ -39,7 +39,7 @@ func TestValEncoder_JsonMarshaler_Error(t *testing.T) {
 
 func TestValEncoder_JsonMarshaler_NonPointerReceiver(t *testing.T) {
 	f := func(t *testing.T, m json.Marshaler, err error) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, m, err)
+		checkEncodeValueWithStandard(t, m, err)
 	}
 	t.Run("non pointer", func(t *testing.T) {
 		f(t, testJsonMarshaler{
@@ -72,7 +72,7 @@ func TestValEncoder_JsonMarshaler_NonPointerReceiver(t *testing.T) {
 
 func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
 	f := func(t *testing.T, m json.Marshaler, err error) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, m, err)
+		checkEncodeValueWithStandard(t, m, err)
 	}
 	t.Run("pointer", func(t *testing.T) {
 		f(t, &testJsonMarshaler2{
@@ -94,7 +94,7 @@ func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
 func TestValEncoder_DynamicJsonMarshaler(t *testing.T) {
 	t.Run("marshaler (nil)", func(t *testing.T) {
 		var i json.Marshaler
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
+		checkEncodeValueWithStandard(t, &i, nil)
 	})
 	t.Run("marshaler error", func(t *testing.T) {
 		e := errors.New("test")
@@ -102,18 +102,18 @@ func TestValEncoder_DynamicJsonMarshaler(t *testing.T) {
 			data: []byte(`"test"`),
 			err:  e,
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i, e)
+		checkEncodeValueWithStandard(t, &i, e)
 	})
 	t.Run("marshaler", func(t *testing.T) {
 		var i json.Marshaler = testJsonMarshaler{
 			data: []byte(`"test"`),
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
+		checkEncodeValueWithStandard(t, &i, nil)
 	})
 	t.Run("marshaler 2", func(t *testing.T) {
 		var i json.Marshaler = &testJsonMarshaler{
 			data: []byte(`"test 2"`),
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
+		checkEncodeValueWithStandard(t, &i, nil)
 	})
 }

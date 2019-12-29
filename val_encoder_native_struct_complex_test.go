@@ -9,7 +9,7 @@ func TestValEncoder_Native_Struct_Complex_OneField(t *testing.T) {
 		type st struct {
 			A int
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+		checkEncodeValueWithStandard(t, st{
 			A: 1,
 		}, nil)
 	})
@@ -17,7 +17,7 @@ func TestValEncoder_Native_Struct_Complex_OneField(t *testing.T) {
 		type st struct {
 			A *int
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+		checkEncodeValueWithStandard(t, st{
 			A: nil,
 		}, nil)
 	})
@@ -25,11 +25,11 @@ func TestValEncoder_Native_Struct_Complex_OneField(t *testing.T) {
 		type st struct {
 			A [1]*int
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+		checkEncodeValueWithStandard(t, st{
 			A: [1]*int{nil},
 		}, nil)
 		i := 1
-		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+		checkEncodeValueWithStandard(t, st{
 			A: [1]*int{&i},
 		}, nil)
 	})
@@ -37,10 +37,10 @@ func TestValEncoder_Native_Struct_Complex_OneField(t *testing.T) {
 		type st struct {
 			A map[int]int
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+		checkEncodeValueWithStandard(t, st{
 			A: nil,
 		}, nil)
-		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+		checkEncodeValueWithStandard(t, st{
 			A: map[int]int{1: 2},
 		}, nil)
 	})
@@ -52,14 +52,14 @@ func TestValEncoder_Native_Struct_Complex_MultipleField(t *testing.T) {
 			A int
 			B int
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*st)(nil), nil)
+		checkEncodeValueWithStandard(t, (*st)(nil), nil)
 	})
 	t.Run("pointer", func(t *testing.T) {
 		type st struct {
 			A int
 			B int
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &st{
+		checkEncodeValueWithStandard(t, &st{
 			A: 1, B: 2,
 		}, nil)
 	})
@@ -68,7 +68,7 @@ func TestValEncoder_Native_Struct_Complex_MultipleField(t *testing.T) {
 			A int
 			B int
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+		checkEncodeValueWithStandard(t, st{
 			A: 1, B: 2,
 		}, nil)
 	})
@@ -85,25 +85,25 @@ func TestValEncoder_Native_Struct_Complex_MultipleField(t *testing.T) {
 			inner
 			C int
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, outer{
+		checkEncodeValueWithStandard(t, outer{
 			inner: nil,
 			C:     1,
 		}, nil)
-		checkEncodeValueWithStandard(t, DefaultEncoder, outer{
+		checkEncodeValueWithStandard(t, outer{
 			inner: &inner{
 				A: 1,
 				B: 2,
 			},
 			C: 3,
 		}, nil)
-		checkEncodeValueWithStandard(t, DefaultEncoder, outer2{}, nil)
+		checkEncodeValueWithStandard(t, outer2{}, nil)
 	})
 	t.Run("pointer field", func(t *testing.T) {
 		type st struct {
 			A *int
 			B *int
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, st{}, nil)
+		checkEncodeValueWithStandard(t, st{}, nil)
 	})
 }
 
@@ -116,7 +116,7 @@ func TestValEncoder_Native_Struct_Complex_Nested(t *testing.T) {
 			inner
 			A int
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, outer{
+		checkEncodeValueWithStandard(t, outer{
 			inner: inner{A: 1},
 			A:     2,
 		}, nil)
@@ -138,7 +138,7 @@ func TestValEncoder_Native_Struct_Complex_Nested(t *testing.T) {
 			aliasInner
 			inner2
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, outer{
+		checkEncodeValueWithStandard(t, outer{
 			inner: inner{
 				A: 1,
 			},

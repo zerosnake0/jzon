@@ -8,7 +8,7 @@ import (
 
 func TestValEncoder_Ptr(t *testing.T) {
 	f := func(t *testing.T, o interface{}) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, o, nil)
+		checkEncodeValueWithStandard(t, o, nil)
 	}
 	t.Run("nil", func(t *testing.T) {
 		f(t, nil)

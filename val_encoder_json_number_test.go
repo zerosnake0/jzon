@@ -7,7 +7,7 @@ import (
 
 func TestValEncoder_JsonNumber(t *testing.T) {
 	f := func(t *testing.T, n json.Number) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, n, nil)
+		checkEncodeValueWithStandard(t, n, nil)
 	}
 	t.Run("empty", func(t *testing.T) {
 		f(t, "")

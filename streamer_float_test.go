@@ -31,7 +31,7 @@ func TestStreamer_Float32_Error(t *testing.T) {
 
 func TestStreamer_Float32(t *testing.T) {
 	f := func(t *testing.T, f float32) {
-		checkEncodeWithStandard(t, DefaultEncoder, f, func(s *Streamer) {
+		checkEncodeWithStandard(t, f, func(s *Streamer) {
 			s.Float32(f)
 		}, nil)
 	}
@@ -76,7 +76,7 @@ func TestStreamer_Float64_Error(t *testing.T) {
 
 func TestStreamer_Float64(t *testing.T) {
 	f := func(t *testing.T, f float64) {
-		checkEncodeWithStandard(t, DefaultEncoder, f, func(s *Streamer) {
+		checkEncodeWithStandard(t, f, func(s *Streamer) {
 			s.Float64(f)
 		}, nil)
 	}

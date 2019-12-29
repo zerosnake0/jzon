@@ -50,7 +50,7 @@ func TestStreamer_Int_ChainError(t *testing.T) {
 
 func TestStreamer_Int8(t *testing.T) {
 	f := func(t *testing.T, i int8) {
-		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
+		checkEncodeWithStandard(t, i, func(s *Streamer) {
 			s.Int8(i)
 		}, nil)
 	}
@@ -64,7 +64,7 @@ func TestStreamer_Int8(t *testing.T) {
 
 func TestStreamer_Uint8(t *testing.T) {
 	f := func(t *testing.T, i uint8) {
-		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
+		checkEncodeWithStandard(t, i, func(s *Streamer) {
 			s.Uint8(i)
 		}, nil)
 	}
@@ -78,7 +78,7 @@ func TestStreamer_Uint8(t *testing.T) {
 
 func TestStreamer_Int16(t *testing.T) {
 	f := func(t *testing.T, i int16) {
-		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
+		checkEncodeWithStandard(t, i, func(s *Streamer) {
 			s.Int16(i)
 		}, nil)
 	}
@@ -92,7 +92,7 @@ func TestStreamer_Int16(t *testing.T) {
 
 func TestStreamer_Uint16(t *testing.T) {
 	f := func(t *testing.T, i uint16) {
-		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
+		checkEncodeWithStandard(t, i, func(s *Streamer) {
 			s.Uint16(i)
 		}, nil)
 	}
@@ -106,7 +106,7 @@ func TestStreamer_Uint16(t *testing.T) {
 
 func TestStreamer_Int32(t *testing.T) {
 	f := func(t *testing.T, i int32) {
-		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
+		checkEncodeWithStandard(t, i, func(s *Streamer) {
 			s.Int32(i)
 		}, nil)
 	}
@@ -120,7 +120,7 @@ func TestStreamer_Int32(t *testing.T) {
 
 func TestStreamer_Uint32(t *testing.T) {
 	f := func(t *testing.T, i uint32) {
-		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
+		checkEncodeWithStandard(t, i, func(s *Streamer) {
 			s.Uint32(i)
 		}, nil)
 	}
@@ -140,7 +140,7 @@ func TestStreamer_Uint32(t *testing.T) {
 
 func TestStreamer_Int64(t *testing.T) {
 	f := func(t *testing.T, i int64) {
-		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
+		checkEncodeWithStandard(t, i, func(s *Streamer) {
 			s.Int64(i)
 		}, nil)
 	}
@@ -154,7 +154,7 @@ func TestStreamer_Int64(t *testing.T) {
 
 func TestStreamer_Uint64(t *testing.T) {
 	f := func(t *testing.T, i uint64) {
-		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
+		checkEncodeWithStandard(t, i, func(s *Streamer) {
 			s.Uint64(i)
 		}, nil)
 	}
@@ -183,7 +183,7 @@ func TestStreamer_Uint64(t *testing.T) {
 
 func TestStreamer_Int(t *testing.T) {
 	f := func(t *testing.T, i int) {
-		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
+		checkEncodeWithStandard(t, i, func(s *Streamer) {
 			s.Int(i)
 		}, nil)
 	}
@@ -194,7 +194,7 @@ func TestStreamer_Int(t *testing.T) {
 
 func TestStreamer_Uint(t *testing.T) {
 	f := func(t *testing.T, i uint) {
-		checkEncodeWithStandard(t, DefaultEncoder, i, func(s *Streamer) {
+		checkEncodeWithStandard(t, i, func(s *Streamer) {
 			s.Uint(i)
 		}, nil)
 	}

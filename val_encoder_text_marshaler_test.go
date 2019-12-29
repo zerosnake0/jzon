@@ -41,7 +41,7 @@ func (m *testTextMarshaler2) MarshalText() ([]byte, error) {
 
 func TestValEncoder_TextMarshaler(t *testing.T) {
 	f := func(t *testing.T, m encoding.TextMarshaler, err error) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, m, err)
+		checkEncodeValueWithStandard(t, m, err)
 	}
 	t.Run("non pointer receiver", func(t *testing.T) {
 		t.Run("non pointer", func(t *testing.T) {
@@ -102,7 +102,7 @@ func TestValEncoder_DynamicTextMarshaler(t *testing.T) {
 			require.Equal(t, "null", string(b))
 		} else {
 			var i encoding.TextMarshaler
-			checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
+			checkEncodeValueWithStandard(t, &i, nil)
 		}
 	})
 	t.Run("marshaler error", func(t *testing.T) {
@@ -111,18 +111,18 @@ func TestValEncoder_DynamicTextMarshaler(t *testing.T) {
 			data: `"test"`,
 			err:  e,
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i, e)
+		checkEncodeValueWithStandard(t, &i, e)
 	})
 	t.Run("marshaler", func(t *testing.T) {
 		var i encoding.TextMarshaler = testTextMarshaler{
 			data: `"test"`,
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
+		checkEncodeValueWithStandard(t, &i, nil)
 	})
 	t.Run("marshaler 2", func(t *testing.T) {
 		var i encoding.TextMarshaler = &testTextMarshaler{
 			data: `"test 2"`,
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &i, nil)
+		checkEncodeValueWithStandard(t, &i, nil)
 	})
 }

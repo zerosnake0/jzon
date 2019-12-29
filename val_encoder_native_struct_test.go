@@ -9,24 +9,24 @@ import (
 func TestValEncoder_Native_Struct_Zero_Field(t *testing.T) {
 	t.Run("pointer", func(t *testing.T) {
 		type a struct{}
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*a)(nil), nil)
+		checkEncodeValueWithStandard(t, (*a)(nil), nil)
 	})
 	t.Run("non pointer", func(t *testing.T) {
 		type a struct{}
-		checkEncodeValueWithStandard(t, DefaultEncoder, a{}, nil)
+		checkEncodeValueWithStandard(t, a{}, nil)
 	})
 }
 
 func TestValEncoder_Native_Struct_Mapping(t *testing.T) {
 	t.Run("unexported field", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, &struct {
+		checkEncodeValueWithStandard(t, &struct {
 			a string
 		}{
 			a: "abc",
 		}, nil)
 	})
 	t.Run("unexported field 2", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, &struct {
+		checkEncodeValueWithStandard(t, &struct {
 			a string
 			B int
 		}{
@@ -35,14 +35,14 @@ func TestValEncoder_Native_Struct_Mapping(t *testing.T) {
 		}, nil)
 	})
 	t.Run("tag ignored 1", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, &struct {
+		checkEncodeValueWithStandard(t, &struct {
 			A string `json:"-"`
 		}{
 			A: "test",
 		}, nil)
 	})
 	t.Run("tag", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, &struct {
+		checkEncodeValueWithStandard(t, &struct {
 			A string `json:"B"`
 		}{
 			A: "test",
@@ -69,7 +69,7 @@ func TestValEncoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 		type outer struct {
 			inner inner
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &outer{
+		checkEncodeValueWithStandard(t, &outer{
 			inner: inner{},
 		}, nil)
 	})
@@ -78,7 +78,7 @@ func TestValEncoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 		type outer struct {
 			inner
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &outer{
+		checkEncodeValueWithStandard(t, &outer{
 			inner: 1,
 		}, nil)
 	})
@@ -91,11 +91,11 @@ func TestValEncoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 			*inner
 			*inner2
 		}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &outer{}, nil)
-		checkEncodeValueWithStandard(t, DefaultEncoder, &outer{
+		checkEncodeValueWithStandard(t, &outer{}, nil)
+		checkEncodeValueWithStandard(t, &outer{
 			inner: &inner{A: 1},
 		}, nil)
-		checkEncodeValueWithStandard(t, DefaultEncoder, &outer{
+		checkEncodeValueWithStandard(t, &outer{
 			inner:  &inner{A: 1},
 			inner2: &inner2{A: 2},
 		}, nil)

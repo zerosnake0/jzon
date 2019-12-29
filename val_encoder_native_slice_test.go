@@ -19,7 +19,7 @@ func TestValEncoder_Slice_Error(t *testing.T) {
 			data: []byte(`"test"`),
 			err:  e,
 		}}
-		checkEncodeValueWithStandard(t, DefaultEncoder, arr, e)
+		checkEncodeValueWithStandard(t, arr, e)
 	})
 	debug.FreeOSMemory()
 }
@@ -27,18 +27,18 @@ func TestValEncoder_Slice_Error(t *testing.T) {
 func TestValEncoder_Slice_Empty(t *testing.T) {
 	t.Run("nil", func(t *testing.T) {
 		var arr []int
-		checkEncodeValueWithStandard(t, DefaultEncoder, arr, nil)
+		checkEncodeValueWithStandard(t, arr, nil)
 	})
 	t.Run("empty", func(t *testing.T) {
 		arr := make([]int, 0)
-		checkEncodeValueWithStandard(t, DefaultEncoder, arr, nil)
+		checkEncodeValueWithStandard(t, arr, nil)
 	})
 	t.Run("nil pointer", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, DefaultEncoder, (*[]int)(nil), nil)
+		checkEncodeValueWithStandard(t, (*[]int)(nil), nil)
 	})
 	t.Run("empty pointer", func(t *testing.T) {
 		arr := make([]int, 0)
-		checkEncodeValueWithStandard(t, DefaultEncoder, &arr, nil)
+		checkEncodeValueWithStandard(t, &arr, nil)
 	})
 	debug.FreeOSMemory()
 }
@@ -46,16 +46,16 @@ func TestValEncoder_Slice_Empty(t *testing.T) {
 func TestValEncoder_Slice(t *testing.T) {
 	t.Run("pointer", func(t *testing.T) {
 		arr := []int{1, 2, 3}
-		checkEncodeValueWithStandard(t, DefaultEncoder, &arr, nil)
+		checkEncodeValueWithStandard(t, &arr, nil)
 	})
 	t.Run("non pointer", func(t *testing.T) {
 		arr := []int{1, 2, 3}
-		checkEncodeValueWithStandard(t, DefaultEncoder, arr, nil)
+		checkEncodeValueWithStandard(t, arr, nil)
 	})
 	t.Run("slice of pointer", func(t *testing.T) {
 		i := 1
 		arr := []*int{(*int)(nil), &i}
-		checkEncodeValueWithStandard(t, DefaultEncoder, arr, nil)
+		checkEncodeValueWithStandard(t, arr, nil)
 	})
 	debug.FreeOSMemory()
 }

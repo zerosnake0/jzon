@@ -44,7 +44,7 @@ func testStreamer(t *testing.T, exp string, cb func(s *Streamer)) {
 	testStreamerWithEncoder(t, DefaultEncoder, exp, cb)
 }
 
-func jsonMarshal(o interface{}) (buf []byte, err error) {
+func jsonMarshal(o interface{}, jsonOpt func(*json.Encoder)) (_ []byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			if err == nil {
@@ -52,8 +52,15 @@ func jsonMarshal(o interface{}) (buf []byte, err error) {
 			}
 		}
 	}()
-	buf, err = json.Marshal(o)
-	return
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	if jsonOpt != nil {
+		jsonOpt(enc)
+	}
+	if err = enc.Encode(o); err != nil {
+		return
+	}
+	return buf.Bytes(), nil
 }
 
 func jsonEqual(t *testing.T, s1, s2 []byte) {
@@ -74,9 +81,23 @@ func jsonEqual(t *testing.T, s1, s2 []byte) {
 		exp, got)
 }
 
-func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb func(s *Streamer),
+var (
+	testNoEscapeEncoder = NewEncoder(&EncoderOption{
+		EscapeHTML: false,
+	})
+)
+
+func checkEncodeWithStandard(t *testing.T, obj interface{}, cb func(s *Streamer),
 	expErr interface{}) {
-	buf, err := jsonMarshal(obj)
+	checkEncodeWithStandardInternal(t, nil, DefaultEncoder, obj, cb, expErr)
+	checkEncodeWithStandardInternal(t, func(encoder *json.Encoder) {
+		encoder.SetEscapeHTML(false)
+	}, testNoEscapeEncoder, obj, cb, expErr)
+}
+
+func checkEncodeWithStandardInternal(t *testing.T, jsonOpt func(*json.Encoder), enc *Encoder, obj interface{},
+	cb func(s *Streamer), expErr interface{}) {
+	buf, err := jsonMarshal(obj, jsonOpt)
 	require.Equal(t, expErr == nil, err == nil, "\nexp: %v\ngot: %v",
 		expErr, err)
 
@@ -128,9 +149,9 @@ func checkEncodeWithStandard(t *testing.T, enc *Encoder, obj interface{}, cb fun
 	}
 }
 
-func checkEncodeValueWithStandard(t *testing.T, enc *Encoder, obj interface{},
+func checkEncodeValueWithStandard(t *testing.T, obj interface{},
 	expErr interface{}) {
-	checkEncodeWithStandard(t, enc, obj, func(s *Streamer) {
+	checkEncodeWithStandard(t, obj, func(s *Streamer) {
 		s.Value(obj)
 	}, expErr)
 }
