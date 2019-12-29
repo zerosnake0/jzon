@@ -1,7 +1,9 @@
 # Feature
 
 - [x] Skip object
-- [ ] Support other tag than `json`
+- [x] Support other tag than `json`
+- [ ] tag option `quoted`
+- [ ] tag option `omitempty`
 
 # Improvement
 

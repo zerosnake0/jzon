@@ -74,7 +74,7 @@ func (enc *structEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 		for _, offset := range fi.offsets[1:] {
 			curPtr = *(*unsafe.Pointer)(curPtr)
 			if curPtr == nil {
-				broken = true // the embedded field is nil
+				broken = true // the embedded pointer field is nil
 				break
 			}
 			curPtr = add(curPtr, offset, "struct field")

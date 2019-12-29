@@ -248,7 +248,11 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				fiRType := rtypeOfType(fi.ptrType.Elem())
 				x.encoder.fields.add(fi, enc.escapeHtml, internalCache[fiRType])
 			}
-			cache[rType] = x.encoder
+			if ifaceIndir(rType) {
+				cache[rType] = x.encoder
+			} else {
+				cache[rType] = &directEncoder{x.encoder}
+			}
 		}
 	}
 }

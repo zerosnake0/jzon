@@ -5,7 +5,45 @@ import (
 )
 
 func TestValEncoder_Native_Struct_Complex_OneField(t *testing.T) {
-
+	t.Run("field indirect", func(t *testing.T) {
+		type st struct {
+			A int
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+			A: 1,
+		}, nil)
+	})
+	t.Run("field direct", func(t *testing.T) {
+		type st struct {
+			A *int
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+			A: nil,
+		}, nil)
+	})
+	t.Run("direct (array)", func(t *testing.T) {
+		type st struct {
+			A [1]*int
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+			A: [1]*int{nil},
+		}, nil)
+		i := 1
+		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+			A: [1]*int{&i},
+		}, nil)
+	})
+	t.Run("direct map", func(t *testing.T) {
+		type st struct {
+			A map[int]int
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+			A: nil,
+		}, nil)
+		checkEncodeValueWithStandard(t, DefaultEncoder, st{
+			A: map[int]int{1: 2},
+		}, nil)
+	})
 }
 
 func TestValEncoder_Native_Struct_Complex_MultipleField(t *testing.T) {
@@ -43,6 +81,10 @@ func TestValEncoder_Native_Struct_Complex_MultipleField(t *testing.T) {
 			*inner
 			C int
 		}
+		type outer2 struct {
+			inner
+			C int
+		}
 		checkEncodeValueWithStandard(t, DefaultEncoder, outer{
 			inner: nil,
 			C:     1,
@@ -54,6 +96,14 @@ func TestValEncoder_Native_Struct_Complex_MultipleField(t *testing.T) {
 			},
 			C: 3,
 		}, nil)
+		checkEncodeValueWithStandard(t, DefaultEncoder, outer2{}, nil)
+	})
+	t.Run("pointer field", func(t *testing.T) {
+		type st struct {
+			A *int
+			B *int
+		}
+		checkEncodeValueWithStandard(t, DefaultEncoder, st{}, nil)
 	})
 }
 
