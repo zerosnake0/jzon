@@ -21,7 +21,11 @@ func init() {
 	readFunctions['{'] = readObjectWithStack
 	for _, c := range []byte("-0123456789") {
 		readFunctions[c] = func(it *Iterator, c byte) (interface{}, error) {
-			return it.readFloat64(c)
+			if it.decoder.useNumber {
+				return it.readNumberAsString(c)
+			} else {
+				return it.readFloat64(c)
+			}
 		}
 	}
 	errFunc := func(it *Iterator, c byte) (interface{}, error) {

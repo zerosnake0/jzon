@@ -24,6 +24,8 @@ type DecoderOption struct {
 	Tag string
 
 	OnlyTaggedField bool
+
+	UseNumber bool
 }
 
 type decoderCache = map[rtype]ValDecoder
@@ -35,6 +37,7 @@ type Decoder struct {
 	caseSensitive   bool
 	tag             string
 	onlyTaggedField bool
+	useNumber       bool
 }
 
 func NewDecoder(opt *DecoderOption) *Decoder {
@@ -52,6 +55,7 @@ func NewDecoder(opt *DecoderOption) *Decoder {
 			dec.tag = opt.Tag
 		}
 		dec.onlyTaggedField = opt.OnlyTaggedField
+		dec.useNumber = opt.UseNumber
 	}
 	dec.decoderCache.Store(cache)
 	return &dec

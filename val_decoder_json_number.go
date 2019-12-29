@@ -25,7 +25,7 @@ func (*jsonNumberDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		it.head += 1
 		return it.expectBytes("ull")
 	case NumberValue:
-		// do not increase it.head here
+		it.head += 1
 		s, err = it.readNumberAsString(c)
 		if err != nil {
 			return err
