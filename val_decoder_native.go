@@ -8,7 +8,7 @@ import (
 type boolDecoder struct {
 }
 
-func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -40,7 +40,7 @@ func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type stringDecoder struct {
 }
 
-func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err

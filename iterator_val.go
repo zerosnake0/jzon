@@ -18,5 +18,5 @@ func (it *Iterator) ReadVal(obj interface{}) error {
 		}
 		dec = it.decoder.createDecoder(eface.rtype, typ)
 	}
-	return dec.Decode(eface.data, it)
+	return dec.Decode(eface.data, it, nil)
 }

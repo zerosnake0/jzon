@@ -71,7 +71,7 @@ func (dec *Decoder) newStructDecoder(typ reflect.Type) *structDecoderBuilder {
 	}
 }
 
-func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator) (err error) {
+func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (err error) {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -113,7 +113,10 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator) (err error) {
 				}
 				curPtr = add(curPtr, offset, "struct field")
 			}
-			if err = stField.decoder.Decode(curPtr, it); err != nil {
+			opt := DecOpts{
+				Quoted: stField.quoted,
+			}
+			if err = stField.decoder.Decode(curPtr, it, &opt); err != nil {
 				return err
 			}
 		} else {

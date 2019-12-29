@@ -131,8 +131,13 @@ func TestValEncoder_Native_Struct_Complex_MultipleField(t *testing.T) {
 			U32  uint32  `json:",string"`
 			U64  uint64  `json:",string"`
 			Uptr uintptr `json:",string"`
+			PI8  *int8   `json:",string"`
 		}
 		checkEncodeValueWithStandard(t, st{}, nil)
+		i8 := int8(1)
+		checkEncodeValueWithStandard(t, st{
+			PI8: &i8,
+		}, nil)
 	})
 }
 

@@ -28,7 +28,7 @@ func (dec *efaceDecoder) checkLoop(ptr unsafe.Pointer, it *Iterator) bool {
 	return uptr != it.lastEfacePtr
 }
 
-func (dec *efaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (dec *efaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	// one risk here is that we may enter an infinite loop which
 	// will cause stack overflow:
 	//   var o interface{}
@@ -114,7 +114,7 @@ func (dec *efaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type ifaceDecoder struct {
 }
 
-func (dec *ifaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (dec *ifaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err

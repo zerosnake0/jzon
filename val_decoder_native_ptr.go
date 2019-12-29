@@ -25,7 +25,7 @@ type pointerDecoder struct {
 	elemDec ValDecoder
 }
 
-func (dec *pointerDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (dec *pointerDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -44,7 +44,7 @@ func (dec *pointerDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		} else {
 			tgtPtr = elemPtr
 		}
-		if err = dec.elemDec.Decode(tgtPtr, it); err != nil {
+		if err = dec.elemDec.Decode(tgtPtr, it, opts); err != nil {
 			return err
 		}
 		if elemPtr == nil {

@@ -87,12 +87,16 @@ func init() {
 	}
 }
 
+type DecOpts struct {
+	Quoted bool
+}
+
 type ValDecoder interface {
-	Decode(ptr unsafe.Pointer, it *Iterator) error
+	Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error
 }
 
 type notSupportedDecoder string
 
-func (dec notSupportedDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (dec notSupportedDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	return TypeNotSupportedError(dec)
 }

@@ -12,7 +12,7 @@ var (
 
 type textUnmarshalerDecoder rtype
 
-func (dec textUnmarshalerDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (dec textUnmarshalerDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	obj := packEFace(rtype(dec), ptr)
 	unmarshaler := obj.(encoding.TextUnmarshaler)
 	c, _, err := it.nextToken()

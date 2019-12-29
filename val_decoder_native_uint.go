@@ -8,7 +8,7 @@ import (
 type uint8Decoder struct {
 }
 
-func (*uint8Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*uint8Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func (*uint8Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type uint16Decoder struct {
 }
 
-func (*uint16Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*uint16Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func (*uint16Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type uint32Decoder struct {
 }
 
-func (*uint32Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*uint32Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func (*uint32Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type uint64Decoder struct {
 }
 
-func (*uint64Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*uint64Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err

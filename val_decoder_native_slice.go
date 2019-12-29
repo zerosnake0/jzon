@@ -33,7 +33,7 @@ type sliceDecoder struct {
 	elemDec ValDecoder
 }
 
-func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -86,7 +86,7 @@ func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 			newPtr = unsafeGrowSlice(dec.rtype, dec.elemRType, newPtr, length)
 			// must get the address every time
 			childPtr := unsafeSliceChildPtr(newPtr, dec.elemSize, length-1)
-			if err = dec.elemDec.Decode(childPtr, it); err != nil {
+			if err = dec.elemDec.Decode(childPtr, it, nil); err != nil {
 				return err
 			}
 			c, _, err = it.nextToken()

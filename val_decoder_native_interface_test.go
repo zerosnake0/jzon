@@ -309,7 +309,7 @@ func TestValDecoder_Native_Interface(t *testing.T) {
 type testIfaceDecoder struct {
 }
 
-func (*testIfaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*testIfaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	o, err := it.Read()
 	if err != nil {
 		return err
