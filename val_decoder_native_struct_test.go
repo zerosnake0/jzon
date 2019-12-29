@@ -330,3 +330,29 @@ func TestValDecoder_Native_Struct_DisallowUnknownFields(t *testing.T) {
 		require.IsType(t, UnknownFieldError(""), err)
 	})
 }
+
+func TestValDecoder_Native_Struct_Quoted(t *testing.T) {
+	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+	}
+	t.Run("int8", func(t *testing.T) {
+		t.Run("leading space", func(t *testing.T) {
+			type st struct {
+				A int8 `json:",string"`
+			}
+			f(t, `{"a":" 1"}`, InvalidDigitError{}, &st{}, &st{})
+		})
+		t.Run("trailing space", func(t *testing.T) {
+			type st struct {
+				A int8 `json:",string"`
+			}
+			f(t, `{"a":"1 "}`, UnexpectedByteError{}, &st{}, &st{})
+		})
+		t.Run("ok", func(t *testing.T) {
+			type st struct {
+				A int8 `json:",string"`
+			}
+			f(t, `{"a":"1"}`, nil, &st{}, &st{})
+		})
+	})
+}

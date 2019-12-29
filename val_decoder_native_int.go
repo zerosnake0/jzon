@@ -8,7 +8,7 @@ import (
 type int8Decoder struct {
 }
 
-func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
+func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -17,9 +17,31 @@ func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 		it.head += 1
 		return it.expectBytes("ull")
 	}
-	i, err := it.ReadInt8()
+	quoted := (opts != nil) && opts.Quoted
+	if quoted {
+		if c != '"' {
+			return UnexpectedByteError{got: c, exp: '"'}
+		}
+		it.head += 1
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+	}
+	it.head += 1
+	i, err := it.readInt8(c)
 	if err != nil {
 		return err
+	}
+	if quoted {
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+		if c != '"' {
+			return UnexpectedByteError{got: c, exp: '"'}
+		}
+		it.head += 1
 	}
 	*(*int8)(ptr) = i
 	return nil
