@@ -220,7 +220,7 @@ func TestValDecoder_Native_Struct_Nested(t *testing.T) {
 	debug.FreeOSMemory()
 }
 
-func TestValDedocer_Native_Struct_Tag(t *testing.T) {
+func TestValDecoder_Native_Struct_CustomTag(t *testing.T) {
 	decoder := NewDecoder(&DecoderOption{
 		Tag: "jzon",
 	})
