@@ -7,6 +7,7 @@ import (
 
 type sliceEncoderBuilder struct {
 	encoder   *sliceEncoder
+	elemType  reflect.Type
 	elemRType rtype
 }
 
@@ -16,6 +17,7 @@ func newSliceEncoder(typ reflect.Type) *sliceEncoderBuilder {
 		encoder: &sliceEncoder{
 			elemSize: elemType.Size(),
 		},
+		elemType:  elemType,
 		elemRType: rtypeOfType(elemType),
 	}
 }
@@ -25,7 +27,7 @@ type sliceEncoder struct {
 	elemEncoder ValEncoder
 }
 
-func (enc *sliceEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (enc *sliceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {
 	if s.Error != nil {
 		return
 	}
@@ -45,7 +47,7 @@ func (enc *sliceEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	s.ArrayStart()
 	curPtr := sh.Data
 	for i := 0; i < sh.Len; i++ {
-		enc.elemEncoder.Encode(unsafe.Pointer(curPtr), s)
+		enc.elemEncoder.Encode(unsafe.Pointer(curPtr), s, nil)
 		if s.Error != nil {
 			return
 		}

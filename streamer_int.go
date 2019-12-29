@@ -48,12 +48,34 @@ func appendInt8(b []byte, v int8) []byte {
 	}
 }
 
+func (s *Streamer) quotedInt8(v int8) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	s.onVal()
+	s.buffer = append(s.buffer, '"')
+	s.buffer = appendInt8(s.buffer, v)
+	s.buffer = append(s.buffer, '"')
+	return s
+}
+
 func (s *Streamer) Int8(v int8) *Streamer {
 	if s.Error != nil {
 		return s
 	}
 	s.onVal()
 	s.buffer = appendInt8(s.buffer, v)
+	return s
+}
+
+func (s *Streamer) quotedUint8(v uint8) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	s.onVal()
+	s.buffer = append(s.buffer, '"')
+	s.buffer = appendUint8(s.buffer, v)
+	s.buffer = append(s.buffer, '"')
 	return s
 }
 
@@ -85,12 +107,34 @@ func appendInt16(b []byte, v int16) []byte {
 	}
 }
 
+func (s *Streamer) quotedInt16(v int16) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	s.onVal()
+	s.buffer = append(s.buffer, '"')
+	s.buffer = appendInt16(s.buffer, v)
+	s.buffer = append(s.buffer, '"')
+	return s
+}
+
 func (s *Streamer) Int16(v int16) *Streamer {
 	if s.Error != nil {
 		return s
 	}
 	s.onVal()
 	s.buffer = appendInt16(s.buffer, v)
+	return s
+}
+
+func (s *Streamer) quotedUint16(v uint16) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	s.onVal()
+	s.buffer = append(s.buffer, '"')
+	s.buffer = appendUint16(s.buffer, v)
+	s.buffer = append(s.buffer, '"')
 	return s
 }
 
@@ -137,12 +181,34 @@ func appendInt32(b []byte, v int32) []byte {
 	}
 }
 
+func (s *Streamer) quotedInt32(v int32) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	s.onVal()
+	s.buffer = append(s.buffer, '"')
+	s.buffer = appendInt32(s.buffer, v)
+	s.buffer = append(s.buffer, '"')
+	return s
+}
+
 func (s *Streamer) Int32(v int32) *Streamer {
 	if s.Error != nil {
 		return s
 	}
 	s.onVal()
 	s.buffer = appendInt32(s.buffer, v)
+	return s
+}
+
+func (s *Streamer) quotedUint32(v uint32) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	s.onVal()
+	s.buffer = append(s.buffer, '"')
+	s.buffer = appendUint32(s.buffer, v)
+	s.buffer = append(s.buffer, '"')
 	return s
 }
 
@@ -210,12 +276,34 @@ func appendInt64(b []byte, v int64) []byte {
 	}
 }
 
+func (s *Streamer) quotedInt64(v int64) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	s.onVal()
+	s.buffer = append(s.buffer, '"')
+	s.buffer = appendInt64(s.buffer, v)
+	s.buffer = append(s.buffer, '"')
+	return s
+}
+
 func (s *Streamer) Int64(v int64) *Streamer {
 	if s.Error != nil {
 		return s
 	}
 	s.onVal()
 	s.buffer = appendInt64(s.buffer, v)
+	return s
+}
+
+func (s *Streamer) quotedUint64(v uint64) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	s.onVal()
+	s.buffer = append(s.buffer, '"')
+	s.buffer = appendUint64(s.buffer, v)
+	s.buffer = append(s.buffer, '"')
 	return s
 }
 

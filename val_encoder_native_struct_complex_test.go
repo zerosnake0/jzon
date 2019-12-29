@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"encoding/json"
 	"testing"
 )
 
@@ -102,6 +103,34 @@ func TestValEncoder_Native_Struct_Complex_MultipleField(t *testing.T) {
 		type st struct {
 			A *int
 			B *int
+		}
+		checkEncodeValueWithStandard(t, st{}, nil)
+	})
+	t.Run("pointer field 2", func(t *testing.T) {
+		type st struct {
+			A *json.Marshaler
+			B *interface{}
+		}
+		checkEncodeValueWithStandard(t, st{}, nil)
+	})
+	t.Run("float field", func(t *testing.T) {
+		type st struct {
+			A float32
+			B float64
+		}
+		checkEncodeValueWithStandard(t, st{}, nil)
+	})
+	t.Run("quoted", func(t *testing.T) {
+		type st struct {
+			I8   int8    `json:",string"`
+			I16  int16   `json:",string"`
+			I32  int32   `json:",string"`
+			I64  int64   `json:",string"`
+			U8   uint8   `json:",string"`
+			U16  uint16  `json:",string"`
+			U32  uint32  `json:",string"`
+			U64  uint64  `json:",string"`
+			Uptr uintptr `json:",string"`
 		}
 		checkEncodeValueWithStandard(t, st{}, nil)
 	})

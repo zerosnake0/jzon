@@ -8,7 +8,7 @@ import (
 // special array (empty)
 type emptyArrayEncoder struct{}
 
-func (enc *emptyArrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (enc *emptyArrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return
@@ -38,7 +38,7 @@ type arrayEncoder struct {
 	length   int
 }
 
-func (enc *arrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (enc *arrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return
@@ -46,7 +46,7 @@ func (enc *arrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	s.ArrayStart()
 	i := 0
 	for {
-		enc.encoder.Encode(ptr, s)
+		enc.encoder.Encode(ptr, s, nil)
 		if s.Error != nil {
 			return
 		}

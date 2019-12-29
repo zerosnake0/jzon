@@ -7,7 +7,7 @@ import (
 type jsonNumberEncoder struct {
 }
 
-func (*jsonNumberEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (*jsonNumberEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	str := *(*string)(ptr)
 	if str == "" {
 		str = "0"

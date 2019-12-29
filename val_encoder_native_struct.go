@@ -57,7 +57,7 @@ type structEncoder struct {
 	fields encoderFields
 }
 
-func (enc *structEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (enc *structEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}
@@ -81,7 +81,10 @@ func (enc *structEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 		}
 		if !broken {
 			s.RawField(fi.rawField)
-			fi.encoder.Encode(curPtr, s)
+			opt := EncOpts{
+				Quoted: fi.quoted,
+			}
+			fi.encoder.Encode(curPtr, s, &opt)
 			if s.Error != nil {
 				return
 			}
@@ -94,7 +97,7 @@ func (enc *structEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 type emptyStructEncoder struct {
 }
 
-func (enc *emptyStructEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (enc *emptyStructEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return

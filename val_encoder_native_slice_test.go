@@ -10,7 +10,7 @@ import (
 func TestValEncoder_Slice_Error(t *testing.T) {
 	t.Run("chain error", func(t *testing.T) {
 		testStreamerChainError(t, func(s *Streamer) {
-			(*sliceEncoder)(nil).Encode(nil, s)
+			(*sliceEncoder)(nil).Encode(nil, s, nil)
 		})
 	})
 	t.Run("error", func(t *testing.T) {

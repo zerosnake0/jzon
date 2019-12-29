@@ -19,6 +19,6 @@ func (s *Streamer) Value(obj interface{}) *Streamer {
 		typ := reflect.TypeOf(obj)
 		enc = s.encoder.createEncoder(eface.rtype, typ)
 	}
-	enc.Encode(eface.data, s)
+	enc.Encode(eface.data, s, nil)
 	return s
 }

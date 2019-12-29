@@ -11,12 +11,12 @@ import (
 func TestValEncoder_TextMarshaler_ChainError(t *testing.T) {
 	t.Run("direct", func(t *testing.T) {
 		testStreamerChainError(t, func(s *Streamer) {
-			textMarshalerEncoder(0).Encode(nil, s)
+			textMarshalerEncoder(0).Encode(nil, s, nil)
 		})
 	})
 	t.Run("dynamic", func(t *testing.T) {
 		testStreamerChainError(t, func(s *Streamer) {
-			(*dynamicTextMarshalerEncoder)(nil).Encode(nil, s)
+			(*dynamicTextMarshalerEncoder)(nil).Encode(nil, s, nil)
 		})
 	})
 }

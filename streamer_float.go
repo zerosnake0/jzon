@@ -18,6 +18,7 @@ func (s *Streamer) Float32(f float32) *Streamer {
 		s.Error = FloatIsNan
 		return s
 	}
+	s.onVal()
 	fmt := byte('f')
 	abs := math.Abs(f64)
 	if abs != 0 {
@@ -56,6 +57,7 @@ func (s *Streamer) Float64(f float64) *Streamer {
 		s.Error = FloatIsNan
 		return s
 	}
+	s.onVal()
 	fmt := byte('f')
 	abs := math.Abs(f)
 	if abs != 0 {

@@ -12,7 +12,7 @@ var (
 
 type textMarshalerEncoder rtype
 
-func (enc textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (enc textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}
@@ -32,7 +32,7 @@ func (enc textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 
 type dynamicTextMarshalerEncoder struct{}
 
-func (*dynamicTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (*dynamicTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}

@@ -90,13 +90,17 @@ func init() {
 	}
 }
 
+type EncOpts struct {
+	Quoted bool
+}
+
 type ValEncoder interface {
-	Encode(ptr unsafe.Pointer, s *Streamer)
+	Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts)
 }
 
 type notSupportedEncoder string
 
-func (enc notSupportedEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (enc notSupportedEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}

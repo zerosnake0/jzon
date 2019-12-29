@@ -21,10 +21,10 @@ type pointerEncoder struct {
 	encoder ValEncoder
 }
 
-func (enc *pointerEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (enc *pointerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return
 	}
-	enc.encoder.Encode(*(*unsafe.Pointer)(ptr), s)
+	enc.encoder.Encode(*(*unsafe.Pointer)(ptr), s, opts)
 }

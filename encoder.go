@@ -215,7 +215,24 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			cache[rType] = v
 		}
 	}
-	// rebuild some encoders
+	// rebuild base64 encoders
+	for rType, builder := range rebuildMap {
+		switch x := builder.(type) {
+		case *sliceEncoderBuilder:
+			if x.elemType.Kind() != reflect.Uint8 {
+				continue
+			}
+			elemEncoder := internalCache[x.elemRType]
+			if elemEncoder != (*uint8Encoder)(nil) {
+				continue
+			}
+			v := (*base64Encoder)(nil)
+			internalCache[rType] = v
+			cache[rType] = v
+			delete(rebuildMap, rType)
+		}
+	}
+	// rebuild other encoders
 	for rType, builder := range rebuildMap {
 		switch x := builder.(type) {
 		case *pointerEncoderBuilder:

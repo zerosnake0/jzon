@@ -27,12 +27,12 @@ func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
 func TestValEncoder_JsonMarshaler_Error(t *testing.T) {
 	t.Run("chain error", func(t *testing.T) {
 		testStreamerChainError(t, func(s *Streamer) {
-			jsonMarshalerEncoder(0).Encode(nil, s)
+			jsonMarshalerEncoder(0).Encode(nil, s, nil)
 		})
 	})
 	t.Run("chain error (dynamic)", func(t *testing.T) {
 		testStreamerChainError(t, func(s *Streamer) {
-			(*dynamicJsonMarshalerEncoder)(nil).Encode(nil, s)
+			(*dynamicJsonMarshalerEncoder)(nil).Encode(nil, s, nil)
 		})
 	})
 }

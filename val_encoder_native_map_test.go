@@ -11,7 +11,7 @@ import (
 func TestValEncoder_Map_Error(t *testing.T) {
 	t.Run("chain error", func(t *testing.T) {
 		testStreamerChainError(t, func(s *Streamer) {
-			(*directMapEncoder)(nil).Encode(nil, s)
+			(*directMapEncoder)(nil).Encode(nil, s, nil)
 		})
 	})
 	t.Run("element error", func(t *testing.T) {

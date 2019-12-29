@@ -7,7 +7,7 @@ import (
 // bool encoder
 type boolEncoder struct{}
 
-func (*boolEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (*boolEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return
@@ -18,7 +18,7 @@ func (*boolEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 // string encoder
 type stringEncoder struct{}
 
-func (*stringEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (*stringEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return

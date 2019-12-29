@@ -7,7 +7,7 @@ import (
 // float32 encoder
 type float32Encoder struct{}
 
-func (*float32Encoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (*float32Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return
@@ -18,7 +18,7 @@ func (*float32Encoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 // float64 encoder
 type float64Encoder struct{}
 
-func (*float64Encoder) Encode(ptr unsafe.Pointer, s *Streamer) {
+func (*float64Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return

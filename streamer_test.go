@@ -74,9 +74,9 @@ func jsonEqual(t *testing.T, s1, s2 []byte) {
 		err    error
 	)
 	err = json.Unmarshal(s1, &o1)
-	require.NoError(t, err)
+	require.NoError(t, err, "err: %s", s1)
 	err = json.Unmarshal(s2, &o2)
-	require.NoError(t, err)
+	require.NoErrorf(t, err, "err: %s", s2)
 	require.Equal(t, o1, o2, "expecting %s but got %s",
 		exp, got)
 }
