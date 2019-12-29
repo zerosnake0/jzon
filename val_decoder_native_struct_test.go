@@ -280,3 +280,53 @@ func TestValDecoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 		f(t, `{"a":1}`, NilEmbeddedPointerError, &outer{}, &outer{})
 	})
 }
+
+func TestValDecoder_Native_Struct_DisallowUnknownFields(t *testing.T) {
+	dec := NewDecoder(&DecoderOption{
+		DisallowUnknownFields: true,
+	})
+	t.Run("zero field (eof)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte(""), &st)
+		require.Equal(t, io.EOF, err)
+	})
+	t.Run("zero field (invalid)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte("["), &st)
+		require.IsType(t, UnexpectedByteError{}, err)
+	})
+	t.Run("zero field (null)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte("null"), &st)
+		require.NoError(t, err)
+	})
+	t.Run("zero field (eof after bracket)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte("{"), &st)
+		require.Equal(t, io.EOF, err)
+	})
+	t.Run("zero field (non empty)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte(`{"a":1}`), &st)
+		require.IsType(t, UnexpectedByteError{}, err)
+	})
+	t.Run("zero field (empty)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte(` { } `), &st)
+		require.NoError(t, err)
+	})
+	t.Run("one field (empty)", func(t *testing.T) {
+		var st struct {
+			A int
+		}
+		err := dec.Unmarshal([]byte(` { } `), &st)
+		require.NoError(t, err)
+	})
+	t.Run("one field (empty)", func(t *testing.T) {
+		var st struct {
+			A int
+		}
+		err := dec.Unmarshal([]byte(` { "b" : 1 } `), &st)
+		require.IsType(t, UnknownFieldError(""), err)
+	})
+}

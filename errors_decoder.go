@@ -101,3 +101,10 @@ type TypeNotSupportedError string
 func (e TypeNotSupportedError) Error() string {
 	return fmt.Sprintf("%q is not supported", string(e))
 }
+
+// UnknownField
+type UnknownFieldError string
+
+func (e UnknownFieldError) Error() string {
+	return fmt.Sprintf("unknown field %q", string(e))
+}

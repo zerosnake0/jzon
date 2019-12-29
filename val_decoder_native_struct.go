@@ -117,6 +117,9 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator) (err error) {
 				return err
 			}
 		} else {
+			if it.decoder.disallowUnknownFields {
+				return UnknownFieldError(field)
+			}
 			if err = it.Skip(); err != nil {
 				return err
 			}

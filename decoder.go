@@ -26,6 +26,8 @@ type DecoderOption struct {
 	OnlyTaggedField bool
 
 	UseNumber bool
+
+	DisallowUnknownFields bool
 }
 
 type decoderCache = map[rtype]ValDecoder
@@ -34,10 +36,11 @@ type Decoder struct {
 	cacheMu      sync.Mutex
 	decoderCache atomic.Value
 
-	caseSensitive   bool
-	tag             string
-	onlyTaggedField bool
-	useNumber       bool
+	caseSensitive         bool
+	tag                   string
+	onlyTaggedField       bool
+	useNumber             bool
+	disallowUnknownFields bool
 }
 
 func NewDecoder(opt *DecoderOption) *Decoder {
@@ -56,6 +59,7 @@ func NewDecoder(opt *DecoderOption) *Decoder {
 		}
 		dec.onlyTaggedField = opt.OnlyTaggedField
 		dec.useNumber = opt.UseNumber
+		dec.disallowUnknownFields = opt.DisallowUnknownFields
 	}
 	dec.decoderCache.Store(cache)
 	return &dec
@@ -145,7 +149,11 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate ...r
 			w := dec.newStructDecoder(elem)
 			if w == nil {
 				// no field to unmarshal
-				cache[rType] = (*skipDecoder)(nil)
+				if dec.disallowUnknownFields {
+					cache[rType] = (*emptyObjectDecoder)(nil)
+				} else {
+					cache[rType] = (*skipDecoder)(nil)
+				}
 			} else {
 				for i := range w.fields.list {
 					fi := &w.fields.list[i]

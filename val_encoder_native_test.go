@@ -1,9 +1,12 @@
 package jzon
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"unsafe"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestValEncoder_Bool(t *testing.T) {
@@ -102,5 +105,14 @@ func TestValEncoder_String(t *testing.T) {
 	t.Run("unicode", func(t *testing.T) {
 		s := "\xe6\x97\xa5\xe6\x9c\xac\xff\xaa\x9e"
 		checkEncodeValueWithStandard(t, s, nil)
+	})
+	t.Run("invalid unicode", func(t *testing.T) {
+		s := `"invalid: \uD834x\uDD1E"`
+		var s2 string
+		err := json.Unmarshal([]byte(s), &s2)
+		require.NoError(t, err)
+		b, err := json.Marshal(s2)
+		require.NoError(t, err)
+		checkEncodeValueWithStandard(t, string(b), nil)
 	})
 }

@@ -3,6 +3,7 @@
 - [x] Skip object
 - [x] Support other tag than `json`
 - [x] Decoder option `UseNumber`
+- [x] Decoder option `DisallowUnknownFields`
 - [ ] tag option `quoted`
 - [ ] tag option `omitempty`
 

@@ -4,8 +4,7 @@ import (
 	"unsafe"
 )
 
-type skipDecoder struct {
-}
+type skipDecoder struct{}
 
 func (*skipDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 	c, _, err := it.nextToken()
@@ -17,4 +16,30 @@ func (*skipDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		return UnexpectedByteError{got: c, exp: '{', exp2: 'n'}
 	}
 	return skipFunctions[c](it, c)
+}
+
+type emptyObjectDecoder struct{}
+
+func (*emptyObjectDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+	c, _, err := it.nextToken()
+	if err != nil {
+		return err
+	}
+	it.head += 1
+	switch c {
+	case 'n':
+		return it.expectBytes("ull")
+	case '{':
+		c, _, err := it.nextToken()
+		if err != nil {
+			return err
+		}
+		it.head += 1
+		if c != '}' {
+			return UnexpectedByteError{got: c, exp: '}'}
+		}
+		return nil
+	default:
+		return UnexpectedByteError{got: c, exp: '{', exp2: 'n'}
+	}
 }
