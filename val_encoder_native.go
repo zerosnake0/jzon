@@ -23,5 +23,17 @@ func (*stringEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 		s.Null()
 		return
 	}
-	s.String(*(*string)(ptr))
+	quoted := (opts != nil) && opts.Quoted
+	if !quoted {
+		s.String(*(*string)(ptr))
+		return
+	}
+	subStream := s.encoder.NewStreamer()
+	defer s.encoder.ReturnStreamer(subStream)
+	subStream.String(*(*string)(ptr))
+	if subStream.Error != nil {
+		s.Error = subStream.Error
+		return
+	}
+	s.String(localByteToString(subStream.buffer))
 }
