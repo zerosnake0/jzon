@@ -152,6 +152,12 @@ func TestValDecoder_Native_Map_KeyDecoder_String(t *testing.T) {
 		m2 := map[key]int{"a": 1}
 		f(t, ` { "b" : 2 } `, nil, &m1, &m2)
 	})
+	t.Run("string 2", func(t *testing.T) {
+		type key string
+		m1 := map[key]int{"a": 1}
+		m2 := map[key]int{"a": 1}
+		f(t, ` { "\"" : 2 } `, nil, &m1, &m2)
+	})
 }
 
 func TestValDecoder_Native_Map_KeyDecoder_Int(t *testing.T) {
@@ -183,12 +189,12 @@ func TestValDecoder_Native_Map_KeyDecoder_Int(t *testing.T) {
 		t.Run("leading space", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
 			m2 := map[key]int{1: 2}
-			f(t, ` { " 2" : 3 } `, nil, &m1, &m2)
+			f(t, ` { " 2" : 3 } `, InvalidDigitError{}, &m1, &m2)
 		})
 		t.Run("trailing space", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
 			m2 := map[key]int{1: 2}
-			f(t, ` { "2 " : 3 } `, nil, &m1, &m2)
+			f(t, ` { "2 " : 3 } `, UnexpectedByteError{}, &m1, &m2)
 		})
 		t.Run("valid", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
@@ -221,12 +227,12 @@ func TestValDecoder_Native_Map_KeyDecoder_Int(t *testing.T) {
 		t.Run("leading space", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
 			m2 := map[key]int{1: 2}
-			f(t, ` { " 2" : 3 } `, nil, &m1, &m2)
+			f(t, ` { " 2" : 3 } `, InvalidDigitError{}, &m1, &m2)
 		})
 		t.Run("trailing space", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
 			m2 := map[key]int{1: 2}
-			f(t, ` { "2 " : 3 } `, nil, &m1, &m2)
+			f(t, ` { "2 " : 3 } `, UnexpectedByteError{}, &m1, &m2)
 		})
 		t.Run("valid", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
@@ -259,12 +265,12 @@ func TestValDecoder_Native_Map_KeyDecoder_Int(t *testing.T) {
 		t.Run("leading space", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
 			m2 := map[key]int{1: 2}
-			f(t, ` { " 2" : 3 } `, nil, &m1, &m2)
+			f(t, ` { " 2" : 3 } `, InvalidDigitError{}, &m1, &m2)
 		})
 		t.Run("trailing space", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
 			m2 := map[key]int{1: 2}
-			f(t, ` { "2 " : 3 } `, nil, &m1, &m2)
+			f(t, ` { "2 " : 3 } `, UnexpectedByteError{}, &m1, &m2)
 		})
 		t.Run("valid", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
@@ -297,12 +303,12 @@ func TestValDecoder_Native_Map_KeyDecoder_Int(t *testing.T) {
 		t.Run("leading space", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
 			m2 := map[key]int{1: 2}
-			f(t, ` { " 2" : 3 } `, nil, &m1, &m2)
+			f(t, ` { " 2" : 3 } `, InvalidDigitError{}, &m1, &m2)
 		})
 		t.Run("trailing space", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
 			m2 := map[key]int{1: 2}
-			f(t, ` { "2 " : 3 } `, nil, &m1, &m2)
+			f(t, ` { "2 " : 3 } `, UnexpectedByteError{}, &m1, &m2)
 		})
 		t.Run("valid", func(t *testing.T) {
 			m1 := map[key]int{1: 2}
@@ -341,12 +347,12 @@ func TestValDecoder_Native_Map_KeyDecoder_Uint(t *testing.T) {
 		t.Run("leading space", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
 			m2 := map[key]uint{1: 2}
-			f(t, ` { " 2" : 3 } `, nil, &m1, &m2)
+			f(t, ` { " 2" : 3 } `, InvalidDigitError{}, &m1, &m2)
 		})
 		t.Run("trailing space", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
 			m2 := map[key]uint{1: 2}
-			f(t, ` { "2 " : 3 } `, nil, &m1, &m2)
+			f(t, ` { "2 " : 3 } `, UnexpectedByteError{}, &m1, &m2)
 		})
 		t.Run("valid", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
@@ -379,12 +385,12 @@ func TestValDecoder_Native_Map_KeyDecoder_Uint(t *testing.T) {
 		t.Run("leading space", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
 			m2 := map[key]uint{1: 2}
-			f(t, ` { " 2" : 3 } `, nil, &m1, &m2)
+			f(t, ` { " 2" : 3 } `, InvalidDigitError{}, &m1, &m2)
 		})
 		t.Run("trailing space", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
 			m2 := map[key]uint{1: 2}
-			f(t, ` { "2 " : 3 } `, nil, &m1, &m2)
+			f(t, ` { "2 " : 3 } `, UnexpectedByteError{}, &m1, &m2)
 		})
 		t.Run("valid", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
@@ -417,12 +423,12 @@ func TestValDecoder_Native_Map_KeyDecoder_Uint(t *testing.T) {
 		t.Run("leading space", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
 			m2 := map[key]uint{1: 2}
-			f(t, ` { " 2" : 3 } `, nil, &m1, &m2)
+			f(t, ` { " 2" : 3 } `, InvalidDigitError{}, &m1, &m2)
 		})
 		t.Run("trailing space", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
 			m2 := map[key]uint{1: 2}
-			f(t, ` { "2 " : 3 } `, nil, &m1, &m2)
+			f(t, ` { "2 " : 3 } `, UnexpectedByteError{}, &m1, &m2)
 		})
 		t.Run("valid", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
@@ -455,12 +461,12 @@ func TestValDecoder_Native_Map_KeyDecoder_Uint(t *testing.T) {
 		t.Run("leading space", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
 			m2 := map[key]uint{1: 2}
-			f(t, ` { " 2" : 3 } `, nil, &m1, &m2)
+			f(t, ` { " 2" : 3 } `, InvalidDigitError{}, &m1, &m2)
 		})
 		t.Run("trailing space", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}
 			m2 := map[key]uint{1: 2}
-			f(t, ` { "2 " : 3 } `, nil, &m1, &m2)
+			f(t, ` { "2 " : 3 } `, UnexpectedByteError{}, &m1, &m2)
 		})
 		t.Run("valid", func(t *testing.T) {
 			m1 := map[key]uint{1: 2}

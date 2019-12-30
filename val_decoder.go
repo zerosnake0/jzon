@@ -64,30 +64,31 @@ func init() {
 	mapDecoderKind((*float64)(nil), (*float64Decoder)(nil))
 
 	// object key decoders
-	mapKeyDecoder((*string)(nil), (*stringKeyDecoder)(nil))
+	mapKeyDecoder((*string)(nil), (*stringDecoder)(nil))
 	if strconv.IntSize == 32 {
-		mapKeyDecoder((*int)(nil), (*int32KeyDecoder)(nil))
-		mapKeyDecoder((*uint)(nil), (*uint32KeyDecoder)(nil))
+		mapKeyDecoder((*int)(nil), (*int32Decoder)(nil))
+		mapKeyDecoder((*uint)(nil), (*uint32Decoder)(nil))
 	} else {
-		mapKeyDecoder((*int)(nil), (*int64KeyDecoder)(nil))
-		mapKeyDecoder((*uint)(nil), (*uint64KeyDecoder)(nil))
+		mapKeyDecoder((*int)(nil), (*int64Decoder)(nil))
+		mapKeyDecoder((*uint)(nil), (*uint64Decoder)(nil))
 	}
-	mapKeyDecoder((*int8)(nil), (*int8KeyDecoder)(nil))
-	mapKeyDecoder((*int16)(nil), (*int16KeyDecoder)(nil))
-	mapKeyDecoder((*int32)(nil), (*int32KeyDecoder)(nil))
-	mapKeyDecoder((*int64)(nil), (*int64KeyDecoder)(nil))
-	mapKeyDecoder((*uint8)(nil), (*uint8KeyDecoder)(nil))
-	mapKeyDecoder((*uint16)(nil), (*uint16KeyDecoder)(nil))
-	mapKeyDecoder((*uint32)(nil), (*uint32KeyDecoder)(nil))
-	mapKeyDecoder((*uint64)(nil), (*uint64KeyDecoder)(nil))
+	mapKeyDecoder((*int8)(nil), (*int8Decoder)(nil))
+	mapKeyDecoder((*int16)(nil), (*int16Decoder)(nil))
+	mapKeyDecoder((*int32)(nil), (*int32Decoder)(nil))
+	mapKeyDecoder((*int64)(nil), (*int64Decoder)(nil))
+	mapKeyDecoder((*uint8)(nil), (*uint8Decoder)(nil))
+	mapKeyDecoder((*uint16)(nil), (*uint16Decoder)(nil))
+	mapKeyDecoder((*uint32)(nil), (*uint32Decoder)(nil))
+	mapKeyDecoder((*uint64)(nil), (*uint64Decoder)(nil))
 	if unsafe.Sizeof(uintptr(0)) == 4 {
-		mapKeyDecoder((*uintptr)(nil), (*uint32KeyDecoder)(nil))
+		mapKeyDecoder((*uintptr)(nil), (*uint32Decoder)(nil))
 	} else {
-		mapKeyDecoder((*uintptr)(nil), (*uint64KeyDecoder)(nil))
+		mapKeyDecoder((*uintptr)(nil), (*uint64Decoder)(nil))
 	}
 }
 
 type DecOpts struct {
+	MapKey bool
 	Quoted bool
 }
 

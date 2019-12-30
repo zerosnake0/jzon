@@ -108,3 +108,10 @@ type UnknownFieldError string
 func (e UnknownFieldError) Error() string {
 	return fmt.Sprintf("unknown field %q", string(e))
 }
+
+// BadQuotedString
+type BadQuotedStringError string
+
+func (e BadQuotedStringError) Error() string {
+	return fmt.Sprintf("bad quoted string %q", string(e))
+}

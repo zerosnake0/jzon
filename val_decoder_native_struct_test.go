@@ -335,24 +335,93 @@ func TestValDecoder_Native_Struct_Quoted(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
 		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
-	t.Run("int8", func(t *testing.T) {
+	t.Run("string", func(t *testing.T) {
+		type st struct {
+			A string `json:",string"`
+		}
+		f2 := func(t *testing.T, data string, ex error) {
+			f(t, data, ex, &st{A: "test"}, &st{A: "test"})
+		}
+		t.Run("null", func(t *testing.T) {
+			f2(t, `{"a":null}`, nil)
+		})
+		t.Run("null string", func(t *testing.T) {
+			f2(t, `{"a":"null"}`, nil)
+		})
 		t.Run("leading space", func(t *testing.T) {
-			type st struct {
-				A int8 `json:",string"`
-			}
-			f(t, `{"a":" 1"}`, InvalidDigitError{}, &st{}, &st{})
+			f2(t, `{"a":" 1"}`, BadQuotedStringError(""))
 		})
 		t.Run("trailing space", func(t *testing.T) {
-			type st struct {
-				A int8 `json:",string"`
-			}
-			f(t, `{"a":"1 "}`, UnexpectedByteError{}, &st{}, &st{})
+			f2(t, `{"a":"1 "}`, BadQuotedStringError(""))
+		})
+		t.Run("empty", func(t *testing.T) {
+			f2(t, `{"a":""}`, BadQuotedStringError(""))
+		})
+		t.Run("not string", func(t *testing.T) {
+			f2(t, `{"a":"1"}`, BadQuotedStringError(""))
+		})
+		t.Run("bad string", func(t *testing.T) {
+			f2(t, `{"a":"\"\"\""}`, BadQuotedStringError(""))
 		})
 		t.Run("ok", func(t *testing.T) {
-			type st struct {
-				A int8 `json:",string"`
-			}
-			f(t, `{"a":"1"}`, nil, &st{}, &st{})
+			f2(t, `{"a":"\"null\""}`, nil)
+		})
+	})
+	t.Run("int", func(t *testing.T) {
+		type stI8 struct {
+			A int8 `json:",string"`
+		}
+		type stI16 struct {
+			A int16 `json:",string"`
+		}
+		type stI32 struct {
+			A int32 `json:",string"`
+		}
+		type stI64 struct {
+			A int64 `json:",string"`
+		}
+		type stU8 struct {
+			A uint8 `json:",string"`
+		}
+		type stU16 struct {
+			A uint16 `json:",string"`
+		}
+		type stU32 struct {
+			A uint32 `json:",string"`
+		}
+		type stU64 struct {
+			A uint64 `json:",string"`
+		}
+		f2 := func(t *testing.T, data string, ex error) {
+			f(t, data, ex, &stI8{A: 2}, &stI8{A: 2})
+			f(t, data, ex, &stI16{A: 2}, &stI16{A: 2})
+			f(t, data, ex, &stI32{A: 2}, &stI32{A: 2})
+			f(t, data, ex, &stI64{A: 2}, &stI64{A: 2})
+			f(t, data, ex, &stU8{A: 2}, &stU8{A: 2})
+			f(t, data, ex, &stU16{A: 2}, &stU16{A: 2})
+			f(t, data, ex, &stU32{A: 2}, &stU32{A: 2})
+			f(t, data, ex, &stU64{A: 2}, &stU64{A: 2})
+		}
+		t.Run("unquoted", func(t *testing.T) {
+			f2(t, `{"a":1}`, UnexpectedByteError{})
+		})
+		t.Run("leading space", func(t *testing.T) {
+			f2(t, `{"a":" 1"}`, InvalidDigitError{})
+		})
+		t.Run("leading eof", func(t *testing.T) {
+			f2(t, `{"a":"`, io.EOF)
+		})
+		t.Run("trailing space", func(t *testing.T) {
+			f2(t, `{"a":"1 "}`, UnexpectedByteError{})
+		})
+		t.Run("trailing eof", func(t *testing.T) {
+			f2(t, `{"a":"1`, io.EOF)
+		})
+		t.Run("empty", func(t *testing.T) {
+			f2(t, `{"a":""}`, InvalidDigitError{})
+		})
+		t.Run("ok", func(t *testing.T) {
+			f2(t, `{"a":"1"}`, nil)
 		})
 	})
 }

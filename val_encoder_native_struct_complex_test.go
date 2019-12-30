@@ -122,6 +122,7 @@ func TestValEncoder_Native_Struct_Complex_MultipleField(t *testing.T) {
 	})
 	t.Run("quoted", func(t *testing.T) {
 		type st struct {
+			S    string  `json:",string"`
 			I8   int8    `json:",string"`
 			I16  int16   `json:",string"`
 			I32  int32   `json:",string"`

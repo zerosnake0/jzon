@@ -61,14 +61,9 @@ func (it *Iterator) readUint64(c byte) (ret uint64, err error) {
 	}
 }
 
-func (it *Iterator) ReadInt64() (int64, error) {
-	c, _, err := it.nextToken()
-	if err != nil {
-		return 0, err
-	}
-	it.head += 1
+func (it *Iterator) readInt64(c byte) (int64, error) {
 	if c == '-' {
-		c, err = it.nextByte()
+		c, err := it.nextByte()
 		if err != nil {
 			return 0, err
 		}
@@ -97,4 +92,13 @@ func (it *Iterator) ReadInt64() (int64, error) {
 		}
 		return int64(v), nil
 	}
+}
+
+func (it *Iterator) ReadInt64() (int64, error) {
+	c, _, err := it.nextToken()
+	if err != nil {
+		return 0, err
+	}
+	it.head += 1
+	return it.readInt64(c)
 }

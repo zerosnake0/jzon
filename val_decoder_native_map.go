@@ -86,7 +86,10 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 	}
 	for {
 		key := unsafe_New(dec.keyRType)
-		if err = dec.keyDec.Decode(key, it, nil); err != nil {
+		opt := DecOpts{
+			MapKey: true,
+		}
+		if err = dec.keyDec.Decode(key, it, &opt); err != nil {
 			return err
 		}
 		c, _, err = it.nextToken()
@@ -118,6 +121,7 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 	}
 }
 
+/*
 // key decoders
 type stringKeyDecoder struct {
 }
@@ -276,3 +280,4 @@ func (*uint64KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 	*(*uint64)(ptr) = i
 	return nil
 }
+*/

@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"io"
 	"unsafe"
 )
 
@@ -40,7 +41,7 @@ func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 type stringDecoder struct {
 }
 
-func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
+func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -52,8 +53,44 @@ func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error
 		if err != nil {
 			return err
 		}
-		*(*string)(ptr) = s
-		return nil
+		quoted := (opts != nil) && opts.Quoted
+		if !quoted {
+			*(*string)(ptr) = s
+			return nil
+		}
+		l := len(s)
+		if l < 2 {
+			// TODO: custom error
+			return BadQuotedStringError(s)
+		}
+		switch s[0] {
+		case 'n':
+			if s != "null" {
+				return BadQuotedStringError(s)
+			}
+			return nil
+		case '"':
+			if s[l-1] != '"' {
+				return BadQuotedStringError(s)
+			}
+			// borrow another iterator
+			subIt := it.decoder.NewIterator()
+			defer it.decoder.ReturnIterator(subIt)
+			subIt.ResetBytes(localStringToBytes(s))
+			subStr, err := subIt.ReadString()
+			if err != nil {
+				return BadQuotedStringError(s)
+			}
+			// check eof
+			_, _, err = subIt.nextToken()
+			if err != io.EOF {
+				return BadQuotedStringError(s)
+			}
+			*(*string)(ptr) = subStr
+			return nil
+		default:
+			return BadQuotedStringError(s)
+		}
 	case 'n':
 		it.head += 1
 		return it.expectBytes("ull")

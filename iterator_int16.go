@@ -60,14 +60,9 @@ func (it *Iterator) readUint16(c byte) (ret uint16, err error) {
 	}
 }
 
-func (it *Iterator) ReadInt16() (int16, error) {
-	c, _, err := it.nextToken()
-	if err != nil {
-		return 0, err
-	}
-	it.head += 1
+func (it *Iterator) readInt16(c byte) (int16, error) {
 	if c == '-' {
-		c, err = it.nextByte()
+		c, err := it.nextByte()
 		if err != nil {
 			return 0, err
 		}
@@ -96,4 +91,13 @@ func (it *Iterator) ReadInt16() (int16, error) {
 		}
 		return int16(v), nil
 	}
+}
+
+func (it *Iterator) ReadInt16() (int16, error) {
+	c, _, err := it.nextToken()
+	if err != nil {
+		return 0, err
+	}
+	it.head += 1
+	return it.readInt16(c)
 }
