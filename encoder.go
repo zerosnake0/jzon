@@ -18,7 +18,12 @@ type EncoderOption struct {
 	OnlyTaggedField bool
 }
 
-type encoderCache = map[rtype]ValEncoder
+type encoderCache map[rtype]ValEncoder
+
+func (cache encoderCache) has(rtype rtype) bool {
+	_, ok := cache[rtype]
+	return ok
+}
 
 type Encoder struct {
 	cacheMu sync.Mutex
@@ -98,7 +103,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		idx -= 1
 
 		rType := rtypeOfType(typ)
-		if _, ok := internalCache[rType]; ok { // check if visited
+		if internalCache.has(rType) { // check if visited
 			continue
 		}
 
@@ -109,6 +114,8 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			continue
 		}
 
+		kind := typ.Kind()
+
 		// check json.Marshaler interface
 		if typ.Implements(jsonMarshalerType) {
 			v := jsonMarshalerEncoder(rType)
@@ -118,16 +125,15 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		}
 		// TODO: ptr to json.Marshaler
 
-		// check text.Marshaler interface
+		// check encoding.TextMarshaler interface
 		if typ.Implements(textMarshalerType) {
 			v := textMarshalerEncoder(rType)
 			internalCache[rType] = v
 			cache[rType] = v
 			continue
 		}
-		// TODO: ptr to text.Marshaler
+		// TODO: ptr to encoding.TextMarshaler
 
-		kind := typ.Kind()
 		if kindRType := encoderKindMap[kind]; kindRType != 0 {
 			// TODO: shall we make this an option?
 			// TODO: so that only the native type is affected?

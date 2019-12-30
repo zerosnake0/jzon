@@ -43,3 +43,26 @@ func TestValEncoder_Ptr(t *testing.T) {
 		f(t, &pb)
 	})
 }
+
+func TestValEncoder_Ptr_Marshaler(t *testing.T) {
+	t.Run("json marshaler", func(t *testing.T) {
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, (**testJsonMarshaler)(nil), nil)
+		})
+		t.Run("ptr of nil ptr", func(t *testing.T) {
+			// TODO: wip
+			t.SkipNow()
+			ptr := (*testJsonMarshaler)(nil)
+			checkEncodeValueWithStandard(t, &ptr, nil)
+		})
+		t.Run("non nil", func(t *testing.T) {
+			// TODO: wip
+			t.SkipNow()
+			m := testJsonMarshaler{
+				data: `"abc"`,
+			}
+			ptr := &m
+			checkEncodeValueWithStandard(t, &ptr, nil)
+		})
+	})
+}

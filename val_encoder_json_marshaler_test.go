@@ -7,21 +7,21 @@ import (
 )
 
 type testJsonMarshaler struct {
-	data []byte
+	data string
 	err  error
 }
 
 func (m testJsonMarshaler) MarshalJSON() ([]byte, error) {
-	return m.data, m.err
+	return []byte(m.data), m.err
 }
 
 type testJsonMarshaler2 struct {
-	data []byte
+	data string
 	err  error
 }
 
 func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
-	return m.data, m.err
+	return []byte(m.data), m.err
 }
 
 func TestValEncoder_JsonMarshaler_Error(t *testing.T) {
@@ -43,25 +43,25 @@ func TestValEncoder_JsonMarshaler_NonPointerReceiver(t *testing.T) {
 	}
 	t.Run("non pointer", func(t *testing.T) {
 		f(t, testJsonMarshaler{
-			data: []byte(`{"a":1}`),
+			data: `{"a":1}`,
 		}, nil)
 	})
 	t.Run("non pointer error", func(t *testing.T) {
 		e := errors.New("test")
 		f(t, testJsonMarshaler{
-			data: []byte(`{"a":1}`),
+			data: `{"a":1}`,
 			err:  e,
 		}, e)
 	})
 	t.Run("pointer", func(t *testing.T) {
 		f(t, &testJsonMarshaler{
-			data: []byte(`{"a":2}`),
+			data: `{"a":2}`,
 		}, nil)
 	})
 	t.Run("pointer error", func(t *testing.T) {
 		e := errors.New("test")
 		f(t, &testJsonMarshaler{
-			data: []byte(`{"a":2}`),
+			data: `{"a":2}`,
 			err:  e,
 		}, e)
 	})
@@ -71,18 +71,23 @@ func TestValEncoder_JsonMarshaler_NonPointerReceiver(t *testing.T) {
 }
 
 func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
+	t.Run("non pointer", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, testJsonMarshaler2{
+			data: `{"b":1}`,
+		}, nil)
+	})
 	f := func(t *testing.T, m json.Marshaler, err error) {
 		checkEncodeValueWithStandard(t, m, err)
 	}
 	t.Run("pointer", func(t *testing.T) {
 		f(t, &testJsonMarshaler2{
-			data: []byte(`{"b":1}`),
+			data: `{"b":1}`,
 		}, nil)
 	})
 	t.Run("pointer error", func(t *testing.T) {
 		e := errors.New("test")
 		f(t, &testJsonMarshaler2{
-			data: []byte(`{"b":1}`),
+			data: `{"b":1}`,
 			err:  e,
 		}, e)
 	})
@@ -99,20 +104,20 @@ func TestValEncoder_DynamicJsonMarshaler(t *testing.T) {
 	t.Run("marshaler error", func(t *testing.T) {
 		e := errors.New("test")
 		var i json.Marshaler = testJsonMarshaler{
-			data: []byte(`"test"`),
+			data: `"test"`,
 			err:  e,
 		}
 		checkEncodeValueWithStandard(t, &i, e)
 	})
 	t.Run("marshaler", func(t *testing.T) {
 		var i json.Marshaler = testJsonMarshaler{
-			data: []byte(`"test"`),
+			data: `"test"`,
 		}
 		checkEncodeValueWithStandard(t, &i, nil)
 	})
 	t.Run("marshaler 2", func(t *testing.T) {
 		var i json.Marshaler = &testJsonMarshaler{
-			data: []byte(`"test 2"`),
+			data: `"test 2"`,
 		}
 		checkEncodeValueWithStandard(t, &i, nil)
 	})

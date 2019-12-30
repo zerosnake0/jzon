@@ -16,7 +16,7 @@ func TestValEncoder_Slice_Error(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		e := errors.New("test")
 		arr := []json.Marshaler{testJsonMarshaler{
-			data: []byte(`"test"`),
+			data: `"test"`,
 			err:  e,
 		}}
 		checkEncodeValueWithStandard(t, arr, e)
