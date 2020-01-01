@@ -120,8 +120,8 @@ func checkEncodeWithStandardInternal(t *testing.T, jsonOpt func(*json.Encoder), 
 	}()
 
 	if err != nil {
-		t.Logf("json err: %s", err)
-		t.Logf("jzon err: %s", streamer.Error)
+		t.Logf("json err: %v", err)
+		t.Logf("jzon err: %v", streamer.Error)
 		expErrType, ok := expErr.(reflect.Type)
 		if ok {
 			gotErrType := reflect.TypeOf(streamer.Error)
