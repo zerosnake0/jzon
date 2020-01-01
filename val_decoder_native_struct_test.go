@@ -250,34 +250,45 @@ func TestValDecoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 		}
 		f(t, `{"inner":1}`, nil, &outer{}, &outer{})
 	})
-	t.Run("nil pointer receiver (duplicate field)", func(t *testing.T) {
-		type inner struct {
-			A int `json:"a"`
-		}
-		type inner2 inner
-		type outer struct {
-			*inner
-			*inner2
-		}
-		f(t, `{"a":1}`, nil, &outer{}, &outer{})
-	})
-	t.Run("nil pointer receiver (field not matched)", func(t *testing.T) {
-		type inner struct {
-			B int
-		}
-		type outer struct {
-			*inner
-		}
-		f(t, `{"a":1}`, nil, &outer{}, &outer{})
-	})
-	t.Run("nil pointer receiver (field matched)", func(t *testing.T) {
-		type inner struct {
-			A int
-		}
-		type outer struct {
-			*inner
-		}
-		f(t, `{"a":1}`, NilEmbeddedPointerError, &outer{}, &outer{})
+	t.Run("nil pointer receiver", func(t *testing.T) {
+		t.Run("duplicate field", func(t *testing.T) {
+			type inner struct {
+				A int `json:"a"`
+			}
+			type inner2 inner
+			type outer struct {
+				*inner
+				*inner2
+			}
+			f(t, `{"a":1}`, nil, &outer{}, &outer{})
+		})
+		t.Run("field not matched", func(t *testing.T) {
+			type inner struct {
+				B int
+			}
+			type outer struct {
+				*inner
+			}
+			f(t, `{"a":1}`, nil, &outer{}, &outer{})
+		})
+		t.Run("field matched", func(t *testing.T) {
+			type inner struct {
+				A int
+			}
+			type outer struct {
+				*inner
+			}
+			f(t, `{"a":1}`, NilEmbeddedPointerError, &outer{}, &outer{})
+		})
+		t.Run("exported field", func(t *testing.T) {
+			type Inner struct {
+				A int
+			}
+			type outer struct {
+				*Inner
+			}
+			f(t, `{"a":1}`, nil, &outer{}, &outer{})
+		})
 	})
 }
 
