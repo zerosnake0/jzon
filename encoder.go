@@ -130,14 +130,6 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			continue
 		}
 		// TODO: ptr to json.Marshaler
-		// if kind != reflect.Ptr {
-		// 	ptrType := reflect.PtrTo(typ)
-		// 	if ptrType.Implements(jsonMarshalerType) {
-		// 		ptrRType := rtypeOfType(ptrType)
-		// 		v := jsonMarshalerEncoder(ptrRType)
-		// 		internalCache[rType]=
-		// 	}
-		// }
 
 		// check encoding.TextMarshaler interface
 		if typ.Implements(textMarshalerType) {

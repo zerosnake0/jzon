@@ -10,6 +10,12 @@ func (tb testMarshalByte) MarshalJSON() ([]byte, error) {
 	return []byte{'"', byte(tb), '"'}, nil
 }
 
+type testMarshalByte2 byte
+
+func (tb *testMarshalByte2) MarshalJSON() ([]byte, error) {
+	return []byte{'"', byte(*tb), '"'}, nil
+}
+
 func TestValEncoder_Native_Base64(t *testing.T) {
 	t.Run("nil byte", func(t *testing.T) {
 		checkEncodeValueWithStandard(t, []byte(nil), nil)
@@ -24,4 +30,8 @@ func TestValEncoder_Native_Base64(t *testing.T) {
 	t.Run("marshaler", func(t *testing.T) {
 		checkEncodeValueWithStandard(t, []testMarshalByte("test"), nil)
 	})
+	t.Run("pointer marshaler", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, []testMarshalByte2("test"), nil)
+	})
+
 }
