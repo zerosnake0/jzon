@@ -160,6 +160,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				continue
 			}
 		}
+
 		switch kind {
 		case reflect.Ptr:
 			elemType := typ.Elem()

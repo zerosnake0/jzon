@@ -4,7 +4,8 @@
 - [x] Support other tag than `json`
 - [x] Decoder option `UseNumber`
 - [x] Decoder option `DisallowUnknownFields`
-- [ ] tag option `quoted`
+- [x] tag option `quoted`
+- [ ] json marshaler (pointer receiver) for values
 - [ ] tag option `omitempty`
 
 # Improvement
