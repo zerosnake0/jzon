@@ -99,6 +99,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 	idx := len(typesToCreate) - 1
 	for idx >= 0 {
 		typ := typesToCreate[idx]
+
 		typesToCreate = typesToCreate[:idx]
 		idx -= 1
 
@@ -119,7 +120,12 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		// check json.Marshaler interface
 		if typ.Implements(jsonMarshalerType) {
 			v := jsonMarshalerEncoder(rType)
-			internalCache[rType] = v
+			if ifaceIndir(rType) {
+				internalCache[rType] = v
+			} else {
+				// marshaler on pointer receiver
+				internalCache[rType] = &pointerEncoder{v}
+			}
 			cache[rType] = v
 			continue
 		}
@@ -136,7 +142,11 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		// check encoding.TextMarshaler interface
 		if typ.Implements(textMarshalerType) {
 			v := textMarshalerEncoder(rType)
-			internalCache[rType] = v
+			if ifaceIndir(rType) {
+				internalCache[rType] = v
+			} else {
+				internalCache[rType] = &pointerEncoder{v}
+			}
 			cache[rType] = v
 			continue
 		}

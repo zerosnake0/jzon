@@ -97,9 +97,18 @@ func TestValEncoder_JsonMarshaler_NonPointerReceiver(t *testing.T) {
 
 func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
 	t.Run("non pointer", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, testJsonMarshaler2{
-			data: `{"b":1}`,
-		}, nil)
+		t.Run("no error", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, testJsonMarshaler2{
+				data: `{"b":1}`,
+			}, nil)
+		})
+		t.Run("error", func(t *testing.T) {
+			e := errors.New("test")
+			checkEncodeValueWithStandard(t, testJsonMarshaler2{
+				data: `{"b":1}`,
+				err:  e,
+			}, nil)
+		})
 	})
 	f := func(t *testing.T, m json.Marshaler, err error) {
 		checkEncodeValueWithStandard(t, m, err)
