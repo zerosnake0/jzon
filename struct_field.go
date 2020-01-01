@@ -8,10 +8,15 @@ import (
 	"reflect"
 )
 
+type offset struct {
+	val   uintptr
+	rtype rtype
+}
+
 type field struct {
 	typ     reflect.Type
 	index   []int
-	offsets []uintptr
+	offsets []offset
 
 	name      string
 	nameBytes []byte                 // []byte(name)

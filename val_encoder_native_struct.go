@@ -44,8 +44,12 @@ func (ef *encoderFields) add(f *field, escapeHtml bool, enc ValEncoder) {
 	} else {
 		rawField = encodeString(rawField, f.name, safeSet[:])
 	}
+	offsets := make([]uintptr, len(f.offsets))
+	for i := range f.offsets {
+		offsets[i] = f.offsets[i].val
+	}
 	ef.list = append(ef.list, encoderFieldInfo{
-		offsets:  f.offsets,
+		offsets:  offsets,
 		rawField: rawField,
 		quoted:   f.quoted,
 		encoder:  enc,

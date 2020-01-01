@@ -11,7 +11,7 @@ type structDecoderBuilder struct {
 }
 
 type decoderFieldInfo struct {
-	offsets   []uintptr
+	offsets   []offset
 	nameBytes []byte                 // []byte(name)
 	equalFold func(s, t []byte) bool // bytes.EqualFold or equivalent
 	quoted    bool
@@ -105,13 +105,17 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 		}
 		stField := dec.fields.find(field, it.decoder.caseSensitive)
 		if stField != nil {
-			curPtr := add(ptr, stField.offsets[0], "struct field")
+			curPtr := add(ptr, stField.offsets[0].val, "struct field")
 			for _, offset := range stField.offsets[1:] {
-				curPtr = *(*unsafe.Pointer)(curPtr)
-				if curPtr == nil {
-					return NilEmbeddedPointerError
+				subPtr := *(*unsafe.Pointer)(curPtr)
+				if subPtr == nil {
+					if offset.rtype == 0 { // the ptr field is not exported
+						return NilEmbeddedPointerError
+					}
+					subPtr = unsafe_New(offset.rtype)
+					*(*unsafe.Pointer)(curPtr) = subPtr
 				}
-				curPtr = add(curPtr, offset, "struct field")
+				curPtr = add(subPtr, offset.val, "struct field")
 			}
 			opt := DecOpts{
 				Quoted: stField.quoted,

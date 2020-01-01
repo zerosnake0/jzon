@@ -18,7 +18,7 @@ var NilPointerReceiverError = errors.New("the receiver is nil")
 var IFaceError = errors.New("cannot unmarshal on empty iface")
 
 // NilEmbeddedError
-var NilEmbeddedPointerError = errors.New("cannot unmarshal on nil embedded pointer")
+var NilEmbeddedPointerError = errors.New("cannot unmarshal on nil pointer (unexported embedded)")
 
 // EfaceLoopingError
 var EfaceLoopingError = errors.New("eface looping detected")
