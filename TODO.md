@@ -5,7 +5,7 @@
 - [x] Decoder option `UseNumber`
 - [x] Decoder option `DisallowUnknownFields`
 - [x] tag option `quoted`
-- [ ] json marshaler (pointer receiver) for values
+- [ ] json/text marshaler (pointer receiver) for values
 - [ ] tag option `omitempty`
 
 # Improvement
