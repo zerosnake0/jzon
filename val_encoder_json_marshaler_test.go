@@ -96,37 +96,60 @@ func TestValEncoder_JsonMarshaler_NonPointerReceiver(t *testing.T) {
 }
 
 func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
+	f := checkEncodeValueWithStandard
 	t.Run("non pointer", func(t *testing.T) {
 		t.Run("no error", func(t *testing.T) {
-			checkEncodeValueWithStandard(t, testJsonMarshaler2{
+			f(t, testJsonMarshaler2{
 				data: `{"b":1}`,
 			}, nil)
 		})
 		t.Run("error", func(t *testing.T) {
 			e := errors.New("test")
-			checkEncodeValueWithStandard(t, testJsonMarshaler2{
+			f(t, testJsonMarshaler2{
 				data: `{"b":1}`,
 				err:  e,
 			}, nil)
 		})
 	})
-	f := func(t *testing.T, m json.Marshaler, err error) {
-		checkEncodeValueWithStandard(t, m, err)
-	}
 	t.Run("pointer", func(t *testing.T) {
-		f(t, &testJsonMarshaler2{
-			data: `{"b":1}`,
-		}, nil)
+		t.Run("nil", func(t *testing.T) {
+			f(t, (*testJsonMarshaler2)(nil), nil)
+		})
+		t.Run("no error", func(t *testing.T) {
+			f(t, &testJsonMarshaler2{
+				data: `{"b":1}`,
+			}, nil)
+		})
+		t.Run("error", func(t *testing.T) {
+			e := errors.New("test")
+			f(t, &testJsonMarshaler2{
+				data: `{"b":1}`,
+				err:  e,
+			}, e)
+		})
 	})
-	t.Run("pointer error", func(t *testing.T) {
-		e := errors.New("test")
-		f(t, &testJsonMarshaler2{
-			data: `{"b":1}`,
-			err:  e,
-		}, e)
-	})
-	t.Run("nil pointer", func(t *testing.T) {
-		f(t, (*testJsonMarshaler2)(nil), nil)
+	t.Run("pointer of pointer", func(t *testing.T) {
+		t.Run("nil", func(t *testing.T) {
+			f(t, (**testJsonMarshaler2)(nil), nil)
+		})
+		t.Run("pointer of nil", func(t *testing.T) {
+			ptr := (*testJsonMarshaler2)(nil)
+			f(t, &ptr, nil)
+		})
+		t.Run("no error", func(t *testing.T) {
+			ptr := &testJsonMarshaler2{
+				data: `{"a":2}`,
+			}
+			f(t, &ptr, nil)
+		})
+		t.Run("error", func(t *testing.T) {
+			e := errors.New("test")
+			ptr := &testJsonMarshaler2{
+				data: `{"a":2}`,
+				err:  e,
+			}
+			f(t, &ptr, e)
+		})
 	})
 }
 
