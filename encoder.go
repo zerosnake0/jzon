@@ -241,11 +241,14 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			}
 			elemPtrType := reflect.PtrTo(x.elemType)
 			elemPtrEncoder := internalCache[rtypeOfType(elemPtrType)]
-			if ptrEncoder, ok := elemPtrEncoder.(*pointerEncoder); !ok {
+			if _, ok := elemPtrEncoder.(*pointerEncoder); !ok {
 				// the element has a special pointer encoder
 				continue
 			} else {
-				if ptrEncoder.encoder != (*uint8Encoder)(nil) {
+				// the pointer decoder has not been rebuilt yet
+				// we need to use the explicit element rtype
+				elemEncoder := internalCache[x.elemRType]
+				if elemEncoder != (*uint8Encoder)(nil) {
 					// the element has a special value encoder
 					continue
 				}
