@@ -12,7 +12,16 @@ func (*boolEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 		s.Null()
 		return
 	}
-	s.Bool(*(*bool)(ptr))
+	quoted := (opts != nil) && opts.Quoted
+	if !quoted {
+		s.Bool(*(*bool)(ptr))
+		return
+	}
+	if *(*bool)(ptr) {
+		s.String("true")
+	} else {
+		s.String("false")
+	}
 }
 
 // string encoder

@@ -9,7 +9,7 @@ import (
 type boolDecoder struct {
 }
 
-func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
+func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -32,6 +32,35 @@ func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 		}
 		*(*bool)(ptr) = false
 		return nil
+	case '"':
+		quoted := (opts != nil) && opts.Quoted
+		if !quoted {
+			return UnexpectedByteError{got: c}
+		}
+		it.head += 1
+		c, _, err := it.nextToken()
+		if err != nil {
+			return err
+		}
+		it.head += 1
+		switch c {
+		case 't':
+			if err := it.expectBytes(`rue"`); err != nil {
+				return err
+			}
+			*(*bool)(ptr) = true
+			return nil
+		case 'f':
+			if err := it.expectBytes(`alse"`); err != nil {
+				return err
+			}
+			*(*bool)(ptr) = false
+			return nil
+		case 'n':
+			return it.expectBytes(`ull"`)
+		default:
+			return UnexpectedByteError{got: c}
+		}
 	default:
 		return UnexpectedByteError{got: c}
 	}
