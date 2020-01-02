@@ -33,5 +33,4 @@ func TestValEncoder_Native_Base64(t *testing.T) {
 	t.Run("pointer marshaler", func(t *testing.T) {
 		checkEncodeValueWithStandard(t, []testMarshalByte2("test"), nil)
 	})
-
 }

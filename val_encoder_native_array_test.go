@@ -22,34 +22,60 @@ func TestValEncoder_Array_Empty(t *testing.T) {
 		arr := [...]int{}
 		checkEncodeValueWithStandard(t, arr, nil)
 	})
-	t.Run("nil pointer", func(t *testing.T) {
-		checkEncodeValueWithStandard(t, (*[0]int)(nil), nil)
+	t.Run("pointer", func(t *testing.T) {
+		f := func(t *testing.T, ptr *[0]int, err error) {
+			checkEncodeValueWithStandard(t, ptr, err)
+		}
+		t.Run("nil", func(t *testing.T) {
+			f(t, nil, nil)
+		})
+		t.Run("pointer", func(t *testing.T) {
+			arr := [...]int{}
+			f(t, &arr, nil)
+		})
 	})
-	t.Run("empty pointer", func(t *testing.T) {
-		arr := [...]int{}
-		checkEncodeValueWithStandard(t, &arr, nil)
+	t.Run("pointer of pointer", func(t *testing.T) {
+		f := func(t *testing.T, ptr **[0]int, err error) {
+			checkEncodeValueWithStandard(t, ptr, err)
+		}
+		t.Run("nil", func(t *testing.T) {
+			f(t, nil, nil)
+		})
+		t.Run("pointer of nil", func(t *testing.T) {
+			ptr := (*[0]int)(nil)
+			f(t, &ptr, nil)
+		})
+		t.Run("non nil", func(t *testing.T) {
+			arr := [...]int{}
+			ptr := &arr
+			f(t, &ptr, nil)
+		})
 	})
 }
 
 func TestValEncoder_Array_Indirect(t *testing.T) {
 	// len != 1
-	t.Run("pointer", func(t *testing.T) {
-		arr := [...]int{1, 2, 3}
-		checkEncodeValueWithStandard(t, &arr, nil)
-	})
-	t.Run("non pointer", func(t *testing.T) {
-		arr := [...]int{1, 2, 3}
-		checkEncodeValueWithStandard(t, arr, nil)
-	})
-	t.Run("array of pointer", func(t *testing.T) {
-		i := 1
-		arr := [...]*int{(*int)(nil), &i}
-		checkEncodeValueWithStandard(t, arr, nil)
+	t.Run("len<>1", func(t *testing.T) {
+		t.Run("pointer", func(t *testing.T) {
+			arr := [...]int{1, 2, 3}
+			checkEncodeValueWithStandard(t, &arr, nil)
+		})
+		t.Run("non pointer", func(t *testing.T) {
+			arr := [...]int{1, 2, 3}
+			checkEncodeValueWithStandard(t, arr, nil)
+		})
+		t.Run("array of pointer", func(t *testing.T) {
+			i := 1
+			arr := [...]*int{(*int)(nil), &i}
+			checkEncodeValueWithStandard(t, arr, nil)
+		})
 	})
 	// element is indirect
-	t.Run("one element array", func(t *testing.T) {
-		arr := [...]int{1}
-		checkEncodeValueWithStandard(t, arr, nil)
+	t.Run("len==1", func(t *testing.T) {
+		t.Run("one element array", func(t *testing.T) {
+			arr := [...]int{1}
+			checkEncodeValueWithStandard(t, arr, nil)
+		})
 	})
 }
 

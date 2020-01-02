@@ -8,6 +8,10 @@ type jsonNumberEncoder struct {
 }
 
 func (*jsonNumberEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+	if ptr == nil {
+		s.Null()
+		return
+	}
 	str := *(*string)(ptr)
 	if str == "" {
 		str = "0"

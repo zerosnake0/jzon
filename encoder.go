@@ -206,7 +206,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			}
 		case reflect.Slice:
 			w := newSliceEncoder(typ)
-			typesToCreate = append(typesToCreate, typ.Elem())
+			typesToCreate = append(typesToCreate, reflect.PtrTo(typ.Elem()))
 			idx += 1
 			internalCache[rType] = w.encoder
 			rebuildMap[rType] = w
@@ -239,9 +239,16 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			if x.elemType.Kind() != reflect.Uint8 {
 				continue
 			}
-			elemEncoder := internalCache[x.elemRType]
-			if elemEncoder != (*uint8Encoder)(nil) {
+			elemPtrType := reflect.PtrTo(x.elemType)
+			elemPtrEncoder := internalCache[rtypeOfType(elemPtrType)]
+			if ptrEncoder, ok := elemPtrEncoder.(*pointerEncoder); !ok {
+				// the element has a special pointer encoder
 				continue
+			} else {
+				if ptrEncoder.encoder != (*uint8Encoder)(nil) {
+					// the element has a special value encoder
+					continue
+				}
 			}
 			v := (*base64Encoder)(nil)
 			internalCache[rType] = v
@@ -273,7 +280,14 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			x.encoder.elemEncoder = internalCache[x.elemRType]
 			cache[rType] = x.encoder
 		case *sliceEncoderBuilder:
-			x.encoder.elemEncoder = internalCache[x.elemRType]
+			elemPtrType := reflect.PtrTo(x.elemType)
+			elemPtrEncoder := internalCache[rtypeOfType(elemPtrType)]
+			if ptrEncoder, ok := elemPtrEncoder.(*pointerEncoder); !ok {
+				// the element has a special pointer encoder
+				x.encoder.elemEncoder = ptrEncoder.encoder
+			} else {
+				x.encoder.elemEncoder = &directEncoder{ptrEncoder}
+			}
 			cache[rType] = x.encoder
 		case *structEncoderBuilder:
 			x.encoder.fields.init(len(x.fields.list))

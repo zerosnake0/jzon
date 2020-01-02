@@ -151,6 +151,25 @@ func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
 			f(t, &ptr, e)
 		})
 	})
+	t.Run("struct member", func(t *testing.T) {
+		type st struct {
+			A testJsonMarshaler2
+		}
+		t.Run("value", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{
+				A: testJsonMarshaler2{
+					data: `{"a":2}`,
+				},
+			}, nil)
+		})
+		t.Run("ptr", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, &st{
+				A: testJsonMarshaler2{
+					data: `{"a":2}`,
+				},
+			}, nil)
+		})
+	})
 }
 
 func TestValEncoder_DynamicJsonMarshaler(t *testing.T) {
