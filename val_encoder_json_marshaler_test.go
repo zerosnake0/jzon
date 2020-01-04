@@ -155,6 +155,10 @@ func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
 		type st struct {
 			A testJsonMarshaler2
 		}
+		/*
+		 * with the current implementation,
+		 * only one of the following two test can succeed
+		 */
 		t.Run("value", func(t *testing.T) {
 			checkEncodeValueWithStandard(t, st{
 				A: testJsonMarshaler2{

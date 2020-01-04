@@ -25,6 +25,19 @@ func (cache encoderCache) has(rtype rtype) bool {
 	return ok
 }
 
+// make sure that the pointer encoders has already been rebuilt
+// before calling, so it's safe to use it's internal encoder
+func (cache encoderCache) preferPtrEncoder(typ reflect.Type) ValEncoder {
+	ptrType := reflect.PtrTo(typ)
+	ptrEncoder := cache[rtypeOfType(ptrType)]
+	if pe, ok := ptrEncoder.(*pointerEncoder); ok {
+		return pe.encoder
+	} else {
+		// the element has a special pointer encoder
+		return &directEncoder{ptrEncoder}
+	}
+}
+
 type Encoder struct {
 	cacheMu sync.Mutex
 	// the encoder cache, or root encoder cache
@@ -217,7 +230,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			} else {
 				for i := range w.fields.list {
 					fi := &w.fields.list[i]
-					typesToCreate = append(typesToCreate, fi.ptrType.Elem())
+					typesToCreate = append(typesToCreate, fi.ptrType)
 					idx += 1
 				}
 				internalCache[rType] = w.encoder
@@ -285,23 +298,14 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			x.encoder.elemEncoder = internalCache[x.elemRType]
 			cache[rType] = x.encoder
 		case *sliceEncoderBuilder:
-			elemPtrType := reflect.PtrTo(x.elemType)
-			elemPtrEncoder := internalCache[rtypeOfType(elemPtrType)]
-			if pe, ok := elemPtrEncoder.(*pointerEncoder); ok {
-				// the pointer encoders has already been rebuilt
-				// so it's safe to use it's internal encoder
-				x.encoder.elemEncoder = pe.encoder
-			} else {
-				// the element has a special pointer encoder
-				x.encoder.elemEncoder = &directEncoder{elemPtrEncoder}
-			}
+			x.encoder.elemEncoder = internalCache.preferPtrEncoder(x.elemType)
 			cache[rType] = x.encoder
 		case *structEncoderBuilder:
 			x.encoder.fields.init(len(x.fields.list))
 			for i := range x.fields.list {
 				fi := &x.fields.list[i]
-				fiRType := rtypeOfType(fi.ptrType.Elem())
-				x.encoder.fields.add(fi, enc.escapeHtml, internalCache[fiRType])
+				v := internalCache.preferPtrEncoder(fi.ptrType.Elem())
+				x.encoder.fields.add(fi, enc.escapeHtml, v)
 			}
 			if ifaceIndir(rType) {
 				cache[rType] = x.encoder
