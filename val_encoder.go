@@ -17,13 +17,21 @@ var (
 
 func createGlobalValEncoder(ptr interface{}, enc ValEncoder) {
 	typ := reflect.TypeOf(ptr).Elem()
-	globalValEncoders[rtypeOfType(typ)] = enc
+	rType := rtypeOfType(typ)
+	if !ifaceIndir(rType) {
+		panic("not supported")
+	}
+	globalValEncoders[rType] = enc
 }
 
 func mapEncoderKind(ptr interface{}, enc ValEncoder) {
 	elem := reflect.TypeOf(ptr).Elem()
 	kind := elem.Kind()
-	encoderKindMap[kind] = rtypeOfType(elem)
+	elemRType := rtypeOfType(elem)
+	if !ifaceIndir(elemRType) {
+		panic("not supported")
+	}
+	encoderKindMap[kind] = elemRType
 	kindEncoders[kind] = enc
 }
 

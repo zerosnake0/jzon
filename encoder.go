@@ -123,7 +123,6 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			if ifaceIndir(rType) {
 				internalCache[rType] = v
 			} else {
-				// marshaler on pointer receiver
 				internalCache[rType] = &pointerEncoder{v}
 			}
 			cache[rType] = v
@@ -244,14 +243,13 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			if _, ok := elemPtrEncoder.(*pointerEncoder); !ok {
 				// the element has a special pointer encoder
 				continue
-			} else {
-				// the pointer decoder has not been rebuilt yet
-				// we need to use the explicit element rtype
-				elemEncoder := internalCache[x.elemRType]
-				if elemEncoder != (*uint8Encoder)(nil) {
-					// the element has a special value encoder
-					continue
-				}
+			}
+			// the pointer decoder has not been rebuilt yet
+			// we need to use the explicit element rtype
+			elemEncoder := internalCache[rtypeOfType(x.elemType)]
+			if elemEncoder != (*uint8Encoder)(nil) {
+				// the element has a special value encoder
+				continue
 			}
 			v := (*base64Encoder)(nil)
 			internalCache[rType] = v
@@ -259,13 +257,19 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			delete(rebuildMap, rType)
 		}
 	}
-	// rebuild other encoders
+	// rebuild ptr encoders
 	for rType, builder := range rebuildMap {
 		switch x := builder.(type) {
 		case *pointerEncoderBuilder:
 			v := internalCache[x.elemRType]
 			x.encoder.encoder = v
 			cache[rType] = v
+			delete(rebuildMap, rType)
+		}
+	}
+	// rebuild other encoders
+	for rType, builder := range rebuildMap {
+		switch x := builder.(type) {
 		case *arrayEncoderBuilder:
 			v := internalCache[x.elemRType]
 			x.encoder.encoder = v
@@ -285,11 +289,13 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		case *sliceEncoderBuilder:
 			elemPtrType := reflect.PtrTo(x.elemType)
 			elemPtrEncoder := internalCache[rtypeOfType(elemPtrType)]
-			if ptrEncoder, ok := elemPtrEncoder.(*pointerEncoder); !ok {
-				// the element has a special pointer encoder
-				x.encoder.elemEncoder = ptrEncoder.encoder
+			if pe, ok := elemPtrEncoder.(*pointerEncoder); ok {
+				// the pointer encoders has already been rebuilt
+				// so it's safe to use it's internal encoder
+				x.encoder.elemEncoder = pe.encoder
 			} else {
-				x.encoder.elemEncoder = &directEncoder{ptrEncoder}
+				// the element has a special pointer encoder
+				x.encoder.elemEncoder = &directEncoder{elemPtrEncoder}
 			}
 			cache[rType] = x.encoder
 		case *structEncoderBuilder:

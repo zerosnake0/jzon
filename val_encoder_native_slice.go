@@ -6,9 +6,8 @@ import (
 )
 
 type sliceEncoderBuilder struct {
-	encoder   *sliceEncoder
-	elemType  reflect.Type
-	elemRType rtype
+	encoder  *sliceEncoder
+	elemType reflect.Type
 }
 
 func newSliceEncoder(typ reflect.Type) *sliceEncoderBuilder {
@@ -17,8 +16,7 @@ func newSliceEncoder(typ reflect.Type) *sliceEncoderBuilder {
 		encoder: &sliceEncoder{
 			elemSize: elemType.Size(),
 		},
-		elemType:  elemType,
-		elemRType: rtypeOfType(elemType),
+		elemType: elemType,
 	}
 }
 
