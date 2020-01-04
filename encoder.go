@@ -128,7 +128,6 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			cache[rType] = v
 			continue
 		}
-		// TODO: ptr to json.Marshaler
 
 		// check encoding.TextMarshaler interface
 		if typ.Implements(textMarshalerType) {
@@ -141,7 +140,6 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			cache[rType] = v
 			continue
 		}
-		// TODO: ptr to encoding.TextMarshaler
 
 		if kindRType := encoderKindMap[kind]; kindRType != 0 {
 			// TODO: shall we make this an option?
