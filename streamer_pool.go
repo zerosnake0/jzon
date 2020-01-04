@@ -16,7 +16,9 @@ func NewStreamerPool() *StreamerPool {
 	return &StreamerPool{
 		pool: sync.Pool{
 			New: func() interface{} {
-				return &Streamer{}
+				return &Streamer{
+					buffer: make([]byte, 0, 64),
+				}
 			},
 		},
 	}
@@ -24,17 +26,10 @@ func NewStreamerPool() *StreamerPool {
 
 func (p *StreamerPool) BorrowStreamer() *Streamer {
 	s := p.pool.Get().(*Streamer)
-	s.buffer = getEmptyByteSlice()
-	s.poped = false
-	s.safeSet = htmlSafeSet[:]
 	return s
 }
 
 func (p *StreamerPool) ReturnStreamer(s *Streamer) {
 	s.reset()
-	if s.buffer != nil {
-		releaseByteSlice(s.buffer)
-		s.buffer = nil
-	}
 	p.pool.Put(s)
 }

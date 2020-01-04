@@ -46,6 +46,7 @@ type Encoder struct {
 	internalCache encoderCache
 
 	escapeHtml      bool
+	safeSet         []string
 	tag             string
 	onlyTaggedField bool
 }
@@ -71,6 +72,11 @@ func NewEncoder(opt *EncoderOption) *Encoder {
 	}
 	enc.encoderCache.Store(cache)
 	enc.internalCache = internalCache
+	if enc.escapeHtml {
+		enc.safeSet = htmlSafeSet[:]
+	} else {
+		enc.safeSet = safeSet[:]
+	}
 	return &enc
 }
 
@@ -81,8 +87,8 @@ func (enc *Encoder) Marshal(obj interface{}) ([]byte, error) {
 	if s.Error != nil {
 		return nil, s.Error
 	}
-	b := s.buffer
-	s.buffer = nil
+	b := make([]byte, len(s.buffer))
+	copy(b, s.buffer)
 	return b, nil
 }
 
