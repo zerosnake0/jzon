@@ -87,6 +87,10 @@ func (enc *Encoder) Marshal(obj interface{}) ([]byte, error) {
 	if s.Error != nil {
 		return nil, s.Error
 	}
+	// we make a new slice with explicit size,
+	//   1. the internal buffer may be much longer than the output one,
+	//      it can be used for longer output
+	//   2. avoid calling bytes buffer pool (sync.Pool)
 	b := make([]byte, len(s.buffer))
 	copy(b, s.buffer)
 	return b, nil
