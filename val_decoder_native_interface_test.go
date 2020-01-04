@@ -335,7 +335,7 @@ func TestValDecoder_Native_Interface_Loop(t *testing.T) {
 	 */
 	t.Run("compatible with standard", func(t *testing.T) {
 		// we have different behavior with standard library for this test
-		t.SkipNow()
+		skipTest(t, "eface looping")
 		var o1 interface{}
 		o1 = &o1
 		var o2 interface{}

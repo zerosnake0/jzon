@@ -160,6 +160,7 @@ func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
 		 * only one of the following two test can succeed
 		 */
 		t.Run("value", func(t *testing.T) {
+			skipTest(t, "pointer encoder on value")
 			checkEncodeValueWithStandard(t, st{
 				A: testJsonMarshaler2{
 					data: `{"a":2}`,

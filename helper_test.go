@@ -4,11 +4,16 @@ import (
 	"io"
 	"reflect"
 	"runtime"
+	"testing"
 )
 
 var (
 	runtimeErrorType = reflect.TypeOf((*runtime.Error)(nil)).Elem()
 )
+
+func skipTest(t *testing.T, fmt string, args ...interface{}) {
+	t.Skipf(fmt, args...)
+}
 
 func withIterator(data string, cb func(it *Iterator)) {
 	it := NewIterator()
