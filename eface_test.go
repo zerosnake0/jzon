@@ -1,7 +1,9 @@
 package jzon
 
 import (
+	"log"
 	"reflect"
+	"runtime/debug"
 	"testing"
 	"unsafe"
 
@@ -34,4 +36,61 @@ func TestEface(t *testing.T) {
 	t.Logf("%+v %+v", v, ok)
 	require.True(t, ok)
 	require.Equal(t, &a, v)
+}
+
+func TestEface2(t *testing.T) {
+	func() {
+		i := 1
+		var o interface{} = i
+		ef := packEFace(rtypeOfType(reflect.TypeOf(i)), unsafe.Pointer(&i))
+
+		t.Log("o", o)
+		t.Log("ef", ef)
+		i2 := ef.(int)
+		t.Log("i2", i2)
+
+		i = 2
+		t.Log("o", o)
+		t.Log("ef", ef)
+		t.Log("i2", i2)
+	}()
+	debug.FreeOSMemory()
+}
+
+type testEFstruct struct {
+	a int
+}
+
+func (t testEFstruct) Foo() {
+	log.Printf("calling %x", unsafe.Pointer(&t))
+	t.a++
+}
+
+func (t testEFstruct) Int() int {
+	return t.a
+}
+
+func TestEface3(t *testing.T) {
+	func() {
+		var st testEFstruct
+		log.Printf("&st, %p", &st)
+		log.Printf("st.a, %d", st.a)
+		type ifoo interface {
+			Foo()
+			Int() int
+		}
+
+		var foo ifoo = st
+		foo.Foo()
+		log.Printf("st.a, %d", st.a)
+		log.Printf("foo.Int(), %d", foo.Int())
+		foo.Foo()
+		log.Printf("foo.Int(), %d", foo.Int())
+
+		ef := packEFace(rtypeOfType(reflect.TypeOf(st)), unsafe.Pointer(&st))
+		foo = ef.(ifoo)
+		foo.Foo()
+		log.Printf("st.a, %d", st.a)
+	}()
+	debug.FreeOSMemory()
 }
