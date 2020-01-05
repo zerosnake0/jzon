@@ -152,7 +152,7 @@ func checkEncodeWithStandardInternal(t *testing.T, jsonOpt func(*json.Encoder), 
 func checkEncodeValueWithStandard(t *testing.T, obj interface{},
 	expErr interface{}) {
 	checkEncodeWithStandard(t, obj, func(s *Streamer) {
-		s.Value(obj)
+		s.Value2(obj)
 	}, expErr)
 }
 

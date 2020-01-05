@@ -24,3 +24,8 @@ func rtypeOfType(typ reflect.Type) rtype {
 	ef := (*eface)(unsafe.Pointer(&typ))
 	return rtype(ef.data)
 }
+
+func ptrOfValue(val reflect.Value) unsafe.Pointer {
+	o := val.Interface()
+	return (*eface)(unsafe.Pointer(&o)).data
+}

@@ -53,3 +53,44 @@ func (enc *sliceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {
 	}
 	s.ArrayEnd()
 }
+
+type sliceEncoderBuilder2 struct {
+	encoder  *sliceEncoder2
+	elemType reflect.Type
+}
+
+func newSliceEncoder2(typ reflect.Type) *sliceEncoderBuilder2 {
+	elemType := typ.Elem()
+	return &sliceEncoderBuilder2{
+		encoder:  &sliceEncoder2{},
+		elemType: elemType,
+	}
+}
+
+type sliceEncoder2 struct {
+	elemEncoder ValEncoder2
+}
+
+func (enc *sliceEncoder2) Encode2(v reflect.Value, s *Streamer, _ *EncOpts) {
+	if s.Error != nil {
+		return
+	}
+	if v.IsNil() {
+		s.Null()
+		return
+	}
+	s.ArrayStart()
+	l := v.Len()
+	i := 0
+	for {
+		enc.elemEncoder.Encode2(v.Index(i), s, nil)
+		if s.Error != nil {
+			return
+		}
+		i++
+		if i == l {
+			break
+		}
+	}
+	s.ArrayEnd()
+}

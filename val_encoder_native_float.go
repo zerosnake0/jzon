@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"reflect"
 	"unsafe"
 )
 
@@ -15,6 +16,11 @@ func (*float32Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	s.Float32(*(*float32)(ptr))
 }
 
+func (*float32Encoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	ptr := ptrOfValue(v)
+	s.Float32(*(*float32)(ptr))
+}
+
 // float64 encoder
 type float64Encoder struct{}
 
@@ -23,5 +29,10 @@ func (*float64Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 		s.Null()
 		return
 	}
+	s.Float64(*(*float64)(ptr))
+}
+
+func (*float64Encoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	ptr := ptrOfValue(v)
 	s.Float64(*(*float64)(ptr))
 }

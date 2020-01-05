@@ -71,16 +71,34 @@ func (t testEFstruct) Int() int {
 }
 
 func TestEface3(t *testing.T) {
+	var f func(o interface{}, i int)
+	f = func(o interface{}, i int) {
+		ef := (*eface)(unsafe.Pointer(&o))
+		log.Println("->", i, ef.data)
+		if i > 0 {
+			f(o, i-1)
+		}
+	}
+	f2 := func(o interface{}) {
+		v := reflect.ValueOf(o)
+		o2 := v.Interface()
+		f(o2, 1)
+	}
 	func() {
 		var st testEFstruct
+		f(st, 1)
 		log.Printf("&st, %p", &st)
 		log.Printf("st.a, %d", st.a)
+
+		f2(st)
+
 		type ifoo interface {
 			Foo()
 			Int() int
 		}
 
 		var foo ifoo = st
+		log.Println("iface data", (*iface)(unsafe.Pointer(&foo)).data)
 		foo.Foo()
 		log.Printf("st.a, %d", st.a)
 		log.Printf("foo.Int(), %d", foo.Int())

@@ -8,6 +8,10 @@ func Marshal(o interface{}) ([]byte, error) {
 	return DefaultEncoder.Marshal(o)
 }
 
+func Marshal2(o interface{}) ([]byte, error) {
+	return DefaultEncoder.Marshal2(o)
+}
+
 func Valid(data []byte) bool {
 	it := NewIterator()
 	b := it.Valid(data)

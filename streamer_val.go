@@ -22,3 +22,21 @@ func (s *Streamer) Value(obj interface{}) *Streamer {
 	enc.Encode(ef.data, s, nil)
 	return s
 }
+
+func (s *Streamer) Value2(obj interface{}) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	if obj == nil {
+		s.Null()
+		return s
+	}
+	v := reflect.ValueOf(obj)
+	typ := v.Type()
+	enc := s.encoder.getEncoderFromCache2(typ)
+	if enc == nil {
+		enc = s.encoder.createEncoder2(typ)
+	}
+	enc.Encode2(v, s, nil)
+	return s
+}

@@ -38,12 +38,21 @@ func (cache encoderCache) preferPtrEncoder(typ reflect.Type) ValEncoder {
 	}
 }
 
+type encoderCache2 map[reflect.Type]ValEncoder2
+
+func (cache encoderCache2) has(typ reflect.Type) bool {
+	_, ok := cache[typ]
+	return ok
+}
+
 type Encoder struct {
 	cacheMu sync.Mutex
 	// the encoder cache, or root encoder cache
 	encoderCache atomic.Value
 	// the internal cache
 	internalCache encoderCache
+
+	encoderCache2 atomic.Value
 
 	escapeHtml      bool
 	safeSet         []string
@@ -58,6 +67,7 @@ func NewEncoder(opt *EncoderOption) *Encoder {
 	}
 	cache := encoderCache{}
 	internalCache := encoderCache{}
+	cache2 := encoderCache2{}
 	if opt != nil {
 		for typ, valEnc := range opt.ValEncoders {
 			rtype := rtypeOfType(typ)
@@ -72,6 +82,7 @@ func NewEncoder(opt *EncoderOption) *Encoder {
 	}
 	enc.encoderCache.Store(cache)
 	enc.internalCache = internalCache
+	enc.encoderCache2.Store(cache2)
 	if enc.escapeHtml {
 		enc.safeSet = htmlSafeSet[:]
 	} else {
@@ -96,8 +107,28 @@ func (enc *Encoder) Marshal(obj interface{}) ([]byte, error) {
 	return b, nil
 }
 
+func (enc *Encoder) Marshal2(obj interface{}) ([]byte, error) {
+	s := enc.NewStreamer()
+	defer enc.ReturnStreamer(s)
+	s.Value2(obj)
+	if s.Error != nil {
+		return nil, s.Error
+	}
+	// we make a new slice with explicit size,
+	//   1. the internal buffer may be much longer than the output one,
+	//      it can be used for longer output
+	//   2. avoid calling bytes buffer pool (sync.Pool)
+	b := make([]byte, len(s.buffer))
+	copy(b, s.buffer)
+	return b, nil
+}
+
 func (enc *Encoder) getEncoderFromCache(rtype rtype) ValEncoder {
 	return enc.encoderCache.Load().(encoderCache)[rtype]
+}
+
+func (enc *Encoder) getEncoderFromCache2(typ reflect.Type) ValEncoder2 {
+	return enc.encoderCache2.Load().(encoderCache2)[typ]
 }
 
 func (enc *Encoder) createEncoder(rtype rtype, typ reflect.Type) ValEncoder {
@@ -115,6 +146,22 @@ func (enc *Encoder) createEncoder(rtype rtype, typ reflect.Type) ValEncoder {
 	enc.createEncoderInternal(newCache, enc.internalCache, typ)
 	enc.encoderCache.Store(newCache)
 	return newCache[rtype]
+}
+
+func (enc *Encoder) createEncoder2(typ reflect.Type) ValEncoder2 {
+	enc.cacheMu.Lock()
+	defer enc.cacheMu.Unlock()
+	cache := enc.encoderCache2.Load().(encoderCache2)
+	if ve := cache[typ]; ve != nil {
+		return ve
+	}
+	newCache := encoderCache2{}
+	for k, v := range cache {
+		newCache[k] = v
+	}
+	enc.createEncoderInternal2(newCache, typ)
+	enc.encoderCache2.Store(newCache)
+	return newCache[typ]
 }
 
 func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typesToCreate ...reflect.Type) {
@@ -137,8 +184,6 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			cache[rType] = v
 			continue
 		}
-
-		kind := typ.Kind()
 
 		// check json.Marshaler interface
 		if typ.Implements(jsonMarshalerType) {
@@ -192,6 +237,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			continue
 		}
 
+		kind := typ.Kind()
 		if kindRType := encoderKindMap[kind]; kindRType != 0 {
 			// TODO: shall we make this an option?
 			// TODO: so that only the native type is affected?
@@ -350,6 +396,95 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			} else {
 				cache[rType] = &directEncoder{x.encoder}
 			}
+		}
+	}
+}
+
+func (enc *Encoder) createEncoderInternal2(cache encoderCache2, typesToCreate ...reflect.Type) {
+	rebuildMap := map[reflect.Type]interface{}{}
+	idx := len(typesToCreate) - 1
+	for idx >= 0 {
+		typ := typesToCreate[idx]
+
+		typesToCreate = typesToCreate[:idx]
+		idx -= 1
+
+		if cache.has(typ) {
+			continue
+		}
+
+		if v, ok := globalValEncoders2[typ]; ok {
+			cache[typ] = v
+			continue
+		}
+
+		if typ.Implements(jsonMarshalerType) {
+			if typ.Kind() == reflect.Ptr {
+				cache[typ] = &jsonMarshalerPointerEncoder2{typ}
+			} else {
+				cache[typ] = &jsonMarshalerEncoder2{typ}
+			}
+			continue
+		}
+
+		// TODO: text marshaler
+
+		kind := typ.Kind()
+		if kindType := encoderKindMap2[kind]; kindType != nil {
+			if v, ok := cache[kindType]; ok {
+				cache[typ] = v
+				continue
+			}
+
+			if v := kindEncoders2[kind]; v != nil {
+				cache[typ] = v
+				continue
+			}
+		}
+
+		switch kind {
+		case reflect.Ptr:
+			elemType := typ.Elem()
+			typesToCreate = append(typesToCreate, elemType)
+			idx += 1
+			w := newPointerEncoder2(elemType)
+			rebuildMap[typ] = w
+			cache[typ] = w.encoder
+		case reflect.Array:
+			if typ.Len() == 0 {
+				cache[typ] = (*emptyArrayEncoder)(nil)
+			} else {
+				elemType := typ.Elem()
+				typesToCreate = append(typesToCreate, elemType)
+				idx += 1
+				w := newArrayEncoder2(typ)
+				rebuildMap[typ] = w
+				cache[typ] = w.encoder
+			}
+		case reflect.Slice:
+			elemType := typ.Elem()
+			if elemType.Kind() == reflect.Uint8 {
+				v, ok := cache[elemType]
+				if !ok || v == (*uint8Encoder)(nil) {
+					cache[typ] = (*base64Encoder)(nil)
+					continue
+				}
+			}
+			typesToCreate = append(typesToCreate, elemType)
+			idx += 1
+			w := newSliceEncoder2(typ)
+			rebuildMap[typ] = w
+			cache[typ] = w.encoder
+		}
+	}
+	for _, builder := range rebuildMap {
+		switch x := builder.(type) {
+		case *pointerEncoderBuilder2:
+			x.encoder.encoder = cache[x.elemType]
+		case *arrayEncoderBuilder2:
+			x.encoder.encoder = cache[x.elemType]
+		case *sliceEncoderBuilder2:
+			x.encoder.elemEncoder = cache[x.elemType]
 		}
 	}
 }

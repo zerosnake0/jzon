@@ -16,6 +16,10 @@ func (enc *emptyArrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncO
 	s.RawString("[]")
 }
 
+func (enc *emptyArrayEncoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	s.RawString("[]")
+}
+
 type arrayEncoderBuilder struct {
 	encoder   *arrayEncoder
 	elemRType rtype
@@ -55,6 +59,42 @@ func (enc *arrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {
 			break
 		}
 		ptr = add(ptr, enc.elemSize, "i < enc.length")
+	}
+	s.ArrayEnd()
+}
+
+type arrayEncoderBuilder2 struct {
+	encoder  *arrayEncoder2
+	elemType reflect.Type
+}
+
+func newArrayEncoder2(typ reflect.Type) *arrayEncoderBuilder2 {
+	elemType := typ.Elem()
+	return &arrayEncoderBuilder2{
+		encoder: &arrayEncoder2{
+			length: typ.Len(),
+		},
+		elemType: elemType,
+	}
+}
+
+type arrayEncoder2 struct {
+	encoder ValEncoder2
+	length  int
+}
+
+func (enc *arrayEncoder2) Encode2(v reflect.Value, s *Streamer, _ *EncOpts) {
+	s.ArrayStart()
+	i := 0
+	for {
+		enc.encoder.Encode2(v.Index(i), s, nil)
+		if s.Error != nil {
+			return
+		}
+		i++
+		if i == enc.length {
+			break
+		}
 	}
 	s.ArrayEnd()
 }

@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"reflect"
 	"unsafe"
 )
 
@@ -12,6 +13,15 @@ func (*uint8Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 		s.Null()
 		return
 	}
+	if opts == nil || !opts.Quoted {
+		s.Uint8(*(*uint8)(ptr))
+	} else {
+		s.quotedUint8(*(*uint8)(ptr))
+	}
+}
+
+func (*uint8Encoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	ptr := ptrOfValue(v)
 	if opts == nil || !opts.Quoted {
 		s.Uint8(*(*uint8)(ptr))
 	} else {
@@ -34,6 +44,15 @@ func (*uint16Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	}
 }
 
+func (*uint16Encoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	ptr := ptrOfValue(v)
+	if opts == nil || !opts.Quoted {
+		s.Uint16(*(*uint16)(ptr))
+	} else {
+		s.quotedUint16(*(*uint16)(ptr))
+	}
+}
+
 // uint32 encoder
 type uint32Encoder struct{}
 
@@ -49,6 +68,15 @@ func (*uint32Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	}
 }
 
+func (*uint32Encoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	ptr := ptrOfValue(v)
+	if opts == nil || !opts.Quoted {
+		s.Uint32(*(*uint32)(ptr))
+	} else {
+		s.quotedUint32(*(*uint32)(ptr))
+	}
+}
+
 // uint64 encoder
 type uint64Encoder struct{}
 
@@ -57,6 +85,15 @@ func (*uint64Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 		s.Null()
 		return
 	}
+	if opts == nil || !opts.Quoted {
+		s.Uint64(*(*uint64)(ptr))
+	} else {
+		s.quotedUint64(*(*uint64)(ptr))
+	}
+}
+
+func (*uint64Encoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	ptr := ptrOfValue(v)
 	if opts == nil || !opts.Quoted {
 		s.Uint64(*(*uint64)(ptr))
 	} else {
