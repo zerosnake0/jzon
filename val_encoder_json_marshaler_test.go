@@ -223,6 +223,30 @@ func (m testDirectJsonMarshaler) MarshalJSON() ([]byte, error) {
 }
 
 func TestValEncoder_JsonMarshaler_Direct(t *testing.T) {
+	t.Run("value", func(t *testing.T) {
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, testDirectJsonMarshaler(nil), nil)
+		})
+		t.Run("non nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, testDirectJsonMarshaler{
+				1: 2,
+			}, nil)
+		})
+	})
+	t.Run("pointer", func(t *testing.T) {
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, (*testDirectJsonMarshaler)(nil), nil)
+		})
+		t.Run("non nil", func(t *testing.T) {
+			var m testDirectJsonMarshaler
+			checkEncodeValueWithStandard(t, &m, nil)
+		})
+		t.Run("non nil 2", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, &testDirectJsonMarshaler{
+				1: 2,
+			}, nil)
+		})
+	})
 	t.Run("struct member", func(t *testing.T) {
 		type st struct {
 			A testDirectJsonMarshaler
