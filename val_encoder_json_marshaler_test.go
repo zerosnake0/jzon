@@ -3,6 +3,7 @@ package jzon
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -152,27 +153,37 @@ func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
 		})
 	})
 	t.Run("struct member", func(t *testing.T) {
-		type st struct {
-			A testJsonMarshaler2
-		}
-		/*
-		 * with the current implementation,
-		 * only one of the following two test can succeed
-		 */
 		t.Run("value", func(t *testing.T) {
-			skipTest(t, "pointer encoder on value")
-			checkEncodeValueWithStandard(t, st{
-				A: testJsonMarshaler2{
-					data: `{"a":2}`,
-				},
-			}, nil)
+			type st struct {
+				A testJsonMarshaler2
+			}
+			/*
+			 * with the current implementation,
+			 * only one of the following two test can succeed
+			 */
+			t.Run("value", func(t *testing.T) {
+				skipTest(t, "pointer encoder on value")
+				checkEncodeValueWithStandard(t, st{
+					A: testJsonMarshaler2{
+						data: `{"a":2}`,
+					},
+				}, nil)
+			})
+			t.Run("ptr", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, &st{
+					A: testJsonMarshaler2{
+						data: `{"a":2}`,
+					},
+				}, nil)
+			})
 		})
-		t.Run("ptr", func(t *testing.T) {
-			checkEncodeValueWithStandard(t, &st{
-				A: testJsonMarshaler2{
-					data: `{"a":2}`,
-				},
-			}, nil)
+		t.Run("pointer", func(t *testing.T) {
+			type st struct {
+				A *testJsonMarshaler2
+			}
+			t.Run("nil", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, &st{}, nil)
+			})
 		})
 	})
 }
@@ -201,5 +212,21 @@ func TestValEncoder_DynamicJsonMarshaler(t *testing.T) {
 			data: `"test 2"`,
 		}
 		checkEncodeValueWithStandard(t, &i, nil)
+	})
+}
+
+type testDirectJsonMarshaler map[int]int
+
+func (m testDirectJsonMarshaler) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("%d", len(m))
+	return []byte(s), nil
+}
+
+func TestValEncoder_JsonMarshaler_Direct(t *testing.T) {
+	t.Run("struct member", func(t *testing.T) {
+		type st struct {
+			A testDirectJsonMarshaler
+		}
+		checkEncodeValueWithStandard(t, &st{}, nil)
 	})
 }
