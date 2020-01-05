@@ -3,6 +3,7 @@ package jzon
 import (
 	"encoding"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -36,6 +37,9 @@ type testTextMarshaler2 struct {
 }
 
 func (m *testTextMarshaler2) MarshalText() ([]byte, error) {
+	if m == nil {
+		return []byte(`is_null`), nil
+	}
 	return []byte(m.data), m.err
 }
 
@@ -124,5 +128,45 @@ func TestValEncoder_DynamicTextMarshaler(t *testing.T) {
 			data: `"test 2"`,
 		}
 		checkEncodeValueWithStandard(t, &i, nil)
+	})
+}
+
+type testDirectTextMarshaler map[int]int
+
+func (m testDirectTextMarshaler) MarshalText() ([]byte, error) {
+	s := fmt.Sprintf("%d", len(m))
+	return []byte(s), nil
+}
+
+func TestValEncoder_TextMarshaler_Direct(t *testing.T) {
+	t.Run("value", func(t *testing.T) {
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, testDirectTextMarshaler(nil), nil)
+		})
+		t.Run("non nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, testDirectTextMarshaler{
+				1: 2,
+			}, nil)
+		})
+	})
+	t.Run("pointer", func(t *testing.T) {
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, (*testDirectTextMarshaler)(nil), nil)
+		})
+		t.Run("non nil", func(t *testing.T) {
+			var m testDirectTextMarshaler
+			checkEncodeValueWithStandard(t, &m, nil)
+		})
+		t.Run("non nil 2", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, &testDirectTextMarshaler{
+				1: 2,
+			}, nil)
+		})
+	})
+	t.Run("struct member", func(t *testing.T) {
+		type st struct {
+			A testDirectTextMarshaler
+		}
+		checkEncodeValueWithStandard(t, &st{}, nil)
 	})
 }

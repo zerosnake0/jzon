@@ -23,11 +23,22 @@ type testJsonMarshaler2 struct {
 
 func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
 	if m == nil {
-		// return []byte(`"is_null"`), nil
-		return []byte(`null`), nil
+		return []byte(`"is_null"`), nil
+		// return []byte(`null`), nil
 	}
 	return []byte(m.data), m.err
 }
+
+/* The following struct definition is not allowed
+type testJsonMarshaler3 struct {
+}
+
+type pTestJsonMarshaler3 *testJsonMarshaler3
+
+func (pTestJsonMarshaler3) MarshalJSON() ([]byte, error) {
+	return nil, nil
+}
+*/
 
 func TestValEncoder_JsonMarshaler_Error(t *testing.T) {
 	t.Run("chain error", func(t *testing.T) {
