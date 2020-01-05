@@ -13,12 +13,12 @@ func (s *Streamer) Value(obj interface{}) *Streamer {
 		s.Null()
 		return s
 	}
-	eface := (*eface)(unsafe.Pointer(&obj))
-	enc := s.encoder.getEncoderFromCache(eface.rtype)
+	ef := (*eface)(unsafe.Pointer(&obj))
+	enc := s.encoder.getEncoderFromCache(ef.rtype)
 	if enc == nil {
 		typ := reflect.TypeOf(obj)
-		enc = s.encoder.createEncoder(eface.rtype, typ)
+		enc = s.encoder.createEncoder(ef.rtype, typ)
 	}
-	enc.Encode(eface.data, s, nil)
+	enc.Encode(ef.data, s, nil)
 	return s
 }

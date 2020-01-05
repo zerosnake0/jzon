@@ -22,6 +22,10 @@ type testJsonMarshaler2 struct {
 }
 
 func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
+	if m == nil {
+		// return []byte(`"is_null"`), nil
+		return []byte(`null`), nil
+	}
 	return []byte(m.data), m.err
 }
 

@@ -142,19 +142,33 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 
 		// check json.Marshaler interface
 		if typ.Implements(jsonMarshalerType) {
-			v := jsonMarshalerEncoder(rType)
 			if ifaceIndir(rType) {
+				v := jsonMarshalerEncoder(rType)
 				internalCache[rType] = v
-			} else {
-				internalCache[rType] = &pointerEncoder{v}
+				cache[rType] = v
+				continue
 			}
-			cache[rType] = v
+			if typ.Kind() == reflect.Ptr {
+				elemType := typ.Elem()
+				if elemType.Implements(jsonMarshalerType) {
+					typesToCreate = append(typesToCreate, elemType)
+					idx += 1
+					w := newPointerEncoder(elemType)
+					internalCache[rType] = w.encoder
+					rebuildMap[rType] = w
+					continue
+				}
+			}
+			v := directJsonMarshalerEncoder(rType)
+			internalCache[rType] = v
+			cache[rType] = &directEncoder{v}
 			continue
 		}
 
 		// check encoding.TextMarshaler interface
 		if typ.Implements(textMarshalerType) {
 			v := textMarshalerEncoder(rType)
+			// TODO:
 			if ifaceIndir(rType) {
 				internalCache[rType] = v
 			} else {
