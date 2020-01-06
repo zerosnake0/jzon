@@ -56,6 +56,36 @@ func (ef *encoderFields) add(f *field, escapeHtml bool, enc ValEncoder) {
 	})
 }
 
+type encoderFieldInfo2 struct {
+	index    []int
+	rawField []byte
+	quoted   bool
+	encoder  ValEncoder2
+}
+
+type encoderFields2 struct {
+	list []encoderFieldInfo2
+}
+
+func (ef *encoderFields2) init(size int) {
+	ef.list = make([]encoderFieldInfo2, 0, size)
+}
+
+func (ef *encoderFields2) add(f *field, escapeHtml bool, enc ValEncoder2) {
+	var rawField []byte
+	if escapeHtml {
+		rawField = encodeString(rawField, f.name, htmlSafeSet[:])
+	} else {
+		rawField = encodeString(rawField, f.name, safeSet[:])
+	}
+	ef.list = append(ef.list, encoderFieldInfo2{
+		index:    f.index,
+		rawField: rawField,
+		quoted:   f.quoted,
+		encoder:  enc,
+	})
+}
+
 // struct encoder
 type structEncoder struct {
 	fields encoderFields
@@ -70,41 +100,94 @@ func (enc *structEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts)
 		return
 	}
 	s.ObjectStart()
+OuterLoop:
 	for i := range enc.fields.list {
 		fi := &enc.fields.list[i]
 		curPtr := add(ptr, fi.offsets[0], "struct field")
 		// ptr != nil => curPtr != nil
-		broken := false
 		for _, offset := range fi.offsets[1:] {
 			curPtr = *(*unsafe.Pointer)(curPtr)
 			if curPtr == nil {
-				broken = true // the embedded pointer field is nil
-				break
+				// the embedded pointer field is nil
+				continue OuterLoop
 			}
 			curPtr = add(curPtr, offset, "struct field")
 		}
-		if !broken {
-			s.RawField(fi.rawField)
-			opt := EncOpts{
-				Quoted: fi.quoted,
+		s.RawField(fi.rawField)
+		opt := EncOpts{
+			Quoted: fi.quoted,
+		}
+		fi.encoder.Encode(curPtr, s, &opt)
+		if s.Error != nil {
+			return
+		}
+	}
+	s.ObjectEnd()
+}
+
+type structEncoderBuilder2 struct {
+	encoder *structEncoder2
+	fields  structFields
+}
+
+func (enc *Encoder) newStructEncoder2(typ reflect.Type) *structEncoderBuilder2 {
+	fields := describeStruct(typ, enc.tag, enc.onlyTaggedField)
+	if fields.count() == 0 {
+		return nil
+	}
+	return &structEncoderBuilder2{
+		encoder: &structEncoder2{},
+		fields:  fields,
+	}
+}
+
+// struct encoder
+type structEncoder2 struct {
+	fields encoderFields2
+}
+
+func (enc *structEncoder2) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	if s.Error != nil {
+		return
+	}
+	s.ObjectStart()
+OuterLoop:
+	for i := range enc.fields.list {
+		fi := &enc.fields.list[i]
+		field := v
+		for i := range fi.index {
+			field = v.Field(fi.index[i])
+			if field.Kind() == reflect.Ptr {
+				if field.IsNil() {
+					continue OuterLoop
+				}
+				field = field.Elem()
 			}
-			fi.encoder.Encode(curPtr, s, &opt)
-			if s.Error != nil {
-				return
-			}
+
+		}
+		s.RawField(fi.rawField)
+		opt := EncOpts{
+			Quoted: fi.quoted,
+		}
+		fi.encoder.Encode2(field, s, &opt)
+		if s.Error != nil {
+			return
 		}
 	}
 	s.ObjectEnd()
 }
 
 // no fields to encoder
-type emptyStructEncoder struct {
-}
+type emptyStructEncoder struct{}
 
-func (enc *emptyStructEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*emptyStructEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return
 	}
+	s.RawString("{}")
+}
+
+func (*emptyStructEncoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
 	s.RawString("{}")
 }

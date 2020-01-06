@@ -26,6 +26,6 @@ func rtypeOfType(typ reflect.Type) rtype {
 }
 
 func ptrOfValue(val reflect.Value) unsafe.Pointer {
-	o := val.Interface()
-	return (*eface)(unsafe.Pointer(&o)).data
+	ptr := (*[2]uintptr)(unsafe.Pointer(&val))
+	return unsafe.Pointer(ptr[1])
 }

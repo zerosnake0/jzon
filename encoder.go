@@ -1,7 +1,6 @@
 package jzon
 
 import (
-	"log"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -444,7 +443,6 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 func (enc *Encoder) createEncoderInternal2(cache encoderCache2, typesToCreate typQueue2) {
 	rebuildMap := map[reflect.Type]interface{}{}
 	for typ := typesToCreate.pop(); typ != nil; typ = typesToCreate.pop() {
-		log.Println("createEncoderInternal2", typ)
 		if cache.has(typ) {
 			continue
 		}
@@ -522,6 +520,21 @@ func (enc *Encoder) createEncoderInternal2(cache encoderCache2, typesToCreate ty
 				rebuildMap[typ] = w
 				cache[typ] = w.encoder
 			}
+		case reflect.Struct:
+			w := enc.newStructEncoder2(typ)
+			if w == nil {
+				// no fields to marshal
+				cache[typ] = (*emptyStructEncoder)(nil)
+			} else {
+				for i := range w.fields.list {
+					fi := &w.fields.list[i]
+					typesToCreate.pushAlsoPtr(fi.ptrType.Elem())
+				}
+				rebuildMap[typ] = w
+				cache[typ] = w.encoder
+			}
+		default:
+			cache[typ] = notSupportedEncoder(typ.String())
 		}
 	}
 	// rebuild base64 encoders
@@ -579,6 +592,13 @@ func (enc *Encoder) createEncoderInternal2(cache encoderCache2, typesToCreate ty
 				v = ce.valueEnc
 			}
 			x.encoder.elemEncoder = v
+		case *structEncoderBuilder2:
+			x.encoder.fields.init(len(x.fields.list))
+			for i := range x.fields.list {
+				fi := &x.fields.list[i]
+				v := cache[fi.ptrType.Elem()]
+				x.encoder.fields.add(fi, enc.escapeHtml, v)
+			}
 		}
 	}
 }
