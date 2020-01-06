@@ -79,8 +79,12 @@ func (enc *sliceEncoder2) Encode2(v reflect.Value, s *Streamer, _ *EncOpts) {
 		s.Null()
 		return
 	}
-	s.ArrayStart()
 	l := v.Len()
+	if l == 0 {
+		s.RawString("[]")
+		return
+	}
+	s.ArrayStart()
 	i := 0
 	for {
 		enc.elemEncoder.Encode2(v.Index(i), s, nil)
