@@ -155,16 +155,17 @@ OuterLoop:
 	for i := range enc.fields.list {
 		fi := &enc.fields.list[i]
 		field := v
-		for i := range fi.index {
-			field = v.Field(fi.index[i])
+		l := len(fi.index) - 1
+		for i := 0; i < l; i++ {
+			field = field.Field(fi.index[i])
 			if field.Kind() == reflect.Ptr {
 				if field.IsNil() {
 					continue OuterLoop
 				}
 				field = field.Elem()
 			}
-
 		}
+		field = field.Field(fi.index[l])
 		s.RawField(fi.rawField)
 		opt := EncOpts{
 			Quoted: fi.quoted,

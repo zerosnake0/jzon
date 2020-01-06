@@ -46,8 +46,7 @@ type pointerEncoder2 struct {
 }
 
 func (enc *pointerEncoder2) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
-	ptr := ptrOfValue(v)
-	if ptr == nil {
+	if v.IsNil() {
 		s.Null()
 		return
 	}
