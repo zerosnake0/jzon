@@ -517,7 +517,8 @@ func (enc *Encoder) createEncoderInternal2(cache encoderCache2, typesToCreate ty
 			if w == nil {
 				cache[typ] = notSupportedEncoder(typ.String())
 			} else {
-				typesToCreate.pushAlsoPtr(typ.Elem())
+				// the map element is never addressable
+				typesToCreate.push(typ.Elem())
 				rebuildMap[typ] = w
 				cache[typ] = w.encoder
 			}
