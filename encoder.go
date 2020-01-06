@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"log"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -43,6 +44,19 @@ type encoderCache2 map[reflect.Type]ValEncoder2
 func (cache encoderCache2) has(typ reflect.Type) bool {
 	_, ok := cache[typ]
 	return ok
+}
+
+// check if the type has a special addr encoder
+func (cache encoderCache2) addrEncoder(typ reflect.Type) ValEncoder2 {
+	ptrType := reflect.PtrTo(typ)
+	ptrEnc, ok := cache[ptrType]
+	if !ok {
+		return nil
+	}
+	if _, ok := ptrEnc.(*pointerEncoder2); ok {
+		return nil
+	}
+	return ptrEnc
 }
 
 type Encoder struct {
@@ -148,6 +162,31 @@ func (enc *Encoder) createEncoder(rtype rtype, typ reflect.Type) ValEncoder {
 	return newCache[rtype]
 }
 
+type typQueue2 []reflect.Type
+
+func (tq *typQueue2) push(t reflect.Type) {
+	*tq = append(*tq, t)
+}
+
+func (tq *typQueue2) pushAlsoPtr(t reflect.Type) {
+	if t.Kind() == reflect.Ptr {
+		*tq = append(*tq, t)
+	} else {
+		*tq = append(*tq, reflect.PtrTo(t), t)
+	}
+}
+
+func (tq *typQueue2) pop() (t reflect.Type) {
+	q := *tq
+	l := len(q)
+	if l == 0 {
+		return nil
+	}
+	t = q[l-1]
+	*tq = q[:l-1]
+	return
+}
+
 func (enc *Encoder) createEncoder2(typ reflect.Type) ValEncoder2 {
 	enc.cacheMu.Lock()
 	defer enc.cacheMu.Unlock()
@@ -159,7 +198,9 @@ func (enc *Encoder) createEncoder2(typ reflect.Type) ValEncoder2 {
 	for k, v := range cache {
 		newCache[k] = v
 	}
-	enc.createEncoderInternal2(newCache, typ)
+	var tq typQueue2
+	tq.push(typ)
+	enc.createEncoderInternal2(newCache, tq)
 	enc.encoderCache2.Store(newCache)
 	return newCache[typ]
 }
@@ -400,16 +441,14 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 	}
 }
 
-func (enc *Encoder) createEncoderInternal2(cache encoderCache2, typesToCreate ...reflect.Type) {
+func (enc *Encoder) createEncoderInternal2(cache encoderCache2, typesToCreate typQueue2) {
 	rebuildMap := map[reflect.Type]interface{}{}
-	idx := len(typesToCreate) - 1
-	for idx >= 0 {
-		typ := typesToCreate[idx]
-
-		typesToCreate = typesToCreate[:idx]
-		idx -= 1
-
+	for typ := typesToCreate.pop(); typ != nil; typ = typesToCreate.pop() {
+		log.Println("createEncoderInternal2", typ)
 		if cache.has(typ) {
+			continue
+		}
+		if _, ok := rebuildMap[typ]; ok { // for some special types
 			continue
 		}
 
@@ -420,14 +459,21 @@ func (enc *Encoder) createEncoderInternal2(cache encoderCache2, typesToCreate ..
 
 		if typ.Implements(jsonMarshalerType) {
 			if typ.Kind() == reflect.Ptr {
-				cache[typ] = &jsonMarshalerPointerEncoder2{typ}
+				cache[typ] = (*jsonPointerMarshalerEncoder2)(nil)
 			} else {
-				cache[typ] = &jsonMarshalerEncoder2{typ}
+				cache[typ] = (*jsonMarshalerEncoder2)(nil)
 			}
 			continue
 		}
 
-		// TODO: text marshaler
+		if typ.Implements(textMarshalerType) {
+			if typ.Kind() == reflect.Ptr {
+				cache[typ] = (*textPointerMarshalerEncoder2)(nil)
+			} else {
+				cache[typ] = (*textMarshalerEncoder2)(nil)
+			}
+			continue
+		}
 
 		kind := typ.Kind()
 		if kindType := encoderKindMap2[kind]; kindType != nil {
@@ -445,8 +491,7 @@ func (enc *Encoder) createEncoderInternal2(cache encoderCache2, typesToCreate ..
 		switch kind {
 		case reflect.Ptr:
 			elemType := typ.Elem()
-			typesToCreate = append(typesToCreate, elemType)
-			idx += 1
+			typesToCreate.push(elemType)
 			w := newPointerEncoder2(elemType)
 			rebuildMap[typ] = w
 			cache[typ] = w.encoder
@@ -454,37 +499,106 @@ func (enc *Encoder) createEncoderInternal2(cache encoderCache2, typesToCreate ..
 			if typ.Len() == 0 {
 				cache[typ] = (*emptyArrayEncoder)(nil)
 			} else {
-				elemType := typ.Elem()
-				typesToCreate = append(typesToCreate, elemType)
-				idx += 1
+				typesToCreate.pushAlsoPtr(typ.Elem())
 				w := newArrayEncoder2(typ)
 				rebuildMap[typ] = w
 				cache[typ] = w.encoder
 			}
 		case reflect.Slice:
-			elemType := typ.Elem()
-			if elemType.Kind() == reflect.Uint8 {
-				v, ok := cache[elemType]
-				if !ok || v == (*uint8Encoder)(nil) {
-					cache[typ] = (*base64Encoder)(nil)
-					continue
-				}
-			}
-			typesToCreate = append(typesToCreate, elemType)
-			idx += 1
+			// the elements of a slice must be addressable
+			typesToCreate.pushAlsoPtr(typ.Elem())
 			w := newSliceEncoder2(typ)
 			rebuildMap[typ] = w
 			cache[typ] = w.encoder
+		case reflect.Interface:
+			cache[typ] = (*efaceEncoder)(nil)
+		case reflect.Map:
+			w := newMapEncoder2(typ)
+			if w == nil {
+				cache[typ] = notSupportedEncoder(typ.String())
+			} else {
+				typesToCreate.pushAlsoPtr(typ.Elem())
+				rebuildMap[typ] = w
+				cache[typ] = w.encoder
+			}
 		}
 	}
+	// rebuild base64 encoders
+	for typ, builder := range rebuildMap {
+		switch x := builder.(type) {
+		case *sliceEncoderBuilder2:
+			if x.elemType.Kind() != reflect.Uint8 {
+				continue
+			}
+			addrEnc := cache.addrEncoder(x.elemType)
+			if addrEnc != nil {
+				// the element has a special element addr encoder
+				continue
+			}
+			enc := cache[x.elemType]
+			if enc != (*uint8Encoder)(nil) {
+				continue
+			}
+			cache[typ] = (*base64Encoder)(nil)
+			delete(rebuildMap, typ)
+		}
+	}
+	// rebuild conditional encoder
+	for typ, typEnc := range cache {
+		addrEnc := cache.addrEncoder(typ)
+		if addrEnc == nil {
+			continue
+		}
+		cache[typ] = &conditionalEncoder{
+			addrEnc:  addrEnc,
+			valueEnc: typEnc,
+		}
+	}
+	// other encoders
 	for _, builder := range rebuildMap {
 		switch x := builder.(type) {
 		case *pointerEncoderBuilder2:
-			x.encoder.encoder = cache[x.elemType]
+			v := cache[x.elemType]
+			if _, ok := v.(*conditionalEncoder); ok {
+				panic("should not reach here")
+			}
+			x.encoder.encoder = v
 		case *arrayEncoderBuilder2:
 			x.encoder.encoder = cache[x.elemType]
 		case *sliceEncoderBuilder2:
-			x.encoder.elemEncoder = cache[x.elemType]
+			v := cache[x.elemType]
+			if ce, ok := v.(*conditionalEncoder); ok {
+				v = &addrEncoder{ce.addrEnc}
+			}
+			x.encoder.elemEncoder = v
+		case *mapEncoderBuilder2:
+			v := cache[x.mapType.Elem()]
+			if ce, ok := v.(*conditionalEncoder); ok {
+				// the map element is never addressable
+				v = ce.valueEnc
+			}
+			x.encoder.elemEncoder = v
 		}
 	}
+}
+
+type conditionalEncoder struct {
+	valueEnc ValEncoder2
+	addrEnc  ValEncoder2
+}
+
+func (ce *conditionalEncoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	if v.CanAddr() {
+		ce.addrEnc.Encode2(v.Addr(), s, opts)
+	} else {
+		ce.valueEnc.Encode2(v, s, opts)
+	}
+}
+
+type addrEncoder struct {
+	addrEnc ValEncoder2
+}
+
+func (ae *addrEncoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	ae.addrEnc.Encode2(v.Addr(), s, opts)
 }

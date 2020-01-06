@@ -93,3 +93,34 @@ func TestValEncoder_Array_Direct(t *testing.T) {
 		checkEncodeValueWithStandard(t, (*[1]*int)(nil), nil)
 	})
 }
+
+func TestValEncoder_Array_Marshaler(t *testing.T) {
+	t.Run("json marshaler", func(t *testing.T) {
+		t.Run("arr value", func(t *testing.T) {
+			t.Run("value", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, [...]testMarshalByte{'t', 'e', 's', 't'}, nil)
+			})
+			t.Run("pointer", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, [...]testMarshalByte2{'t', 'e', 's', 't'}, nil)
+			})
+		})
+		t.Run("arr ptr", func(t *testing.T) {
+			t.Run("value", func(t *testing.T) {
+				arr := [...]testMarshalByte{'t', 'e', 's', 't'}
+				checkEncodeValueWithStandard(t, &arr, nil)
+			})
+			t.Run("pointer", func(t *testing.T) {
+				arr := [...]testMarshalByte2{'t', 'e', 's', 't'}
+				checkEncodeValueWithStandard(t, &arr, nil)
+			})
+		})
+	})
+	t.Run("text marshaler", func(t *testing.T) {
+		t.Run("value", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, [...]testMarshalByte3{'t', 'e', 's', 't'}, nil)
+		})
+		t.Run("pointer", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, [...]testMarshalByte4{'t', 'e', 's', 't'}, nil)
+		})
+	})
+}

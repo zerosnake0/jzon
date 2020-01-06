@@ -23,7 +23,7 @@ func (s *Streamer) Value(obj interface{}) *Streamer {
 	return s
 }
 
-func (s *Streamer) Value2(obj interface{}) *Streamer {
+func (s *Streamer) value2(obj interface{}, opts *EncOpts) *Streamer {
 	if s.Error != nil {
 		return s
 	}
@@ -37,6 +37,10 @@ func (s *Streamer) Value2(obj interface{}) *Streamer {
 	if enc == nil {
 		enc = s.encoder.createEncoder2(typ)
 	}
-	enc.Encode2(v, s, nil)
+	enc.Encode2(v, s, opts)
 	return s
+}
+
+func (s *Streamer) Value2(obj interface{}) *Streamer {
+	return s.value2(obj, nil)
 }

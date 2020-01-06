@@ -1,13 +1,13 @@
 package jzon
 
 import (
+	"reflect"
 	"unsafe"
 )
 
-type efaceEncoder struct {
-}
+type efaceEncoder struct{}
 
-func (enc *efaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*efaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return
@@ -15,10 +15,17 @@ func (enc *efaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) 
 	s.Value(*(*interface{})(ptr))
 }
 
-type ifaceEncoder struct {
+func (*efaceEncoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	if v.IsNil() {
+		s.Null()
+		return
+	}
+	s.value2(v.Elem().Interface(), opts)
 }
 
-func (enc *ifaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+type ifaceEncoder struct{}
+
+func (*ifaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return

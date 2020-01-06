@@ -69,7 +69,26 @@ func (*dynamicTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts
 	s.String(localByteToString(b))
 }
 
-func (*dynamicTextMarshalerEncoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+type textMarshalerEncoder2 struct{}
+
+func (*textMarshalerEncoder2) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	o := v.Interface()
+	marshaler := o.(encoding.TextMarshaler)
+	b, err := marshaler.MarshalText()
+	if err != nil {
+		s.Error = err
+		return
+	}
+	s.String(localByteToString(b))
+}
+
+type textPointerMarshalerEncoder2 struct{}
+
+func (*textPointerMarshalerEncoder2) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+	if v.IsNil() {
+		s.Null()
+		return
+	}
 	o := v.Interface()
 	marshaler := o.(encoding.TextMarshaler)
 	b, err := marshaler.MarshalText()

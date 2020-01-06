@@ -19,6 +19,7 @@ var (
 	globalValEncoders2 = map[reflect.Type]ValEncoder2{}
 	encoderKindMap2    = [numKinds]reflect.Type{}
 	kindEncoders2      = [numKinds]ValEncoder2{}
+	keyEncoders2       = [numKinds]ValEncoder2{}
 )
 
 func createGlobalValEncoder(ptr interface{}, enc ValEncoder) {
@@ -59,6 +60,12 @@ func mapKeyEncoder(ptr interface{}, enc ValEncoder) {
 	keyEncoders[kind] = enc
 }
 
+func mapKeyEncoder2(ptr interface{}, enc ValEncoder2) {
+	ptrType := reflect.TypeOf(ptr)
+	kind := ptrType.Elem().Kind()
+	keyEncoders2[kind] = enc
+}
+
 func init() {
 	// standard json library types
 	createGlobalValEncoder((*json.Number)(nil), (*jsonNumberEncoder)(nil))
@@ -68,8 +75,8 @@ func init() {
 
 	createGlobalValEncoder2((*json.Number)(nil), (*jsonNumberEncoder)(nil))
 	createGlobalValEncoder2((*json.RawMessage)(nil), (*jsonRawMessageEncoder)(nil))
-	createGlobalValEncoder2((*json.Marshaler)(nil), (*dynamicJsonMarshalerEncoder)(nil))
-	createGlobalValEncoder2((*encoding.TextMarshaler)(nil), (*dynamicTextMarshalerEncoder)(nil))
+	createGlobalValEncoder2((*json.Marshaler)(nil), (*jsonPointerMarshalerEncoder2)(nil))
+	createGlobalValEncoder2((*encoding.TextMarshaler)(nil), (*textPointerMarshalerEncoder2)(nil))
 
 	// kind mapping
 	mapEncoderKind((*bool)(nil), (*boolEncoder)(nil))
@@ -144,6 +151,29 @@ func init() {
 	} else {
 		mapKeyEncoder((*uintptr)(nil), (*uint64KeyEncoder)(nil))
 	}
+
+	// object key encoders2
+	mapKeyEncoder2((*string)(nil), (*stringKeyEncoder)(nil))
+	if strconv.IntSize == 32 {
+		mapKeyEncoder2((*int)(nil), (*int32KeyEncoder)(nil))
+		mapKeyEncoder2((*uint)(nil), (*uint32KeyEncoder)(nil))
+	} else {
+		mapKeyEncoder2((*int)(nil), (*int64KeyEncoder)(nil))
+		mapKeyEncoder2((*uint)(nil), (*uint64KeyEncoder)(nil))
+	}
+	mapKeyEncoder2((*int8)(nil), (*int8KeyEncoder)(nil))
+	mapKeyEncoder2((*int16)(nil), (*int16KeyEncoder)(nil))
+	mapKeyEncoder2((*int32)(nil), (*int32KeyEncoder)(nil))
+	mapKeyEncoder2((*int64)(nil), (*int64KeyEncoder)(nil))
+	mapKeyEncoder2((*uint8)(nil), (*uint8KeyEncoder)(nil))
+	mapKeyEncoder2((*uint16)(nil), (*uint16KeyEncoder)(nil))
+	mapKeyEncoder2((*uint32)(nil), (*uint32KeyEncoder)(nil))
+	mapKeyEncoder2((*uint64)(nil), (*uint64KeyEncoder)(nil))
+	if unsafe.Sizeof(uintptr(0)) == 4 {
+		mapKeyEncoder2((*uintptr)(nil), (*uint32KeyEncoder)(nil))
+	} else {
+		mapKeyEncoder2((*uintptr)(nil), (*uint64KeyEncoder)(nil))
+	}
 }
 
 type EncOpts struct {
@@ -161,6 +191,13 @@ type ValEncoder2 interface {
 type notSupportedEncoder string
 
 func (enc notSupportedEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+	if s.Error != nil {
+		return
+	}
+	s.Error = TypeNotSupportedError(enc)
+}
+
+func (enc notSupportedEncoder) Encode2(_ reflect.Value, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}

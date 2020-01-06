@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"log"
 	"reflect"
 	"unsafe"
 )
@@ -87,6 +88,7 @@ func (enc *arrayEncoder2) Encode2(v reflect.Value, s *Streamer, _ *EncOpts) {
 	s.ArrayStart()
 	i := 0
 	for {
+		log.Println(v.Index(i).CanAddr())
 		enc.encoder.Encode2(v.Index(i), s, nil)
 		if s.Error != nil {
 			return

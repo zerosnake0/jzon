@@ -73,11 +73,9 @@ func (*dynamicJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts
 	s.Raw(b)
 }
 
-func (*dynamicJsonMarshalerEncoder) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
-	if v.IsNil() {
-		s.Null()
-		return
-	}
+type jsonMarshalerEncoder2 struct{}
+
+func (*jsonMarshalerEncoder2) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
 	o := v.Interface()
 	marshaler := o.(json.Marshaler)
 	b, err := marshaler.MarshalJSON()
@@ -88,26 +86,9 @@ func (*dynamicJsonMarshalerEncoder) Encode2(v reflect.Value, s *Streamer, opts *
 	s.Raw(b)
 }
 
-type jsonMarshalerEncoder2 struct {
-	reflect.Type
-}
+type jsonPointerMarshalerEncoder2 struct{}
 
-func (enc *jsonMarshalerEncoder2) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
-	o := v.Interface()
-	marshaler := o.(json.Marshaler)
-	b, err := marshaler.MarshalJSON()
-	if err != nil {
-		s.Error = err
-		return
-	}
-	s.Raw(b)
-}
-
-type jsonMarshalerPointerEncoder2 struct {
-	reflect.Type
-}
-
-func (enc *jsonMarshalerPointerEncoder2) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
+func (*jsonPointerMarshalerEncoder2) Encode2(v reflect.Value, s *Streamer, opts *EncOpts) {
 	if v.IsNil() {
 		s.Null()
 		return
