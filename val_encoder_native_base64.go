@@ -7,6 +7,13 @@ import (
 
 type base64Encoder struct{}
 
+func (*base64Encoder) IsEmpty(ptr unsafe.Pointer) bool {
+	if ptr == nil {
+		return true
+	}
+	return len(*(*[]byte)(ptr)) == 0
+}
+
 func (*base64Encoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {
 	if s.Error != nil {
 		return

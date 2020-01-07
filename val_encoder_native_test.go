@@ -50,6 +50,10 @@ func TestValEncoder_Bool_Kind(t *testing.T) {
 
 type testBoolEncoder struct{}
 
+func (*testBoolEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	panic("not implemented")
+}
+
 func (*testBoolEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()

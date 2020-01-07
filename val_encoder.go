@@ -12,7 +12,7 @@ var (
 	globalValEncoders = map[rtype]ValEncoder{}
 	encoderKindMap    = [numKinds]rtype{}
 	kindEncoders      = [numKinds]ValEncoder{}
-	keyEncoders       = [numKinds]ValEncoder{}
+	keyEncoders       = [numKinds]keyEncoder{}
 )
 
 func createGlobalValEncoder(ptr interface{}, enc ValEncoder) {
@@ -35,7 +35,7 @@ func mapEncoderKind(ptr interface{}, enc ValEncoder) {
 	kindEncoders[kind] = enc
 }
 
-func mapKeyEncoder(ptr interface{}, enc ValEncoder) {
+func mapKeyEncoder(ptr interface{}, enc keyEncoder) {
 	ptrType := reflect.TypeOf(ptr)
 	kind := ptrType.Elem().Kind()
 	keyEncoders[kind] = enc
@@ -102,11 +102,22 @@ type EncOpts struct {
 	Quoted bool
 }
 
+type keyEncoder interface {
+	Encode(ptr unsafe.Pointer, s *Streamer)
+}
+
 type ValEncoder interface {
+	IsEmpty(ptr unsafe.Pointer) bool
+
 	Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts)
 }
 
 type notSupportedEncoder string
+
+func (enc notSupportedEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	// TODO: error in interface?
+	panic("not implemented")
+}
 
 func (enc notSupportedEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {

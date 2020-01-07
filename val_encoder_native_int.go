@@ -7,6 +7,13 @@ import (
 // int8 encoder
 type int8Encoder struct{}
 
+func (*int8Encoder) IsEmpty(ptr unsafe.Pointer) bool {
+	if ptr == nil {
+		return true
+	}
+	return *(*int8)(ptr) == 0
+}
+
 func (*int8Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
@@ -21,6 +28,13 @@ func (*int8Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 
 // int16 encoder
 type int16Encoder struct{}
+
+func (*int16Encoder) IsEmpty(ptr unsafe.Pointer) bool {
+	if ptr == nil {
+		return true
+	}
+	return *(*int16)(ptr) == 0
+}
 
 func (*int16Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
@@ -37,6 +51,13 @@ func (*int16Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 // int32 encoder
 type int32Encoder struct{}
 
+func (*int32Encoder) IsEmpty(ptr unsafe.Pointer) bool {
+	if ptr == nil {
+		return true
+	}
+	return *(*int32)(ptr) == 0
+}
+
 func (*int32Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
@@ -51,6 +72,13 @@ func (*int32Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 
 // int64 encoder
 type int64Encoder struct{}
+
+func (*int64Encoder) IsEmpty(ptr unsafe.Pointer) bool {
+	if ptr == nil {
+		return true
+	}
+	return *(*int64)(ptr) == 0
+}
 
 func (*int64Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {

@@ -23,10 +23,11 @@ func (enc *Encoder) newStructEncoder(typ reflect.Type) *structEncoderBuilder {
 
 // encoder field info
 type encoderFieldInfo struct {
-	offsets  []uintptr
-	rawField []byte
-	quoted   bool
-	encoder  ValEncoder
+	offsets   []uintptr
+	rawField  []byte
+	quoted    bool
+	omitEmpty bool
+	encoder   ValEncoder
 }
 
 type encoderFields struct {
@@ -49,16 +50,21 @@ func (ef *encoderFields) add(f *field, escapeHtml bool, enc ValEncoder) {
 		offsets[i] = f.offsets[i].val
 	}
 	ef.list = append(ef.list, encoderFieldInfo{
-		offsets:  offsets,
-		rawField: rawField,
-		quoted:   f.quoted,
-		encoder:  enc,
+		offsets:   offsets,
+		rawField:  rawField,
+		quoted:    f.quoted,
+		omitEmpty: f.omitEmpty,
+		encoder:   enc,
 	})
 }
 
 // struct encoder
 type structEncoder struct {
 	fields encoderFields
+}
+
+func (enc *structEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	panic("not implemented")
 }
 
 func (enc *structEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
@@ -83,6 +89,11 @@ OuterLoop:
 			}
 			curPtr = add(curPtr, offset, "struct field")
 		}
+		if fi.omitEmpty {
+			if fi.encoder.IsEmpty(curPtr) {
+				continue
+			}
+		}
 		s.RawField(fi.rawField)
 		opt := EncOpts{
 			Quoted: fi.quoted,
@@ -97,6 +108,10 @@ OuterLoop:
 
 // no fields to encoder
 type emptyStructEncoder struct{}
+
+func (*emptyStructEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	return true
+}
 
 func (*emptyStructEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {

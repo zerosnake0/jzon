@@ -63,7 +63,7 @@ func jsonMarshal(o interface{}, jsonOpt func(*json.Encoder)) (_ []byte, err erro
 	return buf.Bytes(), nil
 }
 
-func jsonEqual(t *testing.T, s1, s2 []byte) {
+func jsonEqual(s1, s2 []byte) (bool, error) {
 	var err error
 
 	s1 = bytes.TrimSpace(s1)
@@ -71,54 +71,74 @@ func jsonEqual(t *testing.T, s1, s2 []byte) {
 
 	switch s1[0] {
 	case 'n':
-		require.Equal(t, "null", localByteToString(s1))
-		require.Equal(t, "null", localByteToString(s2))
+		return "null" == localByteToString(s1) &&
+			"null" == localByteToString(s2), nil
 	case 't':
-		require.Equal(t, "true", localByteToString(s1))
-		require.Equal(t, "true", localByteToString(s2))
+		return "true" == localByteToString(s1) &&
+			"true" == localByteToString(s2), nil
 	case 'f':
-		require.Equal(t, "false", localByteToString(s1))
-		require.Equal(t, "false", localByteToString(s2))
+		return "false" == localByteToString(s1) &&
+			"false" == localByteToString(s2), nil
 	case '[':
 		var arr1 []json.RawMessage
-		err = json.Unmarshal(s1, &arr1)
-		require.NoError(t, err)
-		var arr2 []json.RawMessage
-		err = json.Unmarshal(s2, &arr2)
-		require.NoError(t, err)
-		l := len(arr1)
-		require.Equal(t, l, len(arr2))
-		for i := 0; i < l; i++ {
-			jsonEqual(t, arr1[i], arr2[i])
+		if err = json.Unmarshal(s1, &arr1); err != nil {
+			return false, err
 		}
+		var arr2 []json.RawMessage
+		if err = json.Unmarshal(s2, &arr2); err != nil {
+			return false, err
+		}
+		l := len(arr1)
+		if l != len(arr2) {
+			return false, nil
+		}
+		for i := 0; i < l; i++ {
+			b, err := jsonEqual(arr1[i], arr2[i])
+			if err != nil || !b {
+				return b, err
+			}
+		}
+		return true, nil
 	case '{':
 		var m1 map[string]json.RawMessage
-		err = json.Unmarshal(s1, &m1)
-		require.NoError(t, err)
-		var m2 map[string]json.RawMessage
-		err = json.Unmarshal(s2, &m2)
-		require.NoError(t, err)
-		l := len(m1)
-		require.Equal(t, l, len(m2))
-		for k := range m1 {
-			jsonEqual(t, m1[k], m2[k])
+		if err = json.Unmarshal(s1, &m1); err != nil {
+			return false, err
 		}
+		var m2 map[string]json.RawMessage
+		if err = json.Unmarshal(s2, &m2); err != nil {
+			return false, err
+		}
+		l := len(m1)
+		if l != len(m2) {
+			return false, nil
+		}
+		for k := range m1 {
+			b, err := jsonEqual(m1[k], m2[k])
+			if err != nil || !b {
+				return b, err
+			}
+		}
+		return true, nil
 	case '"':
 		var str1 string
-		err = json.Unmarshal(s1, &str1)
-		require.NoError(t, err)
+		if err = json.Unmarshal(s1, &str1); err != nil {
+			return false, err
+		}
 		var str2 string
-		err = json.Unmarshal(s2, &str2)
-		require.NoError(t, err)
-		require.Equal(t, str1, str2)
+		if err = json.Unmarshal(s2, &str2); err != nil {
+			return false, err
+		}
+		return str1 == str2, nil
 	default:
 		var f1 float64
-		err = json.Unmarshal(s1, &f1)
-		require.NoError(t, err)
+		if err = json.Unmarshal(s1, &f1); err != nil {
+			return false, err
+		}
 		var f2 float64
-		err = json.Unmarshal(s2, &f2)
-		require.NoError(t, err)
-		require.Equal(t, f2, f2)
+		if err = json.Unmarshal(s2, &f2); err != nil {
+			return false, err
+		}
+		return f1 == f2, nil
 	}
 }
 
@@ -139,7 +159,7 @@ func checkEncodeWithStandard(t *testing.T, obj interface{}, cb func(s *Streamer)
 func checkEncodeWithStandardInternal(t *testing.T, jsonOpt func(*json.Encoder), enc *Encoder, obj interface{},
 	cb func(s *Streamer), expErr interface{}) {
 	buf, err := jsonMarshal(obj, jsonOpt)
-	require.Equal(t, expErr == nil, err == nil, "\nexp: %v\ngot: %v",
+	require.Equal(t, expErr == nil, err == nil, "json.Marshal\nexp: %v\ngot: %v",
 		expErr, err)
 
 	streamer := enc.NewStreamer()
@@ -186,7 +206,11 @@ func checkEncodeWithStandardInternal(t *testing.T, jsonOpt func(*json.Encoder), 
 	} else {
 		t.Logf("got %s", buf)
 		require.NoError(t, streamer.Error)
-		jsonEqual(t, buf, streamer.buffer)
+		b, err := jsonEqual(buf, streamer.buffer)
+		require.NoErrorf(t, err, "final result\njson %s\njzon %s",
+			bytes.TrimSpace(buf), bytes.TrimSpace(streamer.buffer))
+		require.Truef(t, b, "final result\njson %s\njzon %s",
+			bytes.TrimSpace(buf), bytes.TrimSpace(streamer.buffer))
 	}
 }
 

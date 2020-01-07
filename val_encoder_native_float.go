@@ -7,6 +7,13 @@ import (
 // float32 encoder
 type float32Encoder struct{}
 
+func (*float32Encoder) IsEmpty(ptr unsafe.Pointer) bool {
+	if ptr == nil {
+		return true
+	}
+	return *(*float32)(ptr) == 0
+}
+
 func (*float32Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
@@ -17,6 +24,13 @@ func (*float32Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 
 // float64 encoder
 type float64Encoder struct{}
+
+func (*float64Encoder) IsEmpty(ptr unsafe.Pointer) bool {
+	if ptr == nil {
+		return true
+	}
+	return *(*float64)(ptr) == 0
+}
 
 func (*float64Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {

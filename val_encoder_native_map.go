@@ -14,7 +14,7 @@ type mapEncoderBuilder struct {
 func newMapEncoder(mapType reflect.Type) *mapEncoderBuilder {
 	keyType := mapType.Key()
 	var (
-		keyEncoder ValEncoder
+		keyEncoder keyEncoder
 	)
 	keyRType := rtypeOfType(keyType)
 	keyKind := keyType.Kind()
@@ -46,9 +46,17 @@ type directMapEncoder struct {
 	mapRType rtype
 
 	// keyRType   rtype
-	keyEncoder ValEncoder
+	keyEncoder keyEncoder
 
 	elemEncoder ValEncoder
+}
+
+func (enc *directMapEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	// TODO: check coverage
+	if ptr == nil {
+		return true
+	}
+	return false
 }
 
 func (enc *directMapEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {
@@ -62,7 +70,7 @@ func (enc *directMapEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts)
 	s.ObjectStart()
 	iter := mapiterinit(enc.mapRType, ptr)
 	for i := 0; iter.key != nil; i++ {
-		enc.keyEncoder.Encode(iter.key, s, nil)
+		enc.keyEncoder.Encode(iter.key, s)
 		if s.Error != nil {
 			return
 		}
@@ -78,7 +86,7 @@ func (enc *directMapEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts)
 // text marshaler
 type textMarshalerKeyEncoder rtype
 
-func (enc textMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (enc textMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	if s.Error != nil {
 		return
 	}
@@ -97,7 +105,7 @@ func (enc textMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts 
 
 type directTextMarshalerKeyEncoder rtype
 
-func (enc directTextMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (enc directTextMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	if s.Error != nil {
 		return
 	}
@@ -117,14 +125,14 @@ func (enc directTextMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer,
 // key encoders
 type stringKeyEncoder struct{}
 
-func (*stringKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*stringKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	s.Field(*(*string)(ptr))
 }
 
 // int encoders
 type int8KeyEncoder struct{}
 
-func (*int8KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*int8KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	if s.Error != nil {
 		return
 	}
@@ -137,7 +145,7 @@ func (*int8KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 
 type int16KeyEncoder struct{}
 
-func (*int16KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*int16KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	if s.Error != nil {
 		return
 	}
@@ -150,7 +158,7 @@ func (*int16KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 
 type int32KeyEncoder struct{}
 
-func (*int32KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*int32KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	if s.Error != nil {
 		return
 	}
@@ -163,7 +171,7 @@ func (*int32KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 
 type int64KeyEncoder struct{}
 
-func (*int64KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*int64KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	if s.Error != nil {
 		return
 	}
@@ -177,7 +185,7 @@ func (*int64KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 // uint encoders
 type uint8KeyEncoder struct{}
 
-func (*uint8KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*uint8KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	if s.Error != nil {
 		return
 	}
@@ -190,7 +198,7 @@ func (*uint8KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 
 type uint16KeyEncoder struct{}
 
-func (*uint16KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*uint16KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	if s.Error != nil {
 		return
 	}
@@ -203,7 +211,7 @@ func (*uint16KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) 
 
 type uint32KeyEncoder struct{}
 
-func (*uint32KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*uint32KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	if s.Error != nil {
 		return
 	}
@@ -216,7 +224,7 @@ func (*uint32KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) 
 
 type uint64KeyEncoder struct{}
 
-func (*uint64KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*uint64KeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer) {
 	if s.Error != nil {
 		return
 	}

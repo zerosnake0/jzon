@@ -8,7 +8,11 @@ import (
 // special array (empty)
 type emptyArrayEncoder struct{}
 
-func (enc *emptyArrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*emptyArrayEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	panic("not implemented")
+}
+
+func (*emptyArrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return
@@ -38,6 +42,10 @@ type arrayEncoder struct {
 	encoder  ValEncoder
 	elemSize uintptr
 	length   int
+}
+
+func (enc *arrayEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	return false
 }
 
 func (enc *arrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {

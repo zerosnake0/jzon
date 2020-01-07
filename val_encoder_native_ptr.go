@@ -21,6 +21,13 @@ type pointerEncoder struct {
 	encoder ValEncoder
 }
 
+func (enc *pointerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	if ptr == nil {
+		return true
+	}
+	return *(*unsafe.Pointer)(ptr) == nil
+}
+
 func (enc *pointerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()

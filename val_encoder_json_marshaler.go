@@ -12,6 +12,14 @@ var (
 
 type jsonMarshalerEncoder rtype
 
+func (enc jsonMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	// TODO: check coverage
+	if ptr == nil {
+		return true
+	}
+	return false
+}
+
 func (enc jsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
@@ -32,6 +40,13 @@ func (enc jsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *En
 
 type directJsonMarshalerEncoder rtype
 
+func (enc directJsonMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	if ptr == nil {
+		return true
+	}
+	return *(*unsafe.Pointer)(ptr) == nil
+}
+
 func (enc directJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
@@ -51,6 +66,13 @@ func (enc directJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, op
 }
 
 type pointerJsonMarshalerEncoder rtype
+
+func (enc pointerJsonMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	if ptr == nil {
+		return true
+	}
+	return *(*unsafe.Pointer)(ptr) == nil
+}
 
 func (enc pointerJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
@@ -76,6 +98,10 @@ func (enc pointerJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, o
 }
 
 type dynamicJsonMarshalerEncoder struct{}
+
+func (*dynamicJsonMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	panic("not implemented")
+}
 
 func (*dynamicJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {

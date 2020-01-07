@@ -4,7 +4,10 @@ import (
 	"unsafe"
 )
 
-type jsonRawMessageEncoder struct {
+type jsonRawMessageEncoder struct{}
+
+func (*jsonRawMessageEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	panic("not implemented")
 }
 
 func (*jsonRawMessageEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

@@ -25,6 +25,10 @@ type sliceEncoder struct {
 	elemEncoder ValEncoder
 }
 
+func (enc *sliceEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	panic("not implemented")
+}
+
 func (enc *sliceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {
 	if s.Error != nil {
 		return
