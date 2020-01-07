@@ -74,9 +74,6 @@ func (*int32Encoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 type int64Encoder struct{}
 
 func (*int64Encoder) IsEmpty(ptr unsafe.Pointer) bool {
-	if ptr == nil {
-		return true
-	}
 	return *(*int64)(ptr) == 0
 }
 

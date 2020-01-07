@@ -7,7 +7,7 @@ import (
 type jsonRawMessageEncoder struct{}
 
 func (*jsonRawMessageEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	return len(*(*[]byte)(ptr)) == 0
 }
 
 func (*jsonRawMessageEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

@@ -140,6 +140,12 @@ func TestValEncoder_Array_Marshaler(t *testing.T) {
 }
 
 func TestValEncoder_Array_OmitEmpty(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
+		type st struct {
+			A [0]int `json:",omitempty"`
+		}
+		checkEncodeValueWithStandard(t, &st{}, nil)
+	})
 	t.Run("direct", func(t *testing.T) {
 		type st struct {
 			A [1]*int `json:",omitempty"`

@@ -8,7 +8,7 @@ type jsonNumberEncoder struct {
 }
 
 func (*jsonNumberEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	return *(*string)(ptr) == ""
 }
 
 func (*jsonNumberEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

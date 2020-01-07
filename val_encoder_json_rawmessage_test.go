@@ -48,3 +48,22 @@ func TestValEncoder_JsonRawMessage(t *testing.T) {
 		})
 	})
 }
+
+func TestValEncoder_JsonRawMessage_OmitEmpty(t *testing.T) {
+	type st struct {
+		A json.RawMessage `json:",omitempty"`
+	}
+	t.Run("nil", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{}, nil)
+	})
+	t.Run("empty", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{
+			A: json.RawMessage{},
+		}, nil)
+	})
+	t.Run("null", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{
+			A: json.RawMessage("null"),
+		}, nil)
+	})
+}

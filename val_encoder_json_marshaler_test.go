@@ -345,4 +345,17 @@ func TestValEncoder_JsonMarshaler_OmitEmpty(t *testing.T) {
 			},
 		}, nil)
 	})
+	t.Run("dynamic json marshaler", func(t *testing.T) {
+		type st struct {
+			A json.Marshaler `json:",omitempty"`
+		}
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{}, nil)
+		})
+		t.Run("nil pointer", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{
+				A: (*testJsonMarshaler2)(nil),
+			}, nil)
+		})
+	})
 }

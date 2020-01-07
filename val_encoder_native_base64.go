@@ -8,9 +8,6 @@ import (
 type base64Encoder struct{}
 
 func (*base64Encoder) IsEmpty(ptr unsafe.Pointer) bool {
-	if ptr == nil {
-		return true
-	}
 	return len(*(*[]byte)(ptr)) == 0
 }
 

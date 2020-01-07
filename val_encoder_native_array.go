@@ -9,7 +9,7 @@ import (
 type emptyArrayEncoder struct{}
 
 func (*emptyArrayEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	return true
 }
 
 func (*emptyArrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

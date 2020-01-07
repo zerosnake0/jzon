@@ -50,3 +50,22 @@ func TestValEncoder_JsonNumber(t *testing.T) {
 		})
 	})
 }
+
+func TestValEncoder_JsonNumber_OmitEmpty(t *testing.T) {
+	type st struct {
+		A json.Number `json:",omitempty"`
+	}
+	t.Run("empty", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{}, nil)
+	})
+	t.Run("zero", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{
+			A: "0",
+		}, nil)
+	})
+	t.Run("zero float", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{
+			A: "0.0",
+		}, nil)
+	})
+}
