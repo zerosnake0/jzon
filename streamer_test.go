@@ -64,21 +64,62 @@ func jsonMarshal(o interface{}, jsonOpt func(*json.Encoder)) (_ []byte, err erro
 }
 
 func jsonEqual(t *testing.T, s1, s2 []byte) {
-	exp := localByteToString(s1)
-	got := localByteToString(s2)
-	if exp == got {
-		return
+	var err error
+
+	s1 = bytes.TrimSpace(s1)
+	s2 = bytes.TrimSpace(s2)
+
+	switch s1[0] {
+	case 'n':
+		require.Equal(t, "null", localByteToString(s1))
+		require.Equal(t, "null", localByteToString(s2))
+	case 't':
+		require.Equal(t, "true", localByteToString(s1))
+		require.Equal(t, "true", localByteToString(s2))
+	case 'f':
+		require.Equal(t, "false", localByteToString(s1))
+		require.Equal(t, "false", localByteToString(s2))
+	case '[':
+		var arr1 []json.RawMessage
+		err = json.Unmarshal(s1, &arr1)
+		require.NoError(t, err)
+		var arr2 []json.RawMessage
+		err = json.Unmarshal(s2, &arr2)
+		require.NoError(t, err)
+		l := len(arr1)
+		require.Equal(t, l, len(arr2))
+		for i := 0; i < l; i++ {
+			jsonEqual(t, arr1[i], arr2[i])
+		}
+	case '{':
+		var m1 map[string]json.RawMessage
+		err = json.Unmarshal(s1, &m1)
+		require.NoError(t, err)
+		var m2 map[string]json.RawMessage
+		err = json.Unmarshal(s2, &m2)
+		require.NoError(t, err)
+		l := len(m1)
+		require.Equal(t, l, len(m2))
+		for k := range m1 {
+			jsonEqual(t, m1[k], m2[k])
+		}
+	case '"':
+		var str1 string
+		err = json.Unmarshal(s1, &str1)
+		require.NoError(t, err)
+		var str2 string
+		err = json.Unmarshal(s2, &str2)
+		require.NoError(t, err)
+		require.Equal(t, str1, str2)
+	default:
+		var f1 float64
+		err = json.Unmarshal(s1, &f1)
+		require.NoError(t, err)
+		var f2 float64
+		err = json.Unmarshal(s2, &f2)
+		require.NoError(t, err)
+		require.Equal(t, f2, f2)
 	}
-	var (
-		o1, o2 interface{}
-		err    error
-	)
-	err = json.Unmarshal(s1, &o1)
-	require.NoError(t, err, "err: %s", s1)
-	err = json.Unmarshal(s2, &o2)
-	require.NoErrorf(t, err, "err: %s", s2)
-	require.Equal(t, o1, o2, "expecting %s but got %s",
-		exp, got)
 }
 
 var (
