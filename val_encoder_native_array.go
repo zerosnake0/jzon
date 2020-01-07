@@ -18,6 +18,7 @@ func (enc *emptyArrayEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncO
 
 type arrayEncoderBuilder struct {
 	encoder   *arrayEncoder
+	elemType  reflect.Type
 	elemRType rtype
 }
 
@@ -28,6 +29,7 @@ func newArrayEncoder(typ reflect.Type) *arrayEncoderBuilder {
 			elemSize: elemType.Size(),
 			length:   typ.Len(),
 		},
+		elemType:  elemType,
 		elemRType: rtypeOfType(elemType),
 	}
 }

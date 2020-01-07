@@ -5,7 +5,7 @@ import (
 	"unsafe"
 )
 
-func (s *Streamer) Value(obj interface{}) *Streamer {
+func (s *Streamer) value(obj interface{}, opts *EncOpts) *Streamer {
 	if s.Error != nil {
 		return s
 	}
@@ -19,6 +19,10 @@ func (s *Streamer) Value(obj interface{}) *Streamer {
 		typ := reflect.TypeOf(obj)
 		enc = s.encoder.createEncoder(ef.rtype, typ)
 	}
-	enc.Encode(ef.data, s, nil)
+	enc.Encode(ef.data, s, opts)
 	return s
+}
+
+func (s *Streamer) Value(obj interface{}) *Streamer {
+	return s.value(obj, nil)
 }

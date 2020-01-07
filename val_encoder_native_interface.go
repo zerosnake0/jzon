@@ -4,25 +4,23 @@ import (
 	"unsafe"
 )
 
-type efaceEncoder struct {
-}
+type efaceEncoder struct{}
 
-func (enc *efaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*efaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return
 	}
-	s.Value(*(*interface{})(ptr))
+	s.value(*(*interface{})(ptr), opts)
 }
 
-type ifaceEncoder struct {
-}
+type ifaceEncoder struct{}
 
-func (enc *ifaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*ifaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return
 	}
 	o := packIFace(ptr)
-	s.Value(o)
+	s.value(o, opts)
 }

@@ -122,22 +122,24 @@ func TestValEncoder_Native_Struct_Complex_MultipleField(t *testing.T) {
 	})
 	t.Run("quoted", func(t *testing.T) {
 		type st struct {
-			S    string  `json:",string"`
-			I8   int8    `json:",string"`
-			I16  int16   `json:",string"`
-			I32  int32   `json:",string"`
-			I64  int64   `json:",string"`
-			U8   uint8   `json:",string"`
-			U16  uint16  `json:",string"`
-			U32  uint32  `json:",string"`
-			U64  uint64  `json:",string"`
-			Uptr uintptr `json:",string"`
-			PI8  *int8   `json:",string"`
+			S    string      `json:",string"`
+			I8   int8        `json:",string"`
+			I16  int16       `json:",string"`
+			I32  int32       `json:",string"`
+			I64  int64       `json:",string"`
+			U8   uint8       `json:",string"`
+			U16  uint16      `json:",string"`
+			U32  uint32      `json:",string"`
+			U64  uint64      `json:",string"`
+			Uptr uintptr     `json:",string"`
+			PI8  *int8       `json:",string"`
+			O    interface{} `json:",string"`
 		}
 		checkEncodeValueWithStandard(t, st{}, nil)
 		i8 := int8(1)
 		checkEncodeValueWithStandard(t, st{
 			PI8: &i8,
+			O:   &i8,
 		}, nil)
 	})
 }

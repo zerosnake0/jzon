@@ -7,25 +7,25 @@ import (
 type testMarshalByte byte
 
 func (tb testMarshalByte) MarshalJSON() ([]byte, error) {
-	return []byte{'"', byte(tb), '"'}, nil
+	return []byte{'"', '1', byte(tb), '"'}, nil
 }
 
 type testMarshalByte2 byte
 
 func (tb *testMarshalByte2) MarshalJSON() ([]byte, error) {
-	return []byte{'"', byte(*tb), '"'}, nil
+	return []byte{'"', '2', byte(*tb), '"'}, nil
 }
 
 type testMarshalByte3 byte
 
 func (tb testMarshalByte3) MarshalText() ([]byte, error) {
-	return []byte{'"', byte(tb), '"'}, nil
+	return []byte{'"', '3', byte(tb), '"'}, nil
 }
 
 type testMarshalByte4 byte
 
 func (tb *testMarshalByte4) MarshalText() ([]byte, error) {
-	return []byte{'"', byte(*tb), '"'}, nil
+	return []byte{'"', '4', byte(*tb), '"'}, nil
 }
 
 func TestValEncoder_Native_Base64(t *testing.T) {

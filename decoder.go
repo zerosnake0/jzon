@@ -90,20 +90,16 @@ func (dec *Decoder) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder 
 	for k, v := range cache {
 		newCache[k] = v
 	}
-	dec.createDecoderInternal(newCache, ptrType)
+	var q typeQueue
+	q.push(ptrType)
+	dec.createDecoderInternal(newCache, q)
 	dec.decoderCache.Store(newCache)
 	return newCache[rType]
 }
 
-func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate ...reflect.Type) {
+func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate typeQueue) {
 	rebuildMap := map[rtype]interface{}{}
-	idx := len(typesToCreate) - 1
-	for idx >= 0 {
-		// pop one
-		ptrType := typesToCreate[idx]
-		typesToCreate = typesToCreate[:idx]
-		idx -= 1
-
+	for ptrType := typesToCreate.pop(); ptrType != nil; ptrType = typesToCreate.pop() {
 		rType := rtypeOfType(ptrType)
 		if _, ok := cache[rType]; ok { // check if visited
 			continue
@@ -157,29 +153,25 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate ...r
 			} else {
 				for i := range w.fields.list {
 					fi := &w.fields.list[i]
-					typesToCreate = append(typesToCreate, fi.ptrType)
-					idx += 1
+					typesToCreate.push(fi.ptrType)
 				}
 				cache[rType] = w.decoder
 				rebuildMap[rType] = w
 			}
 		case reflect.Ptr:
-			typesToCreate = append(typesToCreate, elem)
-			idx += 1
+			typesToCreate.push(elem)
 			w := newPointerDecoder(elem)
 			cache[rType] = w.decoder
 			rebuildMap[rType] = w
 		case reflect.Array:
 			elemPtrType := reflect.PtrTo(elem.Elem())
-			typesToCreate = append(typesToCreate, elemPtrType)
-			idx += 1
+			typesToCreate.push(elemPtrType)
 			w := newArrayDecoder(elem)
 			cache[rType] = w.decoder
 			rebuildMap[rType] = w
 		case reflect.Slice:
 			elemPtrType := reflect.PtrTo(elem.Elem())
-			typesToCreate = append(typesToCreate, elemPtrType)
-			idx += 1
+			typesToCreate.push(elemPtrType)
 			w := newSliceDecoder(elem)
 			cache[rType] = w.decoder
 			rebuildMap[rType] = w
@@ -189,8 +181,7 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate ...r
 				cache[rType] = notSupportedDecoder(ptrType.String())
 			} else {
 				valuePtrType := reflect.PtrTo(elem.Elem())
-				typesToCreate = append(typesToCreate, valuePtrType)
-				idx += 1
+				typesToCreate.push(valuePtrType)
 				cache[rType] = w.decoder
 				rebuildMap[rType] = w
 			}

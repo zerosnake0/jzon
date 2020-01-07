@@ -70,38 +70,35 @@ func (enc *structEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts)
 		return
 	}
 	s.ObjectStart()
+OuterLoop:
 	for i := range enc.fields.list {
 		fi := &enc.fields.list[i]
 		curPtr := add(ptr, fi.offsets[0], "struct field")
 		// ptr != nil => curPtr != nil
-		broken := false
 		for _, offset := range fi.offsets[1:] {
 			curPtr = *(*unsafe.Pointer)(curPtr)
 			if curPtr == nil {
-				broken = true // the embedded pointer field is nil
-				break
+				// the embedded pointer field is nil
+				continue OuterLoop
 			}
 			curPtr = add(curPtr, offset, "struct field")
 		}
-		if !broken {
-			s.RawField(fi.rawField)
-			opt := EncOpts{
-				Quoted: fi.quoted,
-			}
-			fi.encoder.Encode(curPtr, s, &opt)
-			if s.Error != nil {
-				return
-			}
+		s.RawField(fi.rawField)
+		opt := EncOpts{
+			Quoted: fi.quoted,
+		}
+		fi.encoder.Encode(curPtr, s, &opt)
+		if s.Error != nil {
+			return
 		}
 	}
 	s.ObjectEnd()
 }
 
 // no fields to encoder
-type emptyStructEncoder struct {
-}
+type emptyStructEncoder struct{}
 
-func (enc *emptyStructEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*emptyStructEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if ptr == nil {
 		s.Null()
 		return

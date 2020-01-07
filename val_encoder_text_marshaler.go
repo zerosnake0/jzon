@@ -50,6 +50,31 @@ func (enc directTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, op
 	s.String(localByteToString(b))
 }
 
+type pointerTextMarshalerEncoder rtype
+
+func (enc pointerTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+	if s.Error != nil {
+		return
+	}
+	if ptr == nil {
+		s.Null()
+		return
+	}
+	ptr = *(*unsafe.Pointer)(ptr)
+	if ptr == nil {
+		s.Null()
+		return
+	}
+	obj := packEFace(rtype(enc), ptr)
+	marshaler := obj.(encoding.TextMarshaler)
+	b, err := marshaler.MarshalText()
+	if err != nil {
+		s.Error = err
+		return
+	}
+	s.String(localByteToString(b))
+}
+
 type dynamicTextMarshalerEncoder struct{}
 
 func (*dynamicTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

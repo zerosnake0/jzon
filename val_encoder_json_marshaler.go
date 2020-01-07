@@ -50,6 +50,31 @@ func (enc directJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, op
 	s.Raw(b)
 }
 
+type pointerJsonMarshalerEncoder rtype
+
+func (enc pointerJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+	if s.Error != nil {
+		return
+	}
+	if ptr == nil {
+		s.Null()
+		return
+	}
+	ptr = *(*unsafe.Pointer)(ptr)
+	if ptr == nil {
+		s.Null()
+		return
+	}
+	obj := packEFace(rtype(enc), ptr)
+	marshaler := obj.(json.Marshaler)
+	b, err := marshaler.MarshalJSON()
+	if err != nil {
+		s.Error = err
+		return
+	}
+	s.Raw(b)
+}
+
 type dynamicJsonMarshalerEncoder struct{}
 
 func (*dynamicJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

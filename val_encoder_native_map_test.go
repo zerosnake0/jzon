@@ -53,10 +53,22 @@ func (i testMapIntKey2) MarshalText() ([]byte, error) {
 	return []byte(strconv.Itoa(int(i * 2))), nil
 }
 
+type testMapIntKey2Ptr int
+
+func (i *testMapIntKey2Ptr) MarshalText() ([]byte, error) {
+	return []byte(strconv.Itoa(int(*i * 2))), nil
+}
+
 type testMapStringKey2 string
 
 func (s testMapStringKey2) MarshalText() ([]byte, error) {
 	return []byte(strconv.Itoa(len(s))), nil
+}
+
+type testMapStringKey2Ptr string
+
+func (s *testMapStringKey2Ptr) MarshalText() ([]byte, error) {
+	return []byte(strconv.Itoa(len(*s))), nil
 }
 
 func TestValEncoder_Native_Map_KeyEncoder_TextMarshaler(t *testing.T) {
@@ -68,41 +80,59 @@ func TestValEncoder_Native_Map_KeyEncoder_TextMarshaler(t *testing.T) {
 		checkEncodeValueWithStandard(t, m, TypeNotSupportedError(""))
 	})
 	t.Run("marshaler 1-non pointer", func(t *testing.T) {
-		type key = testTextMarshaler
-		m := map[key]int{{
-			data: "a",
-		}: 1}
-		checkEncodeValueWithStandard(t, m, nil)
-	})
-	t.Run("marshaler 1-non pointer (err)", func(t *testing.T) {
-		type key = testTextMarshaler
-		e := errors.New("test")
-		m := map[key]int{{
-			data: "a",
-			err:  e,
-		}: 1}
-		checkEncodeValueWithStandard(t, m, e)
+		t.Run("no error", func(t *testing.T) {
+			type key = testTextMarshaler
+			m := map[key]int{{
+				data: "a",
+			}: 1}
+			checkEncodeValueWithStandard(t, m, nil)
+		})
+		t.Run("no error 2", func(t *testing.T) {
+			type key = testTextMarshaler
+			m := map[key]int{{
+				data: "a",
+			}: 1}
+			checkEncodeValueWithStandard(t, &m, nil)
+		})
+		t.Run("error", func(t *testing.T) {
+			type key = testTextMarshaler
+			e := errors.New("test")
+			m := map[key]int{{
+				data: "a",
+				err:  e,
+			}: 1}
+			checkEncodeValueWithStandard(t, m, e)
+		})
 	})
 	t.Run("marshaler 1-pointer", func(t *testing.T) {
-		type key = *testTextMarshaler
-		m := map[key]int{{
-			data: "a",
-		}: 1}
-		checkEncodeValueWithStandard(t, m, nil)
-	})
-	t.Run("marshaler 1-pointer (err)", func(t *testing.T) {
-		e := errors.New("test")
-		type key = *testTextMarshaler
-		m := map[key]int{{
-			data: "a",
-			err:  e,
-		}: 1}
-		checkEncodeValueWithStandard(t, m, e)
-	})
-	t.Run("marshaler 1-pointer (nil)", func(t *testing.T) {
-		type key = *testTextMarshaler
-		m := map[key]int{nil: 1}
-		checkEncodeValueWithStandard(t, m, runtimeErrorType)
+		t.Run("no error", func(t *testing.T) {
+			type key = *testTextMarshaler
+			m := map[key]int{{
+				data: "a",
+			}: 1}
+			checkEncodeValueWithStandard(t, m, nil)
+		})
+		t.Run("no error 2", func(t *testing.T) {
+			type key = *testTextMarshaler
+			m := map[key]int{{
+				data: "a",
+			}: 1}
+			checkEncodeValueWithStandard(t, &m, nil)
+		})
+		t.Run("error", func(t *testing.T) {
+			e := errors.New("test")
+			type key = *testTextMarshaler
+			m := map[key]int{{
+				data: "a",
+				err:  e,
+			}: 1}
+			checkEncodeValueWithStandard(t, m, e)
+		})
+		t.Run("nil", func(t *testing.T) {
+			type key = *testTextMarshaler
+			m := map[key]int{nil: 1}
+			checkEncodeValueWithStandard(t, m, runtimeErrorType)
+		})
 	})
 	t.Run("marshaler 2-non pointer", func(t *testing.T) {
 		type key = testTextMarshaler2
@@ -112,38 +142,57 @@ func TestValEncoder_Native_Map_KeyEncoder_TextMarshaler(t *testing.T) {
 		checkEncodeValueWithStandard(t, m, TypeNotSupportedError(""))
 	})
 	t.Run("marshaler 2-pointer", func(t *testing.T) {
-		type key = *testTextMarshaler2
-		m := map[key]int{{
-			data: "a",
-		}: 1}
-		checkEncodeValueWithStandard(t, m, nil)
-	})
-	t.Run("marshaler 2-pointer (err)", func(t *testing.T) {
-		e := errors.New("test")
-		type key = *testTextMarshaler2
-		m := map[key]int{{
-			data: "a",
-			err:  e,
-		}: 1}
-		checkEncodeValueWithStandard(t, m, e)
-	})
-	t.Run("marshaler 2-pointer (nil)", func(t *testing.T) {
-		type key = *testTextMarshaler2
-		m := map[key]int{nil: 1}
-		checkEncodeValueWithStandard(t, m, runtimeErrorType)
+		t.Run("no error", func(t *testing.T) {
+			type key = *testTextMarshaler2
+			m := map[key]int{{
+				data: "a",
+			}: 1}
+			checkEncodeValueWithStandard(t, m, nil)
+		})
+		t.Run("error", func(t *testing.T) {
+			e := errors.New("test")
+			type key = *testTextMarshaler2
+			m := map[key]int{{
+				data: "a",
+				err:  e,
+			}: 1}
+			checkEncodeValueWithStandard(t, m, e)
+		})
+		t.Run("nil", func(t *testing.T) {
+			type key = *testTextMarshaler2
+			m := map[key]int{nil: 1}
+			checkEncodeValueWithStandard(t, m, nil)
+		})
 	})
 	t.Run("int key", func(t *testing.T) {
-		m := map[testMapIntKey2]testMapIntKey2{
-			1: 2,
-		}
-		checkEncodeValueWithStandard(t, m, nil)
+		t.Run("value", func(t *testing.T) {
+			m := map[testMapIntKey2]testMapIntKey2{
+				1: 2,
+			}
+			checkEncodeValueWithStandard(t, m, nil)
+		})
+		t.Run("ptr", func(t *testing.T) {
+			m := map[testMapIntKey2Ptr]testMapIntKey2Ptr{
+				1: 2,
+			}
+			checkEncodeValueWithStandard(t, m, nil)
+		})
 	})
 	t.Run("string key", func(t *testing.T) {
-		// the MarshalText of the key is ignored
-		m := map[testMapStringKey2]testMapStringKey2{
-			"key": "value",
-		}
-		checkEncodeValueWithStandard(t, m, nil)
+		t.Run("value", func(t *testing.T) {
+			// the MarshalText of the key is ignored
+			m := map[testMapStringKey2]testMapStringKey2{
+				"key": "value",
+			}
+			checkEncodeValueWithStandard(t, m, nil)
+		})
+		t.Run("ptr", func(t *testing.T) {
+			// the MarshalText of the key is ignored
+			m := map[testMapStringKey2Ptr]testMapStringKey2Ptr{
+				"key": "value",
+			}
+			checkEncodeValueWithStandard(t, m, nil)
+		})
 	})
 }
 

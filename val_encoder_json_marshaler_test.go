@@ -204,7 +204,7 @@ func TestValEncoder_JsonMarshaler_PointerReceiver(t *testing.T) {
 }
 
 func TestValEncoder_DynamicJsonMarshaler(t *testing.T) {
-	t.Run("marshaler (nil)", func(t *testing.T) {
+	t.Run("marshaler nil", func(t *testing.T) {
 		var i json.Marshaler
 		checkEncodeValueWithStandard(t, &i, nil)
 	})
@@ -267,5 +267,41 @@ func TestValEncoder_JsonMarshaler_Direct(t *testing.T) {
 			A testDirectJsonMarshaler
 		}
 		checkEncodeValueWithStandard(t, &st{}, nil)
+	})
+	t.Run("value of marshaler", func(t *testing.T) {
+		t.Run("nil", func(t *testing.T) {
+			var m json.Marshaler
+			checkEncodeValueWithStandard(t, m, nil)
+		})
+		t.Run("value", func(t *testing.T) {
+			var m json.Marshaler = testDirectJsonMarshaler{
+				1: 2,
+			}
+			checkEncodeValueWithStandard(t, m, nil)
+		})
+		t.Run("pointer", func(t *testing.T) {
+			var m json.Marshaler = &testDirectJsonMarshaler{
+				1: 2,
+			}
+			checkEncodeValueWithStandard(t, m, nil)
+		})
+	})
+	t.Run("pointer of marshaler", func(t *testing.T) {
+		t.Run("nil", func(t *testing.T) {
+			var m json.Marshaler
+			checkEncodeValueWithStandard(t, &m, nil)
+		})
+		t.Run("value", func(t *testing.T) {
+			var m json.Marshaler = testDirectJsonMarshaler{
+				1: 2,
+			}
+			checkEncodeValueWithStandard(t, &m, nil)
+		})
+		t.Run("pointer", func(t *testing.T) {
+			var m json.Marshaler = &testDirectJsonMarshaler{
+				1: 2,
+			}
+			checkEncodeValueWithStandard(t, &m, nil)
+		})
 	})
 }

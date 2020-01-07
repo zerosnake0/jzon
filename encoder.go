@@ -112,20 +112,16 @@ func (enc *Encoder) createEncoder(rtype rtype, typ reflect.Type) ValEncoder {
 	for k, v := range cache {
 		newCache[k] = v
 	}
-	enc.createEncoderInternal(newCache, enc.internalCache, typ)
+	var q typeQueue
+	q.push(typ)
+	enc.createEncoderInternal(newCache, enc.internalCache, q)
 	enc.encoderCache.Store(newCache)
 	return newCache[rtype]
 }
 
-func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typesToCreate ...reflect.Type) {
+func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typesToCreate typeQueue) {
 	rebuildMap := map[rtype]interface{}{}
-	idx := len(typesToCreate) - 1
-	for idx >= 0 {
-		typ := typesToCreate[idx]
-
-		typesToCreate = typesToCreate[:idx]
-		idx -= 1
-
+	for typ := typesToCreate.pop(); typ != nil; typ = typesToCreate.pop() {
 		rType := rtypeOfType(typ)
 		if internalCache.has(rType) { // check if visited
 			continue
@@ -137,8 +133,6 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			cache[rType] = v
 			continue
 		}
-
-		kind := typ.Kind()
 
 		// check json.Marshaler interface
 		if typ.Implements(jsonMarshalerType) {
@@ -152,13 +146,16 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				elemType := typ.Elem()
 				if elemType.Implements(jsonMarshalerType) {
 					// treat as a pointer encoder
-					typesToCreate = append(typesToCreate, elemType)
-					idx += 1
+					typesToCreate.push(elemType)
 					w := newPointerEncoder(elemType)
 					internalCache[rType] = w.encoder
 					rebuildMap[rType] = w
-					continue
+				} else {
+					v := pointerJsonMarshalerEncoder(rType)
+					internalCache[rType] = v
+					cache[rType] = &directEncoder{v}
 				}
+				continue
 			}
 			v := directJsonMarshalerEncoder(rType)
 			internalCache[rType] = v
@@ -178,13 +175,16 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				elemType := typ.Elem()
 				if elemType.Implements(textMarshalerType) {
 					// treat as a pointer encoder
-					typesToCreate = append(typesToCreate, elemType)
-					idx += 1
+					typesToCreate.push(elemType)
 					w := newPointerEncoder(elemType)
 					internalCache[rType] = w.encoder
 					rebuildMap[rType] = w
-					continue
+				} else {
+					v := pointerTextMarshalerEncoder(rType)
+					internalCache[rType] = v
+					cache[rType] = &directEncoder{v}
 				}
+				continue
 			}
 			v := directTextMarshalerEncoder(rType)
 			internalCache[rType] = v
@@ -192,6 +192,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			continue
 		}
 
+		kind := typ.Kind()
 		if kindRType := encoderKindMap[kind]; kindRType != 0 {
 			// TODO: shall we make this an option?
 			// TODO: so that only the native type is affected?
@@ -212,15 +213,13 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		switch kind {
 		case reflect.Ptr:
 			elemType := typ.Elem()
-			typesToCreate = append(typesToCreate, elemType)
-			idx += 1
+			typesToCreate.push(elemType)
 			w := newPointerEncoder(elemType)
 			internalCache[rType] = w.encoder
 			rebuildMap[rType] = w
 		case reflect.Array:
 			elemType := typ.Elem()
-			typesToCreate = append(typesToCreate, elemType)
-			idx += 1
+			typesToCreate.push(reflect.PtrTo(elemType))
 			if typ.Len() == 0 {
 				v := (*emptyArrayEncoder)(nil)
 				internalCache[rType] = v
@@ -246,16 +245,14 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				internalCache[rType] = v
 				cache[rType] = v
 			} else {
-				typesToCreate = append(typesToCreate, typ.Elem())
-				idx += 1
+				typesToCreate.push(typ.Elem())
 				// pointer decoder is a reverse of direct encoder
 				internalCache[rType] = &pointerEncoder{w.encoder}
 				rebuildMap[rType] = w
 			}
 		case reflect.Slice:
 			w := newSliceEncoder(typ)
-			typesToCreate = append(typesToCreate, reflect.PtrTo(typ.Elem()))
-			idx += 1
+			typesToCreate.push(reflect.PtrTo(typ.Elem()))
 			internalCache[rType] = w.encoder
 			rebuildMap[rType] = w
 		case reflect.Struct:
@@ -268,8 +265,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			} else {
 				for i := range w.fields.list {
 					fi := &w.fields.list[i]
-					typesToCreate = append(typesToCreate, fi.ptrType)
-					idx += 1
+					typesToCreate.push(fi.ptrType)
 				}
 				internalCache[rType] = w.encoder
 				rebuildMap[rType] = w
@@ -320,8 +316,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 	for rType, builder := range rebuildMap {
 		switch x := builder.(type) {
 		case *arrayEncoderBuilder:
-			v := internalCache[x.elemRType]
-			x.encoder.encoder = v
+			x.encoder.encoder = internalCache.preferPtrEncoder(x.elemType)
 			if ifaceIndir(rType) {
 				cache[rType] = x.encoder
 			} else {
