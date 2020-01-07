@@ -120,3 +120,19 @@ func TestValEncoder_String(t *testing.T) {
 		checkEncodeValueWithStandard(t, string(b), nil)
 	})
 }
+
+func TestValEncoder_Bool_OmitEmpty(t *testing.T) {
+	type st struct {
+		S bool `json:",omitempty"`
+	}
+	checkEncodeValueWithStandard(t, st{}, nil)
+	checkEncodeValueWithStandard(t, st{S: true}, nil)
+}
+
+func TestValEncoder_String_OmitEmpty(t *testing.T) {
+	type st struct {
+		S string `json:",omitempty"`
+	}
+	checkEncodeValueWithStandard(t, st{}, nil)
+	checkEncodeValueWithStandard(t, st{S: "test"}, nil)
+}

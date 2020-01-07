@@ -36,3 +36,31 @@ func TestValEncoder_Float64(t *testing.T) {
 		checkEncodeValueWithStandard(t, &f, nil)
 	})
 }
+
+func TestValEncoder_Float32_OmitEmpty(t *testing.T) {
+	type st struct {
+		A float32 `json:",omitempty"`
+	}
+	t.Run("zero", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{}, nil)
+	})
+	t.Run("explicit zero", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{
+			A: 0.0,
+		}, nil)
+	})
+}
+
+func TestValEncoder_Float64_OmitEmpty(t *testing.T) {
+	type st struct {
+		A float64 `json:",omitempty"`
+	}
+	t.Run("zero", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{}, nil)
+	})
+	t.Run("explicit zero", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{
+			A: 0.0,
+		}, nil)
+	})
+}

@@ -84,3 +84,15 @@ func TestValEncoder_Uint64(t *testing.T) {
 		checkEncodeValueWithStandard(t, &i, nil)
 	})
 }
+
+func TestValEncoder_Uint_OmitEmpty(t *testing.T) {
+	type st struct {
+		U    uint    `json:",omitempty"`
+		U8   uint8   `json:",omitempty"`
+		U16  uint16  `json:",omitempty"`
+		U32  uint32  `json:",omitempty"`
+		U64  uint64  `json:",omitempty"`
+		Uptr uintptr `json:",omitempty"`
+	}
+	checkEncodeValueWithStandard(t, st{}, nil)
+}

@@ -84,3 +84,14 @@ func TestValEncoder_Int64(t *testing.T) {
 		checkEncodeValueWithStandard(t, &i, nil)
 	})
 }
+
+func TestValEncoder_Int_OmitEmpty(t *testing.T) {
+	type st struct {
+		I   int   `json:",omitempty"`
+		I8  int8  `json:",omitempty"`
+		I16 int16 `json:",omitempty"`
+		I32 int32 `json:",omitempty"`
+		I64 int64 `json:",omitempty"`
+	}
+	checkEncodeValueWithStandard(t, st{}, nil)
+}

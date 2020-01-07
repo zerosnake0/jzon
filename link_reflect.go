@@ -32,6 +32,10 @@ func typedmemmove(rtype rtype, dst, src unsafe.Pointer)
 //go:noescape
 func mapassign(t rtype, m, key, val unsafe.Pointer)
 
+//go:linkname maplen reflect.maplen
+//go:noescape
+func maplen(m unsafe.Pointer) int
+
 //go:linkname ifaceIndir reflect.ifaceIndir
 func ifaceIndir(t rtype) bool
 

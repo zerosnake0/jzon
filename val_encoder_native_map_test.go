@@ -269,3 +269,25 @@ func TestValEncoder_Native_Map_KeyEncoder_Uint(t *testing.T) {
 		checkEncodeValueWithStandard(t, m, nil)
 	})
 }
+
+func TestValEncoder_Map_OmitEmpty(t *testing.T) {
+	t.Run("normal", func(t *testing.T) {
+		type M map[int]int
+		type st struct {
+			M M `json:",omitempty"`
+		}
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{}, nil)
+		})
+		t.Run("empty", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{
+				M: M{},
+			}, nil)
+		})
+		t.Run("non empty", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{
+				M: M{1: 2},
+			}, nil)
+		})
+	})
+}

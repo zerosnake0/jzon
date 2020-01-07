@@ -8,9 +8,6 @@ import (
 type boolEncoder struct{}
 
 func (*boolEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	if ptr == nil {
-		return true
-	}
 	return !(*(*bool)(ptr))
 }
 
@@ -35,9 +32,6 @@ func (*boolEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 type stringEncoder struct{}
 
 func (*stringEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	if ptr == nil {
-		return true
-	}
 	return *(*string)(ptr) == ""
 }
 

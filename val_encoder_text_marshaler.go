@@ -13,7 +13,7 @@ var (
 type textMarshalerEncoder rtype
 
 func (enc textMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	return false
 }
 
 func (enc textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
@@ -37,7 +37,7 @@ func (enc textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *En
 type directTextMarshalerEncoder rtype
 
 func (enc directTextMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	return *(*unsafe.Pointer)(ptr) == nil
 }
 
 func (enc directTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
@@ -61,7 +61,7 @@ func (enc directTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, op
 type pointerTextMarshalerEncoder rtype
 
 func (enc pointerTextMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	return *(*unsafe.Pointer)(ptr) == nil
 }
 
 func (enc pointerTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
@@ -90,7 +90,7 @@ func (enc pointerTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, o
 type dynamicTextMarshalerEncoder struct{}
 
 func (*dynamicTextMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	return *(*encoding.TextMarshaler)(ptr) == nil
 }
 
 func (*dynamicTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

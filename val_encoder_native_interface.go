@@ -7,9 +7,6 @@ import (
 type efaceEncoder struct{}
 
 func (*efaceEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	if ptr == nil {
-		return true
-	}
 	return *(*interface{})(ptr) == nil
 }
 
@@ -24,7 +21,9 @@ func (*efaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 type ifaceEncoder struct{}
 
 func (*ifaceEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	// TODO: is this ok?
+	o := packIFace(ptr)
+	return o == nil
 }
 
 func (*ifaceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

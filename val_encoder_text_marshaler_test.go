@@ -170,3 +170,57 @@ func TestValEncoder_TextMarshaler_Direct(t *testing.T) {
 		checkEncodeValueWithStandard(t, &st{}, nil)
 	})
 }
+
+func TestValEncoder_TextMarshaler_OmitEmpty(t *testing.T) {
+	t.Run("text marshaler", func(t *testing.T) {
+		type st struct {
+			A testTextMarshaler `json:",omitempty"`
+		}
+		checkEncodeValueWithStandard(t, st{
+			A: testTextMarshaler{
+				data: "true",
+			},
+		}, nil)
+	})
+	t.Run("direct text marshaler", func(t *testing.T) {
+		type st struct {
+			A testDirectTextMarshaler `json:",omitempty"`
+		}
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{}, nil)
+		})
+		t.Run("zero", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{
+				A: testDirectTextMarshaler{},
+			}, nil)
+		})
+		t.Run("non zero", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{
+				A: testDirectTextMarshaler{1: 2},
+			}, nil)
+		})
+	})
+	t.Run("pointer text marshaler", func(t *testing.T) {
+		type st struct {
+			A testTextMarshaler2 `json:",omitempty"`
+		}
+		checkEncodeValueWithStandard(t, &st{
+			A: testTextMarshaler2{
+				data: "true",
+			},
+		}, nil)
+	})
+	t.Run("dynamic text marshaler", func(t *testing.T) {
+		type st struct {
+			A encoding.TextMarshaler `json:",omitempty"`
+		}
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{}, nil)
+		})
+		t.Run("nil pointer", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{
+				A: (*testTextMarshaler2)(nil),
+			}, nil)
+		})
+	})
+}

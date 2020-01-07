@@ -59,3 +59,25 @@ func TestValEncoder_Slice(t *testing.T) {
 	})
 	debug.FreeOSMemory()
 }
+
+func TestValEncoder_Slice_OmitEmpty(t *testing.T) {
+	t.Run("normal", func(t *testing.T) {
+		type S []int
+		type st struct {
+			S S `json:",omitempty"`
+		}
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{}, nil)
+		})
+		t.Run("empty", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{
+				S: S{},
+			}, nil)
+		})
+		t.Run("non empty", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{
+				S: S{1},
+			}, nil)
+		})
+	})
+}

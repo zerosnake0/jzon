@@ -26,7 +26,8 @@ type sliceEncoder struct {
 }
 
 func (enc *sliceEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	sh := (*reflect.SliceHeader)(ptr)
+	return sh.Data == 0 || sh.Len == 0
 }
 
 func (enc *sliceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {

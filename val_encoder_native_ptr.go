@@ -22,10 +22,11 @@ type pointerEncoder struct {
 }
 
 func (enc *pointerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	ptr = *(*unsafe.Pointer)(ptr)
 	if ptr == nil {
 		return true
 	}
-	return *(*unsafe.Pointer)(ptr) == nil
+	return enc.encoder.IsEmpty(ptr)
 }
 
 func (enc *pointerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

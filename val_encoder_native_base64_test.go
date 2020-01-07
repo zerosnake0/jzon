@@ -56,3 +56,22 @@ func TestValEncoder_Native_Base64(t *testing.T) {
 		})
 	})
 }
+
+func TestValEncoder_Native_Base64_OmitEmpty(t *testing.T) {
+	type st struct {
+		A []byte `json:",omitempty"`
+	}
+	t.Run("nil", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{}, nil)
+	})
+	t.Run("empty", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{
+			A: []byte{},
+		}, nil)
+	})
+	t.Run("non empty", func(t *testing.T) {
+		checkEncodeValueWithStandard(t, st{
+			A: []byte("test"),
+		}, nil)
+	})
+}
