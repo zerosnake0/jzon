@@ -52,6 +52,7 @@ type directMapEncoder struct {
 }
 
 func (enc *directMapEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	ptr = *(*unsafe.Pointer)(ptr)
 	return maplen(ptr) == 0
 }
 
@@ -59,6 +60,11 @@ func (enc *directMapEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts)
 	if s.Error != nil {
 		return
 	}
+	if ptr == nil {
+		s.Null()
+		return
+	}
+	ptr = *(*unsafe.Pointer)(ptr)
 	if ptr == nil {
 		s.Null()
 		return

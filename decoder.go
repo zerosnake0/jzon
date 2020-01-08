@@ -72,6 +72,10 @@ func (dec *Decoder) Unmarshal(data []byte, obj interface{}) error {
 	return err
 }
 
+func (dec *Decoder) UnmarshalFromString(s string, obj interface{}) error {
+	return dec.Unmarshal(localStringToBytes(s), obj)
+}
+
 func (dec *Decoder) getDecoderFromCache(rType rtype) ValDecoder {
 	return dec.decoderCache.Load().(decoderCache)[rType]
 }

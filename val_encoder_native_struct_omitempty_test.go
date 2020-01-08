@@ -17,15 +17,37 @@ func TestValEncoder_Native_Struct_OmitEmpty(t *testing.T) {
 			U32  uint32      `json:",omitempty"`
 			U64  uint64      `json:",omitempty"`
 			Uptr uintptr     `json:",omitempty"`
-			PI8  *int8       `json:",omitempty"`
 			O    interface{} `json:",omitempty"`
 		}
 		checkEncodeValueWithStandard(t, st{}, nil)
-		i8 := int8(1)
+		i8 := int8(0)
 		checkEncodeValueWithStandard(t, st{
-			PI8: &i8,
-			O:   &i8,
+			O: &i8,
 		}, nil)
+		i8 = int8(1)
+		checkEncodeValueWithStandard(t, st{
+			O: &i8,
+		}, nil)
+	})
+	t.Run("pointer", func(t *testing.T) {
+		type st struct {
+			PI8 *int8 `json:",omitempty"`
+		}
+		t.Run("nil", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, st{}, nil)
+		})
+		t.Run("zero", func(t *testing.T) {
+			i8 := int8(0)
+			checkEncodeValueWithStandard(t, st{
+				PI8: &i8,
+			}, nil)
+		})
+		t.Run("non zero", func(t *testing.T) {
+			i8 := int8(1)
+			checkEncodeValueWithStandard(t, st{
+				PI8: &i8,
+			}, nil)
+		})
 	})
 	t.Run("struct", func(t *testing.T) {
 		type inner struct {

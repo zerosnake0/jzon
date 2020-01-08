@@ -43,7 +43,7 @@ type directTextMarshalerEncoder struct {
 }
 
 func (enc *directTextMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	return enc.isEmpty(*(*unsafe.Pointer)(ptr))
+	return enc.isEmpty(ptr)
 }
 
 func (enc *directTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

@@ -43,7 +43,7 @@ type directJsonMarshalerEncoder struct {
 }
 
 func (enc *directJsonMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	return enc.isEmpty(*(*unsafe.Pointer)(ptr))
+	return enc.isEmpty(ptr)
 }
 
 func (enc *directJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

@@ -260,7 +260,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			} else {
 				typesToCreate.push(typ.Elem())
 				// pointer decoder is a reverse of direct encoder
-				internalCache[rType] = &pointerEncoder{w.encoder}
+				internalCache[rType] = w.encoder
 				rebuildMap[rType] = w
 			}
 		case reflect.Slice:
@@ -342,7 +342,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		case *mapEncoderBuilder:
 			// TODO: key/value encoder
 			x.encoder.elemEncoder = internalCache[x.elemRType]
-			cache[rType] = x.encoder
+			cache[rType] = &directEncoder{x.encoder}
 		case *sliceEncoderBuilder:
 			x.encoder.elemEncoder = internalCache.preferPtrEncoder(x.elemType)
 			cache[rType] = x.encoder
