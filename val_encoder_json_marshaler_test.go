@@ -3,42 +3,8 @@ package jzon
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"testing"
 )
-
-type testJsonMarshaler struct {
-	data string
-	err  error
-}
-
-func (m testJsonMarshaler) MarshalJSON() ([]byte, error) {
-	return []byte(m.data), m.err
-}
-
-type testJsonMarshaler2 struct {
-	data string
-	err  error
-}
-
-func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
-	if m == nil {
-		return []byte(`"is_null"`), nil
-		// return []byte(`null`), nil
-	}
-	return []byte(m.data), m.err
-}
-
-/* The following struct definition is not allowed
-type testJsonMarshaler3 struct {
-}
-
-type pTestJsonMarshaler3 *testJsonMarshaler3
-
-func (pTestJsonMarshaler3) MarshalJSON() ([]byte, error) {
-	return nil, nil
-}
-*/
 
 func TestValEncoder_JsonMarshaler_Error(t *testing.T) {
 	t.Run("chain error", func(t *testing.T) {
@@ -230,41 +196,34 @@ func TestValEncoder_DynamicJsonMarshaler(t *testing.T) {
 	})
 }
 
-type testDirectJsonMarshaler map[int]int
-
-func (m testDirectJsonMarshaler) MarshalJSON() ([]byte, error) {
-	s := fmt.Sprintf("%d", len(m))
-	return []byte(s), nil
-}
-
 func TestValEncoder_JsonMarshaler_Direct(t *testing.T) {
 	t.Run("value", func(t *testing.T) {
 		t.Run("nil", func(t *testing.T) {
-			checkEncodeValueWithStandard(t, testDirectJsonMarshaler(nil), nil)
+			checkEncodeValueWithStandard(t, testMapJsonMarshaler(nil), nil)
 		})
 		t.Run("non nil", func(t *testing.T) {
-			checkEncodeValueWithStandard(t, testDirectJsonMarshaler{
+			checkEncodeValueWithStandard(t, testMapJsonMarshaler{
 				1: 2,
 			}, nil)
 		})
 	})
 	t.Run("pointer", func(t *testing.T) {
 		t.Run("nil", func(t *testing.T) {
-			checkEncodeValueWithStandard(t, (*testDirectJsonMarshaler)(nil), nil)
+			checkEncodeValueWithStandard(t, (*testMapJsonMarshaler)(nil), nil)
 		})
 		t.Run("non nil", func(t *testing.T) {
-			var m testDirectJsonMarshaler
+			var m testMapJsonMarshaler
 			checkEncodeValueWithStandard(t, &m, nil)
 		})
 		t.Run("non nil 2", func(t *testing.T) {
-			checkEncodeValueWithStandard(t, &testDirectJsonMarshaler{
+			checkEncodeValueWithStandard(t, &testMapJsonMarshaler{
 				1: 2,
 			}, nil)
 		})
 	})
 	t.Run("struct member", func(t *testing.T) {
 		type st struct {
-			A testDirectJsonMarshaler
+			A testMapJsonMarshaler
 		}
 		checkEncodeValueWithStandard(t, &st{}, nil)
 	})
@@ -274,13 +233,13 @@ func TestValEncoder_JsonMarshaler_Direct(t *testing.T) {
 			checkEncodeValueWithStandard(t, m, nil)
 		})
 		t.Run("value", func(t *testing.T) {
-			var m json.Marshaler = testDirectJsonMarshaler{
+			var m json.Marshaler = testMapJsonMarshaler{
 				1: 2,
 			}
 			checkEncodeValueWithStandard(t, m, nil)
 		})
 		t.Run("pointer", func(t *testing.T) {
-			var m json.Marshaler = &testDirectJsonMarshaler{
+			var m json.Marshaler = &testMapJsonMarshaler{
 				1: 2,
 			}
 			checkEncodeValueWithStandard(t, m, nil)
@@ -292,13 +251,13 @@ func TestValEncoder_JsonMarshaler_Direct(t *testing.T) {
 			checkEncodeValueWithStandard(t, &m, nil)
 		})
 		t.Run("value", func(t *testing.T) {
-			var m json.Marshaler = testDirectJsonMarshaler{
+			var m json.Marshaler = testMapJsonMarshaler{
 				1: 2,
 			}
 			checkEncodeValueWithStandard(t, &m, nil)
 		})
 		t.Run("pointer", func(t *testing.T) {
-			var m json.Marshaler = &testDirectJsonMarshaler{
+			var m json.Marshaler = &testMapJsonMarshaler{
 				1: 2,
 			}
 			checkEncodeValueWithStandard(t, &m, nil)
@@ -317,21 +276,24 @@ func TestValEncoder_JsonMarshaler_OmitEmpty(t *testing.T) {
 			},
 		}, nil)
 	})
+	t.Run("indirect json marshaler", func(t *testing.T) {
+
+	})
 	t.Run("direct json marshaler", func(t *testing.T) {
 		type st struct {
-			A testDirectJsonMarshaler `json:",omitempty"`
+			A testMapJsonMarshaler `json:",omitempty"`
 		}
 		t.Run("nil", func(t *testing.T) {
 			checkEncodeValueWithStandard(t, st{}, nil)
 		})
 		t.Run("zero", func(t *testing.T) {
 			checkEncodeValueWithStandard(t, st{
-				A: testDirectJsonMarshaler{},
+				A: testMapJsonMarshaler{},
 			}, nil)
 		})
 		t.Run("non zero", func(t *testing.T) {
 			checkEncodeValueWithStandard(t, st{
-				A: testDirectJsonMarshaler{1: 2},
+				A: testMapJsonMarshaler{1: 2},
 			}, nil)
 		})
 	})
@@ -339,11 +301,19 @@ func TestValEncoder_JsonMarshaler_OmitEmpty(t *testing.T) {
 		type st struct {
 			A testJsonMarshaler2 `json:",omitempty"`
 		}
-		checkEncodeValueWithStandard(t, &st{
-			A: testJsonMarshaler2{
-				data: "true",
-			},
-		}, nil)
+		t.Run("no data", func(t *testing.T) {
+			skipTest(t, "incompatible with std")
+			checkEncodeValueWithStandard(t, &st{
+				A: testJsonMarshaler2{},
+			}, nil)
+		})
+		t.Run("with data", func(t *testing.T) {
+			checkEncodeValueWithStandard(t, &st{
+				A: testJsonMarshaler2{
+					data: "true",
+				},
+			}, nil)
+		})
 	})
 	t.Run("dynamic json marshaler", func(t *testing.T) {
 		type st struct {

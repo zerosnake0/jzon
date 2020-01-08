@@ -64,7 +64,7 @@ type structEncoder struct {
 }
 
 func (enc *structEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	return false
 }
 
 func (enc *structEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

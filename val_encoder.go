@@ -116,7 +116,7 @@ type notSupportedEncoder string
 
 func (enc notSupportedEncoder) IsEmpty(ptr unsafe.Pointer) bool {
 	// TODO: error in interface?
-	panic("not implemented")
+	return false
 }
 
 func (enc notSupportedEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {

@@ -134,6 +134,8 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			continue
 		}
 
+		kind := typ.Kind()
+
 		// check json.Marshaler interface
 		if typ.Implements(jsonMarshalerType) {
 			if ifaceIndir(rType) {
@@ -157,7 +159,10 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				}
 				continue
 			}
-			v := directJsonMarshalerEncoder(rType)
+			v := &directJsonMarshalerEncoder{
+				isEmpty: isEmptyFunctions[kind],
+				rtype:   rType,
+			}
 			internalCache[rType] = v
 			cache[rType] = &directEncoder{v}
 			continue
@@ -192,7 +197,6 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			continue
 		}
 
-		kind := typ.Kind()
 		if kindRType := encoderKindMap[kind]; kindRType != 0 {
 			// TODO: shall we make this an option?
 			// TODO: so that only the native type is affected?

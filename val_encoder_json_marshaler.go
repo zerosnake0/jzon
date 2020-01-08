@@ -34,13 +34,16 @@ func (enc jsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *En
 	s.Raw(b)
 }
 
-type directJsonMarshalerEncoder rtype
-
-func (enc directJsonMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	return *(*unsafe.Pointer)(ptr) == nil
+type directJsonMarshalerEncoder struct {
+	isEmpty func(ptr unsafe.Pointer) bool
+	rtype   rtype
 }
 
-func (enc directJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (enc *directJsonMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	return enc.isEmpty(*(*unsafe.Pointer)(ptr))
+}
+
+func (enc *directJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}
@@ -48,7 +51,7 @@ func (enc directJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, op
 		s.Null()
 		return
 	}
-	obj := packEFace(rtype(enc), *(*unsafe.Pointer)(ptr))
+	obj := packEFace(enc.rtype, *(*unsafe.Pointer)(ptr))
 	marshaler := obj.(json.Marshaler)
 	b, err := marshaler.MarshalJSON()
 	if err != nil {

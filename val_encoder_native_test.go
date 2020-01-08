@@ -51,7 +51,7 @@ func TestValEncoder_Bool_Kind(t *testing.T) {
 type testBoolEncoder struct{}
 
 func (*testBoolEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	panic("not implemented")
+	return *(*bool)(ptr)
 }
 
 func (*testBoolEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
@@ -75,6 +75,16 @@ func TestValEncoder_Bool_Kind_CustomEncoder(t *testing.T) {
 	testStreamerWithEncoder(t, enc, "true", func(s *Streamer) {
 		s.Value(false)
 	})
+	testStreamerWithEncoder(t, enc, `{"B":true}`, func(s *Streamer) {
+		s.Value(struct {
+			B bool `json:",omitempty"`
+		}{B: false})
+	})
+	testStreamerWithEncoder(t, enc, `{}`, func(s *Streamer) {
+		s.Value(struct {
+			B bool `json:",omitempty"`
+		}{B: true})
+	})
 
 	type Bool bool
 
@@ -83,6 +93,16 @@ func TestValEncoder_Bool_Kind_CustomEncoder(t *testing.T) {
 	})
 	testStreamerWithEncoder(t, enc, "true", func(s *Streamer) {
 		s.Value(Bool(false))
+	})
+	testStreamerWithEncoder(t, enc, `{"B":true}`, func(s *Streamer) {
+		s.Value(struct {
+			B Bool `json:",omitempty"`
+		}{B: false})
+	})
+	testStreamerWithEncoder(t, enc, `{}`, func(s *Streamer) {
+		s.Value(struct {
+			B Bool `json:",omitempty"`
+		}{B: true})
 	})
 }
 

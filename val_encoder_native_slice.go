@@ -25,7 +25,7 @@ type sliceEncoder struct {
 	elemEncoder ValEncoder
 }
 
-func (enc *sliceEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+func (*sliceEncoder) IsEmpty(ptr unsafe.Pointer) bool {
 	sh := (*reflect.SliceHeader)(ptr)
 	return sh.Data == 0 || sh.Len == 0
 }
