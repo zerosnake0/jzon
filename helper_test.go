@@ -2,12 +2,9 @@ package jzon
 
 import (
 	"io"
-	"log"
 	"reflect"
 	"runtime"
 	"testing"
-
-	"github.com/json-iterator/go"
 )
 
 var (
@@ -16,11 +13,6 @@ var (
 
 func skipTest(t *testing.T, fmt string, args ...interface{}) {
 	t.Skipf(fmt, args...)
-}
-
-func iterMarshal(o interface{}) {
-	data, err := jsoniter.Marshal(o)
-	log.Printf("iter | %v | %s", err, data)
 }
 
 func withIterator(data string, cb func(it *Iterator)) {
