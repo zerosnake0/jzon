@@ -1,7 +1,12 @@
 # Feature
 
 - [x] Skip object
-- [ ] Support other tag than `json`
+- [x] Support other tag than `json`
+- [x] Decoder option `UseNumber`
+- [x] Decoder option `DisallowUnknownFields`
+- [x] tag option `quoted`
+- [ ] json/text marshaler (pointer receiver) for values
+- [ ] tag option `omitempty`
 
 # Improvement
 

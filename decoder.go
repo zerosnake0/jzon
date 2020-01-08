@@ -24,6 +24,10 @@ type DecoderOption struct {
 	Tag string
 
 	OnlyTaggedField bool
+
+	UseNumber bool
+
+	DisallowUnknownFields bool
 }
 
 type decoderCache = map[rtype]ValDecoder
@@ -32,9 +36,11 @@ type Decoder struct {
 	cacheMu      sync.Mutex
 	decoderCache atomic.Value
 
-	caseSensitive   bool
-	tag             string
-	onlyTaggedField bool
+	caseSensitive         bool
+	tag                   string
+	onlyTaggedField       bool
+	useNumber             bool
+	disallowUnknownFields bool
 }
 
 func NewDecoder(opt *DecoderOption) *Decoder {
@@ -52,6 +58,8 @@ func NewDecoder(opt *DecoderOption) *Decoder {
 			dec.tag = opt.Tag
 		}
 		dec.onlyTaggedField = opt.OnlyTaggedField
+		dec.useNumber = opt.UseNumber
+		dec.disallowUnknownFields = opt.DisallowUnknownFields
 	}
 	dec.decoderCache.Store(cache)
 	return &dec
@@ -62,6 +70,10 @@ func (dec *Decoder) Unmarshal(data []byte, obj interface{}) error {
 	err := it.Unmarshal(data, obj)
 	dec.ReturnIterator(it)
 	return err
+}
+
+func (dec *Decoder) UnmarshalFromString(s string, obj interface{}) error {
+	return dec.Unmarshal(localStringToBytes(s), obj)
 }
 
 func (dec *Decoder) getDecoderFromCache(rType rtype) ValDecoder {
@@ -82,23 +94,18 @@ func (dec *Decoder) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder 
 	for k, v := range cache {
 		newCache[k] = v
 	}
-	typesToCreate := []reflect.Type{ptrType}
-	dec.createDecoderInternal(newCache, typesToCreate)
+	var q typeQueue
+	q.push(ptrType)
+	dec.createDecoderInternal(newCache, q)
 	dec.decoderCache.Store(newCache)
 	return newCache[rType]
 }
 
-func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []reflect.Type) {
+func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate typeQueue) {
 	rebuildMap := map[rtype]interface{}{}
-	idx := len(typesToCreate) - 1
-	for idx >= 0 {
-		// pop one
-		ptrType := typesToCreate[idx]
-		typesToCreate = typesToCreate[:idx]
-		idx -= 1
-
+	for ptrType := typesToCreate.pop(); ptrType != nil; ptrType = typesToCreate.pop() {
 		rType := rtypeOfType(ptrType)
-		if _, ok := cache[rType]; ok { // double check
+		if _, ok := cache[rType]; ok { // check if visited
 			continue
 		}
 		// check global decoders
@@ -117,7 +124,7 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 		}
 		elem := ptrType.Elem()
 		elemKind := elem.Kind()
-		if elemNativeRType := kindMap[elemKind]; elemNativeRType != 0 {
+		if elemNativeRType := decoderKindMap[elemKind]; elemNativeRType != 0 {
 			// TODO: shall we make this an option?
 			// TODO: so that only the native type is affected?
 			// check if the native type has a custom decoder
@@ -139,36 +146,36 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 				cache[rType] = (*ifaceDecoder)(nil)
 			}
 		case reflect.Struct:
-			vd := dec.newStructDecoder(elem)
-			if vd == nil {
+			w := dec.newStructDecoder(elem)
+			if w == nil {
 				// no field to unmarshal
-				cache[rType] = (*skipDecoder)(nil)
-			} else {
-				for i := range vd.fields.list {
-					fi := &vd.fields.list[i]
-					typesToCreate = append(typesToCreate, fi.ptrType)
-					idx += 1
+				if dec.disallowUnknownFields {
+					cache[rType] = (*emptyObjectDecoder)(nil)
+				} else {
+					cache[rType] = (*skipDecoder)(nil)
 				}
-				cache[rType] = vd
-				rebuildMap[rType] = vd
+			} else {
+				for i := range w.fields.list {
+					fi := &w.fields.list[i]
+					typesToCreate.push(fi.ptrType)
+				}
+				cache[rType] = w.decoder
+				rebuildMap[rType] = w
 			}
 		case reflect.Ptr:
-			typesToCreate = append(typesToCreate, elem)
-			idx += 1
+			typesToCreate.push(elem)
 			w := newPointerDecoder(elem)
 			cache[rType] = w.decoder
 			rebuildMap[rType] = w
 		case reflect.Array:
 			elemPtrType := reflect.PtrTo(elem.Elem())
-			typesToCreate = append(typesToCreate, elemPtrType)
-			idx += 1
+			typesToCreate.push(elemPtrType)
 			w := newArrayDecoder(elem)
 			cache[rType] = w.decoder
 			rebuildMap[rType] = w
 		case reflect.Slice:
 			elemPtrType := reflect.PtrTo(elem.Elem())
-			typesToCreate = append(typesToCreate, elemPtrType)
-			idx += 1
+			typesToCreate.push(elemPtrType)
 			w := newSliceDecoder(elem)
 			cache[rType] = w.decoder
 			rebuildMap[rType] = w
@@ -178,8 +185,7 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 				cache[rType] = notSupportedDecoder(ptrType.String())
 			} else {
 				valuePtrType := reflect.PtrTo(elem.Elem())
-				typesToCreate = append(typesToCreate, valuePtrType)
-				idx += 1
+				typesToCreate.push(valuePtrType)
 				cache[rType] = w.decoder
 				rebuildMap[rType] = w
 			}
@@ -188,14 +194,16 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate []re
 		}
 	}
 	// rebuild some decoders
-	for _, vd := range rebuildMap {
-		switch x := vd.(type) {
+	for _, builder := range rebuildMap {
+		switch x := builder.(type) {
 		case *pointerDecoderBuilder:
 			x.decoder.elemDec = cache[x.ptrRType]
-		case *structDecoder:
+		case *structDecoderBuilder:
+			x.decoder.fields.init(len(x.fields.list))
 			for i := range x.fields.list {
 				fi := &x.fields.list[i]
-				fi.decoder = cache[fi.rtype]
+				fiPtrRType := rtypeOfType(fi.ptrType)
+				x.decoder.fields.add(fi, cache[fiPtrRType])
 			}
 		case *arrayDecoderBuilder:
 			x.decoder.elemDec = cache[x.elemPtrRType]

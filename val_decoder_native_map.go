@@ -22,10 +22,15 @@ func newMapDecoder(mapType reflect.Type) *mapDecoderBuilder {
 	keyKind := keyType.Kind()
 	// the string type is specially treated in order to be
 	// compatible with the standard lib
-	if keyKind != reflect.String && keyPtrType.Implements(textUnmarshalerType) {
+	switch {
+	case keyKind == reflect.String:
+		keyDecoder = keyDecoders[keyKind]
+	case keyPtrType.Implements(textUnmarshalerType):
 		keyDecoder = textUnmarshalerDecoder(rtypeOfType(keyPtrType))
-	} else if keyDecoder = keyDecoders[keyType.Kind()]; keyDecoder == nil {
-		return nil
+	default:
+		if keyDecoder = keyDecoders[keyType.Kind()]; keyDecoder == nil {
+			return nil
+		}
 	}
 	return &mapDecoderBuilder{
 		decoder: &mapDecoder{
@@ -48,7 +53,7 @@ type mapDecoder struct {
 	valDec   ValDecoder
 }
 
-func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -81,7 +86,10 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 	}
 	for {
 		key := unsafe_New(dec.keyRType)
-		if err = dec.keyDec.Decode(key, it); err != nil {
+		opt := DecOpts{
+			MapKey: true,
+		}
+		if err = dec.keyDec.Decode(key, it, &opt); err != nil {
 			return err
 		}
 		c, _, err = it.nextToken()
@@ -93,7 +101,7 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		}
 		it.head += 1
 		val := unsafe_New(dec.valRType)
-		if err = dec.valDec.Decode(val, it); err != nil {
+		if err = dec.valDec.Decode(val, it, nil); err != nil {
 			return err
 		}
 		mapassign(dec.rtype, *(*unsafe.Pointer)(ptr), key, val)
@@ -113,11 +121,12 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 	}
 }
 
+/*
 // key decoders
 type stringKeyDecoder struct {
 }
 
-func (*stringKeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*stringKeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	s, err := it.ReadString()
 	if err != nil {
 		return err
@@ -130,7 +139,7 @@ func (*stringKeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type int8KeyDecoder struct {
 }
 
-func (*int8KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*int8KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	if err := it.expectQuote(); err != nil {
 		return err
 	}
@@ -148,7 +157,7 @@ func (*int8KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type int16KeyDecoder struct {
 }
 
-func (*int16KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*int16KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	if err := it.expectQuote(); err != nil {
 		return err
 	}
@@ -166,7 +175,7 @@ func (*int16KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type int32KeyDecoder struct {
 }
 
-func (*int32KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*int32KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	if err := it.expectQuote(); err != nil {
 		return err
 	}
@@ -184,7 +193,7 @@ func (*int32KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type int64KeyDecoder struct {
 }
 
-func (*int64KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*int64KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	if err := it.expectQuote(); err != nil {
 		return err
 	}
@@ -203,7 +212,7 @@ func (*int64KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type uint8KeyDecoder struct {
 }
 
-func (*uint8KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*uint8KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	if err := it.expectQuote(); err != nil {
 		return err
 	}
@@ -221,7 +230,7 @@ func (*uint8KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type uint16KeyDecoder struct {
 }
 
-func (*uint16KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*uint16KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	if err := it.expectQuote(); err != nil {
 		return err
 	}
@@ -239,7 +248,7 @@ func (*uint16KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type uint32KeyDecoder struct {
 }
 
-func (*uint32KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*uint32KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	if err := it.expectQuote(); err != nil {
 		return err
 	}
@@ -257,7 +266,7 @@ func (*uint32KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type uint64KeyDecoder struct {
 }
 
-func (*uint64KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*uint64KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	if err := it.expectQuote(); err != nil {
 		return err
 	}
@@ -271,3 +280,4 @@ func (*uint64KeyDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 	*(*uint64)(ptr) = i
 	return nil
 }
+*/

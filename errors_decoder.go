@@ -18,7 +18,10 @@ var NilPointerReceiverError = errors.New("the receiver is nil")
 var IFaceError = errors.New("cannot unmarshal on empty iface")
 
 // NilEmbeddedError
-var NilEmbeddedPointerError = errors.New("cannot unmarshal on nil embedded pointer")
+var NilEmbeddedPointerError = errors.New("cannot unmarshal on nil pointer (unexported embedded)")
+
+// EfaceLoopingError
+var EfaceLoopingError = errors.New("eface looping detected")
 
 // InvalidStringCharError
 type InvalidStringCharError struct {
@@ -97,4 +100,18 @@ type TypeNotSupportedError string
 
 func (e TypeNotSupportedError) Error() string {
 	return fmt.Sprintf("%q is not supported", string(e))
+}
+
+// UnknownField
+type UnknownFieldError string
+
+func (e UnknownFieldError) Error() string {
+	return fmt.Sprintf("unknown field %q", string(e))
+}
+
+// BadQuotedString
+type BadQuotedStringError string
+
+func (e BadQuotedStringError) Error() string {
+	return fmt.Sprintf("bad quoted string %q", string(e))
 }

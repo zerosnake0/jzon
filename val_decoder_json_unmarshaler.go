@@ -12,7 +12,7 @@ var (
 
 type jsonUnmarshalerDecoder rtype
 
-func (dec jsonUnmarshalerDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (dec jsonUnmarshalerDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	obj := packEFace(rtype(dec), ptr)
 	unmarshaler := obj.(json.Unmarshaler)
 	b, err := it.SkipRaw()

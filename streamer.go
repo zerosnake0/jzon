@@ -10,9 +10,8 @@ type Streamer struct {
 	writer io.Writer
 	buffer []byte
 
-	Error   error
-	poped   bool
-	safeSet []string
+	Error error
+	poped bool
 }
 
 func NewStreamer() *Streamer {
@@ -26,6 +25,8 @@ func ReturnStreamer(s *Streamer) {
 func (s *Streamer) reset() {
 	s.writer = nil
 	s.Error = nil
+	s.poped = false
+	s.buffer = s.buffer[:0]
 }
 
 func (s *Streamer) Reset(w io.Writer) {
@@ -133,7 +134,18 @@ func (s *Streamer) Field(field string) *Streamer {
 		return s
 	}
 	s.onVal()
-	s.string(field)
+	s.buffer = encodeString(s.buffer, field, s.encoder.safeSet)
+	s.buffer = append(s.buffer, ':')
+	s.poped = false
+	return s
+}
+
+func (s *Streamer) RawField(b []byte) *Streamer {
+	if s.Error != nil {
+		return s
+	}
+	s.onVal()
+	s.buffer = append(s.buffer, b...)
 	s.buffer = append(s.buffer, ':')
 	s.poped = false
 	return s

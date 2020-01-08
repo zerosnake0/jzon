@@ -6,8 +6,14 @@ import (
 
 func TestValDecoder_Native_Struct_Tag(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
+	t.Run("quote (invalid tag)", func(t *testing.T) {
+		type st struct {
+			A int `json:"\""`
+		}
+		f(t, `{"\"":1}`, nil, &st{}, &st{})
+	})
 	t.Run("unicode (u)", func(t *testing.T) {
 		type st struct {
 			A int `json:"\u4e2d"`

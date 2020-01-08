@@ -25,212 +25,218 @@ func runeToAscii(s string) string {
 
 func TestIterator_Str_readU4(t *testing.T) {
 	origin := `中`
-	src := []byte(runeToAscii(`"` + origin + `"`))
+	src := runeToAscii(`"` + origin + `"`)
 	t.Run("eof", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes(src[:3])
-		_, err := it.ReadString()
-		require.Equal(t, io.EOF, err)
+		withIterator(src[:3], func(it *Iterator) {
+			_, err := it.ReadString()
+			require.Equal(t, io.EOF, err)
+		})
 	})
 	t.Run("eof2", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes(src[:len(src)-1])
-		_, err := it.ReadString()
-		require.Equal(t, io.EOF, err)
+		withIterator(src[:len(src)-1], func(it *Iterator) {
+			_, err := it.ReadString()
+			require.Equal(t, io.EOF, err)
+		})
 	})
 	t.Run("invalid_unicode", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\uG`))
-		_, err := it.ReadString()
-		require.IsType(t, InvalidUnicodeCharError{}, err)
+		withIterator(`"\uG`, func(it *Iterator) {
+			_, err := it.ReadString()
+			require.IsType(t, InvalidUnicodeCharError{}, err)
+		})
 	})
 	t.Run("bytes", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes(src)
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Equal(t, origin, s)
+		withIterator(src, func(it *Iterator) {
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Equal(t, origin, s)
+		})
 	})
 	t.Run("reader", func(t *testing.T) {
-		it := NewIterator()
-		it.Reset(&oneByteReader{
-			b: src,
+		withIterator("", func(it *Iterator) {
+			it.Reset(&oneByteReader{
+				b: src,
+			})
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Equal(t, origin, s)
 		})
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Equal(t, origin, s)
 	})
 }
 
 func TestIterator_Str_readEscapedChar(t *testing.T) {
 	t.Run("eof", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\`))
-		_, err := it.ReadString()
-		require.Equal(t, io.EOF, err)
+		withIterator(`"\`, func(it *Iterator) {
+			_, err := it.ReadString()
+			require.Equal(t, io.EOF, err)
+		})
 	})
 	t.Run("control", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\n"`))
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Len(t, s, 1)
-		require.Equal(t, "\n", s)
+		withIterator(`"\n"`, func(it *Iterator) {
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Len(t, s, 1)
+			require.Equal(t, "\n", s)
+		})
 	})
 	t.Run("invalid escape char", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\a"`))
-		_, err := it.ReadString()
-		require.IsType(t, InvalidEscapeCharError{}, err)
+		withIterator(`"\a"`, func(it *Iterator) {
+			_, err := it.ReadString()
+			require.IsType(t, InvalidEscapeCharError{}, err)
+		})
 	})
 	t.Run("unicode error 1", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\u0`))
-		_, err := it.ReadString()
-		require.Equal(t, io.EOF, err)
+		withIterator(`"\u0`, func(it *Iterator) {
+			_, err := it.ReadString()
+			require.Equal(t, io.EOF, err)
+		})
 	})
 	t.Run("surrogate err 1", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\ud800`))
-		_, err := it.ReadString()
-		require.Equal(t, io.EOF, err)
+		withIterator(`"\ud800`, func(it *Iterator) {
+			_, err := it.ReadString()
+			require.Equal(t, io.EOF, err)
+		})
 	})
 	t.Run("surrogate incomplete", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\ud800"`))
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Equal(t, string(runeError), s)
+		withIterator(`"\ud800"`, func(it *Iterator) {
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Equal(t, string(runeError), s)
+		})
 	})
 	t.Run("surrogate err 2", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\ud800\`))
-		_, err := it.ReadString()
-		require.Equal(t, io.EOF, err)
+		withIterator(`"\ud800\`, func(it *Iterator) {
+			_, err := it.ReadString()
+			require.Equal(t, io.EOF, err)
+		})
 	})
 	t.Run("surrogate err 3", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\ud800\a`))
-		_, err := it.ReadString()
-		require.IsType(t, InvalidEscapeCharError{}, err)
+		withIterator(`"\ud800\a`, func(it *Iterator) {
+			_, err := it.ReadString()
+			require.IsType(t, InvalidEscapeCharError{}, err)
+		})
 	})
 	t.Run("surrogate other escaped char", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\ud800\n"`))
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Equal(t, string(runeError)+"\n", s)
+		withIterator(`"\ud800\n"`, func(it *Iterator) {
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Equal(t, string(runeError)+"\n", s)
+		})
 	})
 	t.Run("surrogate err 4", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\ud800\u`))
-		_, err := it.ReadString()
-		require.Equal(t, io.EOF, err)
+		withIterator(`"\ud800\u`, func(it *Iterator) {
+			_, err := it.ReadString()
+			require.Equal(t, io.EOF, err)
+		})
 	})
 	t.Run("surrogate runeError", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\udc00\u0000"`))
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Equal(t, `"\ufffd\x00"`, fmt.Sprintf("%+q", s))
+		withIterator(`"\udc00\u0000"`, func(it *Iterator) {
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Equal(t, `"\ufffd\x00"`, fmt.Sprintf("%+q", s))
+		})
 	})
 	t.Run("surrogate", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\uD852\uDF62"`))
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Equal(t, "𤭢", s)
+		withIterator(`"\uD852\uDF62"`, func(it *Iterator) {
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Equal(t, "𤭢", s)
+		})
 	})
 	t.Run("non surrogate", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\u4e2d"`)) // 中
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Equal(t, "中", s)
+		s := `"\u4e2d"` // 中
+		withIterator(s, func(it *Iterator) {
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Equal(t, "中", s)
+		})
 	})
 }
 
 func TestIterator_Str_readStringAsSlice(t *testing.T) {
 	t.Run("reader error", func(t *testing.T) {
-		it := NewIterator()
-		e := errors.New("test")
-		it.Reset(&oneByteReader{
-			err: e,
+		withIterator("", func(it *Iterator) {
+			e := errors.New("test")
+			it.Reset(&oneByteReader{
+				err: e,
+			})
+			_, err := it.ReadString()
+			require.Error(t, e, err)
 		})
-		_, err := it.ReadString()
-		require.Error(t, e, err)
 	})
 	t.Run("bad value type", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`1`))
-		_, err := it.ReadString()
-		require.IsType(t, UnexpectedByteError{}, err)
+		withIterator(`1`, func(it *Iterator) {
+			_, err := it.ReadString()
+			require.IsType(t, UnexpectedByteError{}, err)
+		})
 	})
 	t.Run("simple", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"abc123"`))
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Equal(t, "abc123", s)
-		_, err = it.NextValueType()
-		require.Equal(t, io.EOF, err)
+		withIterator(`"abc123"`, func(it *Iterator) {
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Equal(t, "abc123", s)
+			_, err = it.NextValueType()
+			require.Equal(t, io.EOF, err)
+		})
 	})
 	t.Run("escape error", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\`))
-		_, err := it.ReadString()
-		require.Equal(t, io.EOF, err)
+		withIterator(`"\`, func(it *Iterator) {
+			_, err := it.ReadString()
+			require.Equal(t, io.EOF, err)
+		})
 	})
 	t.Run("escape", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"\n"`))
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Equal(t, "\n", s)
+		withIterator(`"\n"`, func(it *Iterator) {
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Equal(t, "\n", s)
+		})
 	})
 	t.Run("invalid string char", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte("\"\x00\""))
-		_, err := it.ReadString()
-		require.IsType(t, InvalidStringCharError{}, err)
+		withIterator("\"\x00\"", func(it *Iterator) {
+			_, err := it.ReadString()
+			require.IsType(t, InvalidStringCharError{}, err)
+		})
 	})
 	t.Run("reade err", func(t *testing.T) {
-		it := NewIterator()
-		it.Reset(&oneByteReader{
-			b: []byte(`"\n`),
+		withIterator("", func(it *Iterator) {
+			it.Reset(&oneByteReader{
+				b: `"\n`,
+			})
+			_, err := it.ReadString()
+			require.Equal(t, io.EOF, err)
 		})
-		_, err := it.ReadString()
-		require.Equal(t, io.EOF, err)
 	})
 	t.Run("reader", func(t *testing.T) {
-		it := NewIterator()
-		it.Reset(&oneByteReader{
-			b: []byte(`"\n"`),
+		withIterator("", func(it *Iterator) {
+			it.Reset(&oneByteReader{
+				b: `"\n"`,
+			})
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Len(t, s, 1)
+			require.Equal(t, "\n", s)
 		})
-		s, err := it.ReadString()
-		require.NoError(t, err)
-		require.Len(t, s, 1)
-		require.Equal(t, "\n", s)
 	})
 }
 
 func TestIterator_Str_ReadStringAsSlice(t *testing.T) {
 	t.Run("not string", func(t *testing.T) {
-		it := NewIterator()
-		_, err := it.ReadStringAsSlice(nil)
-		require.Equal(t, io.EOF, err)
+		withIterator("", func(it *Iterator) {
+			_, err := it.ReadStringAsSlice(nil)
+			require.Equal(t, io.EOF, err)
+		})
 	})
 	t.Run("normal", func(t *testing.T) {
-		it := NewIterator()
-		it.ResetBytes([]byte(`"abc"`))
-		buf := make([]byte, 0, 32)
-		ret, err := it.ReadStringAsSlice(buf)
-		require.NoError(t, err)
-		p1 := (*reflect.SliceHeader)(unsafe.Pointer(&buf))
-		p2 := (*reflect.SliceHeader)(unsafe.Pointer(&ret))
-		require.Equal(t, p1.Data, p2.Data)
-		require.Equal(t, p1.Cap, p2.Cap)
-		require.Equal(t, []byte("abc"), ret)
+		withIterator(`"abc"`, func(it *Iterator) {
+			buf := make([]byte, 0, 32)
+			ret, err := it.ReadStringAsSlice(buf)
+			require.NoError(t, err)
+			p1 := (*reflect.SliceHeader)(unsafe.Pointer(&buf))
+			p2 := (*reflect.SliceHeader)(unsafe.Pointer(&ret))
+			require.Equal(t, p1.Data, p2.Data)
+			require.Equal(t, p1.Cap, p2.Cap)
+			require.Equal(t, []byte("abc"), ret)
+		})
 	})
 }
 
