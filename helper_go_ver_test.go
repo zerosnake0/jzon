@@ -47,8 +47,14 @@ func (gv goVersionInfo) LessEqual(v string) bool {
 	if gv.Major > other.Major {
 		return false
 	}
+	if gv.Major < other.Major {
+		return true
+	}
 	if gv.Minor > other.Minor {
 		return false
+	}
+	if gv.Minor < other.Minor {
+		return true
 	}
 	return gv.Build <= other.Build
 }
