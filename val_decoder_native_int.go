@@ -8,7 +8,7 @@ import (
 type int8Decoder struct {
 }
 
-func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -17,9 +17,31 @@ func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		it.head += 1
 		return it.expectBytes("ull")
 	}
-	i, err := it.ReadInt8()
+	quoted := (opts != nil) && (opts.Quoted || opts.MapKey)
+	if quoted {
+		if c != '"' {
+			return UnexpectedByteError{got: c, exp: '"'}
+		}
+		it.head += 1
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+	}
+	it.head += 1
+	i, err := it.readInt8(c)
 	if err != nil {
 		return err
+	}
+	if quoted {
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+		if c != '"' {
+			return UnexpectedByteError{got: c, exp: '"'}
+		}
+		it.head += 1
 	}
 	*(*int8)(ptr) = i
 	return nil
@@ -29,7 +51,7 @@ func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type int16Decoder struct {
 }
 
-func (*int16Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*int16Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -38,9 +60,31 @@ func (*int16Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		it.head += 1
 		return it.expectBytes("ull")
 	}
-	i, err := it.ReadInt16()
+	quoted := (opts != nil) && (opts.Quoted || opts.MapKey)
+	if quoted {
+		if c != '"' {
+			return UnexpectedByteError{got: c, exp: '"'}
+		}
+		it.head += 1
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+	}
+	it.head += 1
+	i, err := it.readInt16(c)
 	if err != nil {
 		return err
+	}
+	if quoted {
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+		if c != '"' {
+			return UnexpectedByteError{got: c, exp: '"'}
+		}
+		it.head += 1
 	}
 	*(*int16)(ptr) = i
 	return nil
@@ -50,7 +94,7 @@ func (*int16Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type int32Decoder struct {
 }
 
-func (*int32Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*int32Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -59,9 +103,31 @@ func (*int32Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		it.head += 1
 		return it.expectBytes("ull")
 	}
-	i, err := it.ReadInt32()
+	quoted := (opts != nil) && (opts.Quoted || opts.MapKey)
+	if quoted {
+		if c != '"' {
+			return UnexpectedByteError{got: c, exp: '"'}
+		}
+		it.head += 1
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+	}
+	it.head += 1
+	i, err := it.readInt32(c)
 	if err != nil {
 		return err
+	}
+	if quoted {
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+		if c != '"' {
+			return UnexpectedByteError{got: c, exp: '"'}
+		}
+		it.head += 1
 	}
 	*(*int32)(ptr) = i
 	return nil
@@ -71,7 +137,7 @@ func (*int32Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type int64Decoder struct {
 }
 
-func (*int64Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*int64Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -80,9 +146,31 @@ func (*int64Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		it.head += 1
 		return it.expectBytes("ull")
 	}
-	i, err := it.ReadInt64()
+	quoted := (opts != nil) && (opts.Quoted || opts.MapKey)
+	if quoted {
+		if c != '"' {
+			return UnexpectedByteError{got: c, exp: '"'}
+		}
+		it.head += 1
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+	}
+	it.head += 1
+	i, err := it.readInt64(c)
 	if err != nil {
 		return err
+	}
+	if quoted {
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+		if c != '"' {
+			return UnexpectedByteError{got: c, exp: '"'}
+		}
+		it.head += 1
 	}
 	*(*int64)(ptr) = i
 	return nil

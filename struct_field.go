@@ -8,10 +8,15 @@ import (
 	"reflect"
 )
 
+type offset struct {
+	val   uintptr
+	rtype rtype
+}
+
 type field struct {
 	typ     reflect.Type
 	index   []int
-	offsets []uintptr
+	offsets []offset
 
 	name      string
 	nameBytes []byte                 // []byte(name)
@@ -22,8 +27,7 @@ type field struct {
 	omitEmpty bool
 
 	ptrType reflect.Type
-	rtype   rtype
-	decoder ValDecoder
+	// rtype   rtype
 }
 
 type structFields struct {
@@ -33,23 +37,6 @@ type structFields struct {
 
 func (sf *structFields) count() int {
 	return len(sf.list)
-}
-
-func (sf *structFields) find(key []byte, caseSensitive bool) *field {
-	if i, ok := sf.nameIndex[localByteToString(key)]; ok {
-		return &sf.list[i]
-	}
-	if caseSensitive {
-		return nil
-	}
-	// TODO: performance of this?
-	for i := range sf.list {
-		ff := &sf.list[i]
-		if ff.equalFold(ff.nameBytes, key) {
-			return ff
-		}
-	}
-	return nil
 }
 
 // byIndex sorts field by index sequence.

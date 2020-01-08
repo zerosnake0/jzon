@@ -6,7 +6,12 @@ import (
 )
 
 func localStringToBytes(s string) []byte {
-	return *(*[]byte)(unsafe.Pointer((*reflect.SliceHeader)(unsafe.Pointer(&s))))
+	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	return *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
+		Data: sh.Data,
+		Len:  sh.Len,
+		Cap:  sh.Len,
+	}))
 }
 
 func localByteToString(buf []byte) string {

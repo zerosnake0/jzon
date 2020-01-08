@@ -2,7 +2,10 @@ package jzon
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -39,6 +42,183 @@ func testStreamerWithEncoder(t *testing.T, enc *Encoder, exp string, cb func(s *
 
 func testStreamer(t *testing.T, exp string, cb func(s *Streamer)) {
 	testStreamerWithEncoder(t, DefaultEncoder, exp, cb)
+}
+
+func jsonMarshal(o interface{}, jsonOpt func(*json.Encoder)) (_ []byte, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			if err == nil {
+				err = fmt.Errorf("panic: %v", e)
+			}
+		}
+	}()
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	if jsonOpt != nil {
+		jsonOpt(enc)
+	}
+	if err = enc.Encode(o); err != nil {
+		return
+	}
+	return buf.Bytes(), nil
+}
+
+func jsonEqual(s1, s2 []byte) (bool, error) {
+	var err error
+
+	s1 = bytes.TrimSpace(s1)
+	s2 = bytes.TrimSpace(s2)
+
+	switch s1[0] {
+	case 'n':
+		return "null" == localByteToString(s1) &&
+			"null" == localByteToString(s2), nil
+	case 't':
+		return "true" == localByteToString(s1) &&
+			"true" == localByteToString(s2), nil
+	case 'f':
+		return "false" == localByteToString(s1) &&
+			"false" == localByteToString(s2), nil
+	case '[':
+		var arr1 []json.RawMessage
+		if err = json.Unmarshal(s1, &arr1); err != nil {
+			return false, err
+		}
+		var arr2 []json.RawMessage
+		if err = json.Unmarshal(s2, &arr2); err != nil {
+			return false, err
+		}
+		l := len(arr1)
+		if l != len(arr2) {
+			return false, nil
+		}
+		for i := 0; i < l; i++ {
+			b, err := jsonEqual(arr1[i], arr2[i])
+			if err != nil || !b {
+				return b, err
+			}
+		}
+		return true, nil
+	case '{':
+		var m1 map[string]json.RawMessage
+		if err = json.Unmarshal(s1, &m1); err != nil {
+			return false, err
+		}
+		var m2 map[string]json.RawMessage
+		if err = json.Unmarshal(s2, &m2); err != nil {
+			return false, err
+		}
+		l := len(m1)
+		if l != len(m2) {
+			return false, nil
+		}
+		for k := range m1 {
+			b, err := jsonEqual(m1[k], m2[k])
+			if err != nil || !b {
+				return b, err
+			}
+		}
+		return true, nil
+	case '"':
+		var str1 string
+		if err = json.Unmarshal(s1, &str1); err != nil {
+			return false, err
+		}
+		var str2 string
+		if err = json.Unmarshal(s2, &str2); err != nil {
+			return false, err
+		}
+		return str1 == str2, nil
+	default:
+		var f1 float64
+		if err = json.Unmarshal(s1, &f1); err != nil {
+			return false, err
+		}
+		var f2 float64
+		if err = json.Unmarshal(s2, &f2); err != nil {
+			return false, err
+		}
+		return f1 == f2, nil
+	}
+}
+
+var (
+	testNoEscapeEncoder = NewEncoder(&EncoderOption{
+		EscapeHTML: false,
+	})
+)
+
+func checkEncodeWithStandard(t *testing.T, obj interface{}, cb func(s *Streamer),
+	expErr interface{}) {
+	checkEncodeWithStandardInternal(t, nil, DefaultEncoder, obj, cb, expErr)
+	checkEncodeWithStandardInternal(t, func(encoder *json.Encoder) {
+		encoder.SetEscapeHTML(false)
+	}, testNoEscapeEncoder, obj, cb, expErr)
+}
+
+func checkEncodeWithStandardInternal(t *testing.T, jsonOpt func(*json.Encoder), enc *Encoder, obj interface{},
+	cb func(s *Streamer), expErr interface{}) {
+	buf, err := jsonMarshal(obj, jsonOpt)
+	require.Equal(t, expErr == nil, err == nil, "json.Marshal\nexp: %v\ngot: %v",
+		expErr, err)
+
+	streamer := enc.NewStreamer()
+	defer enc.ReturnStreamer(streamer)
+	func() {
+		defer func() {
+			if e := recover(); e != nil {
+				if streamer.Error != nil {
+					panic(e)
+				}
+				ex, ok := e.(error)
+				if !ok {
+					panic(e)
+				}
+				streamer.Error = ex
+			}
+		}()
+		cb(streamer)
+	}()
+
+	if err != nil {
+		t.Logf("json err: %v", err)
+		t.Logf("jzon err: %v", streamer.Error)
+		expErrType, ok := expErr.(reflect.Type)
+		if ok {
+			gotErrType := reflect.TypeOf(streamer.Error)
+			if expErrType.Kind() == reflect.Interface {
+				require.True(t, gotErrType.Implements(expErrType), "exp err:%v\ngot err:%v",
+					expErrType, streamer.Error)
+			} else {
+				require.Equal(t, expErrType, gotErrType, "exp err:%v\ngot err:%v",
+					expErrType, streamer.Error)
+			}
+		} else {
+			if reflect.TypeOf(errors.New("")) == reflect.TypeOf(expErr) {
+				require.Equalf(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
+					expErr, streamer.Error)
+			} else {
+				require.IsTypef(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
+					expErr, streamer.Error)
+			}
+		}
+		require.Error(t, streamer.Error, "json.Marshal error: %v", err)
+	} else {
+		t.Logf("got %s", buf)
+		require.NoError(t, streamer.Error)
+		b, err := jsonEqual(buf, streamer.buffer)
+		require.NoErrorf(t, err, "final result\njson %s\njzon %s",
+			bytes.TrimSpace(buf), bytes.TrimSpace(streamer.buffer))
+		require.Truef(t, b, "final result\njson %s\njzon %s",
+			bytes.TrimSpace(buf), bytes.TrimSpace(streamer.buffer))
+	}
+}
+
+func checkEncodeValueWithStandard(t *testing.T, obj interface{},
+	expErr interface{}) {
+	checkEncodeWithStandard(t, obj, func(s *Streamer) {
+		s.Value(obj)
+	}, expErr)
 }
 
 func testStreamerChainError(t *testing.T, cb func(s *Streamer)) {

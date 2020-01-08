@@ -33,7 +33,7 @@ type arrayDecoder struct {
 	elemDec ValDecoder
 }
 
-func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 		for {
 			if count < dec.length {
 				elemPtr := unsafe.Pointer(childPtr)
-				if err := dec.elemDec.Decode(elemPtr, it); err != nil {
+				if err := dec.elemDec.Decode(elemPtr, it, nil); err != nil {
 					return err
 				}
 				count += 1

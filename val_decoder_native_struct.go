@@ -5,29 +5,73 @@ import (
 	"unsafe"
 )
 
-type fieldInfo struct {
-	offset  uintptr
-	ptrType reflect.Type
-	rtype   rtype
-	decoder ValDecoder
+type structDecoderBuilder struct {
+	decoder *structDecoder
+	fields  structFields
+}
+
+type decoderFieldInfo struct {
+	offsets   []offset
+	nameBytes []byte                 // []byte(name)
+	equalFold func(s, t []byte) bool // bytes.EqualFold or equivalent
+	quoted    bool
+	decoder   ValDecoder
+}
+
+type decoderFields struct {
+	list      []decoderFieldInfo
+	nameIndex map[string]int
+}
+
+func (df *decoderFields) init(size int) {
+	df.list = make([]decoderFieldInfo, 0, size)
+	df.nameIndex = make(map[string]int, size)
+}
+
+func (df *decoderFields) add(f *field, dec ValDecoder) {
+	df.nameIndex[f.name] = len(df.list)
+	df.list = append(df.list, decoderFieldInfo{
+		offsets:   f.offsets,
+		nameBytes: f.nameBytes,
+		equalFold: f.equalFold,
+		quoted:    f.quoted,
+		decoder:   dec,
+	})
+}
+
+func (df *decoderFields) find(key []byte, caseSensitive bool) *decoderFieldInfo {
+	if i, ok := df.nameIndex[localByteToString(key)]; ok {
+		return &df.list[i]
+	}
+	if caseSensitive {
+		return nil
+	}
+	// TODO: performance of this?
+	for i := range df.list {
+		ff := &df.list[i]
+		if ff.equalFold(ff.nameBytes, key) {
+			return ff
+		}
+	}
+	return nil
 }
 
 type structDecoder struct {
-	// fields map[string]*fieldInfo
-	fields structFields
+	fields decoderFields
 }
 
-func (dec *Decoder) newStructDecoder(typ reflect.Type) *structDecoder {
+func (dec *Decoder) newStructDecoder(typ reflect.Type) *structDecoderBuilder {
 	fields := describeStruct(typ, dec.tag, dec.onlyTaggedField)
 	if fields.count() == 0 {
 		return nil
 	}
-	return &structDecoder{
-		fields: fields,
+	return &structDecoderBuilder{
+		decoder: &structDecoder{},
+		fields:  fields,
 	}
 }
 
-func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator) (err error) {
+func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (err error) {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -61,18 +105,28 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator) (err error) {
 		}
 		stField := dec.fields.find(field, it.decoder.caseSensitive)
 		if stField != nil {
-			curPtr := add(ptr, stField.offsets[0], "struct field")
+			curPtr := add(ptr, stField.offsets[0].val, "struct field")
 			for _, offset := range stField.offsets[1:] {
-				curPtr = *(*unsafe.Pointer)(curPtr)
-				if curPtr == nil {
-					return NilEmbeddedPointerError
+				subPtr := *(*unsafe.Pointer)(curPtr)
+				if subPtr == nil {
+					if offset.rtype == 0 { // the ptr field is not exported
+						return NilEmbeddedPointerError
+					}
+					subPtr = unsafe_New(offset.rtype)
+					*(*unsafe.Pointer)(curPtr) = subPtr
 				}
-				curPtr = add(curPtr, offset, "struct field")
+				curPtr = add(subPtr, offset.val, "struct field")
 			}
-			if err = stField.decoder.Decode(curPtr, it); err != nil {
+			opt := DecOpts{
+				Quoted: stField.quoted,
+			}
+			if err = stField.decoder.Decode(curPtr, it, &opt); err != nil {
 				return err
 			}
 		} else {
+			if it.decoder.disallowUnknownFields {
+				return UnknownFieldError(field)
+			}
 			if err = it.Skip(); err != nil {
 				return err
 			}

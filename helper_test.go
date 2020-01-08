@@ -1,9 +1,39 @@
 package jzon
 
-import "io"
+import (
+	"io"
+	"log"
+	"reflect"
+	"runtime"
+	"testing"
+
+	"github.com/json-iterator/go"
+)
+
+var (
+	runtimeErrorType = reflect.TypeOf((*runtime.Error)(nil)).Elem()
+)
+
+func skipTest(t *testing.T, fmt string, args ...interface{}) {
+	t.Skipf(fmt, args...)
+}
+
+func iterMarshal(o interface{}) {
+	data, err := jsoniter.Marshal(o)
+	log.Printf("iter | %v | %s", err, data)
+}
+
+func withIterator(data string, cb func(it *Iterator)) {
+	it := NewIterator()
+	defer ReturnIterator(it)
+	if data != "" {
+		it.ResetBytes(localStringToBytes(data))
+	}
+	cb(it)
+}
 
 type oneByteReader struct {
-	b   []byte
+	b   string
 	err error
 }
 

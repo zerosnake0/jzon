@@ -10,7 +10,7 @@ import (
 
 func TestValDecoder_Native_Struct_Zero_Field(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("nil receiver", func(t *testing.T) {
 		f(t, "null", NilPointerReceiverError, nil, nil)
@@ -29,7 +29,7 @@ func TestValDecoder_Native_Struct_Zero_Field(t *testing.T) {
 
 func TestValDecoder_Native_Struct_Mapping(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("unexported field", func(t *testing.T) {
 		f(t, ` { "a" : "abc" } `, nil, &struct {
@@ -80,7 +80,7 @@ func TestValDecoder_Native_Struct_Mapping(t *testing.T) {
 
 func TestValDecoder_Native_Struct(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("nil receiver", func(t *testing.T) {
 		f(t, "null", NilPointerReceiverError, nil, nil)
@@ -208,7 +208,7 @@ type testStruct struct {
 
 func TestValDecoder_Native_Struct_Nested(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("nested", func(t *testing.T) {
 		f(t, `{"a":null,"c":1,"b":{}}`, nil, &testStruct{
@@ -220,7 +220,7 @@ func TestValDecoder_Native_Struct_Nested(t *testing.T) {
 	debug.FreeOSMemory()
 }
 
-func TestValDedocer_Native_Struct_Tag(t *testing.T) {
+func TestValDecoder_Native_Struct_CustomTag(t *testing.T) {
 	decoder := NewDecoder(&DecoderOption{
 		Tag: "jzon",
 	})
@@ -234,7 +234,7 @@ func TestValDedocer_Native_Struct_Tag(t *testing.T) {
 
 func TestValDecoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 	}
 	t.Run("not embedded", func(t *testing.T) {
 		type inner struct{}
@@ -250,33 +250,189 @@ func TestValDecoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 		}
 		f(t, `{"inner":1}`, nil, &outer{}, &outer{})
 	})
-	t.Run("nil pointer receiver (duplicate field)", func(t *testing.T) {
-		type inner struct {
-			A int `json:"a"`
-		}
-		type inner2 inner
-		type outer struct {
-			*inner
-			*inner2
-		}
-		f(t, `{"a":1}`, nil, &outer{}, &outer{})
+	t.Run("nil pointer receiver", func(t *testing.T) {
+		t.Run("duplicate field", func(t *testing.T) {
+			type inner struct {
+				A int `json:"a"`
+			}
+			type inner2 inner
+			type outer struct {
+				*inner
+				*inner2
+			}
+			f(t, `{"a":1}`, nil, &outer{}, &outer{})
+		})
+		t.Run("field not matched", func(t *testing.T) {
+			type inner struct {
+				B int
+			}
+			type outer struct {
+				*inner
+			}
+			f(t, `{"a":1}`, nil, &outer{}, &outer{})
+		})
+		t.Run("field matched", func(t *testing.T) {
+			type inner struct {
+				A int
+			}
+			type outer struct {
+				*inner
+			}
+			f(t, `{"a":1}`, NilEmbeddedPointerError, &outer{}, &outer{})
+		})
+		t.Run("exported field", func(t *testing.T) {
+			type Inner struct {
+				A int
+			}
+			type outer struct {
+				*Inner
+			}
+			f(t, `{"a":1}`, nil, &outer{}, &outer{})
+		})
 	})
-	t.Run("nil pointer receiver (field not matched)", func(t *testing.T) {
-		type inner struct {
-			B int
-		}
-		type outer struct {
-			*inner
-		}
-		f(t, `{"a":1}`, nil, &outer{}, &outer{})
+}
+
+func TestValDecoder_Native_Struct_DisallowUnknownFields(t *testing.T) {
+	dec := NewDecoder(&DecoderOption{
+		DisallowUnknownFields: true,
 	})
-	t.Run("nil pointer receiver (field matched)", func(t *testing.T) {
-		type inner struct {
+	t.Run("zero field (eof)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte(""), &st)
+		require.Equal(t, io.EOF, err)
+	})
+	t.Run("zero field (invalid)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte("["), &st)
+		require.IsType(t, UnexpectedByteError{}, err)
+	})
+	t.Run("zero field (null)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte("null"), &st)
+		require.NoError(t, err)
+	})
+	t.Run("zero field (eof after bracket)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte("{"), &st)
+		require.Equal(t, io.EOF, err)
+	})
+	t.Run("zero field (non empty)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte(`{"a":1}`), &st)
+		require.IsType(t, UnexpectedByteError{}, err)
+	})
+	t.Run("zero field (empty)", func(t *testing.T) {
+		var st struct{}
+		err := dec.Unmarshal([]byte(` { } `), &st)
+		require.NoError(t, err)
+	})
+	t.Run("one field (empty)", func(t *testing.T) {
+		var st struct {
 			A int
 		}
-		type outer struct {
-			*inner
+		err := dec.Unmarshal([]byte(` { } `), &st)
+		require.NoError(t, err)
+	})
+	t.Run("one field (empty)", func(t *testing.T) {
+		var st struct {
+			A int
 		}
-		f(t, `{"a":1}`, NilEmbeddedPointerError, &outer{}, &outer{})
+		err := dec.Unmarshal([]byte(` { "b" : 1 } `), &st)
+		require.IsType(t, UnknownFieldError(""), err)
+	})
+}
+
+func TestValDecoder_Native_Struct_Quoted(t *testing.T) {
+	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+	}
+	t.Run("string", func(t *testing.T) {
+		type st struct {
+			A string `json:",string"`
+		}
+		f2 := func(t *testing.T, data string, ex error) {
+			f(t, data, ex, &st{A: "test"}, &st{A: "test"})
+		}
+		t.Run("null", func(t *testing.T) {
+			f2(t, `{"a":null}`, nil)
+		})
+		t.Run("null string", func(t *testing.T) {
+			f2(t, `{"a":"null"}`, nil)
+		})
+		t.Run("leading space", func(t *testing.T) {
+			f2(t, `{"a":" 1"}`, BadQuotedStringError(""))
+		})
+		t.Run("trailing space", func(t *testing.T) {
+			f2(t, `{"a":"1 "}`, BadQuotedStringError(""))
+		})
+		t.Run("empty", func(t *testing.T) {
+			f2(t, `{"a":""}`, BadQuotedStringError(""))
+		})
+		t.Run("not string", func(t *testing.T) {
+			f2(t, `{"a":"1"}`, BadQuotedStringError(""))
+		})
+		t.Run("bad string", func(t *testing.T) {
+			f2(t, `{"a":"\"\"\""}`, BadQuotedStringError(""))
+		})
+		t.Run("ok", func(t *testing.T) {
+			f2(t, `{"a":"\"null\""}`, nil)
+		})
+	})
+	t.Run("int", func(t *testing.T) {
+		type stI8 struct {
+			A int8 `json:",string"`
+		}
+		type stI16 struct {
+			A int16 `json:",string"`
+		}
+		type stI32 struct {
+			A int32 `json:",string"`
+		}
+		type stI64 struct {
+			A int64 `json:",string"`
+		}
+		type stU8 struct {
+			A uint8 `json:",string"`
+		}
+		type stU16 struct {
+			A uint16 `json:",string"`
+		}
+		type stU32 struct {
+			A uint32 `json:",string"`
+		}
+		type stU64 struct {
+			A uint64 `json:",string"`
+		}
+		f2 := func(t *testing.T, data string, ex error) {
+			f(t, data, ex, &stI8{A: 2}, &stI8{A: 2})
+			f(t, data, ex, &stI16{A: 2}, &stI16{A: 2})
+			f(t, data, ex, &stI32{A: 2}, &stI32{A: 2})
+			f(t, data, ex, &stI64{A: 2}, &stI64{A: 2})
+			f(t, data, ex, &stU8{A: 2}, &stU8{A: 2})
+			f(t, data, ex, &stU16{A: 2}, &stU16{A: 2})
+			f(t, data, ex, &stU32{A: 2}, &stU32{A: 2})
+			f(t, data, ex, &stU64{A: 2}, &stU64{A: 2})
+		}
+		t.Run("unquoted", func(t *testing.T) {
+			f2(t, `{"a":1}`, UnexpectedByteError{})
+		})
+		t.Run("leading space", func(t *testing.T) {
+			f2(t, `{"a":" 1"}`, InvalidDigitError{})
+		})
+		t.Run("leading eof", func(t *testing.T) {
+			f2(t, `{"a":"`, io.EOF)
+		})
+		t.Run("trailing space", func(t *testing.T) {
+			f2(t, `{"a":"1 "}`, UnexpectedByteError{})
+		})
+		t.Run("trailing eof", func(t *testing.T) {
+			f2(t, `{"a":"1`, io.EOF)
+		})
+		t.Run("empty", func(t *testing.T) {
+			f2(t, `{"a":""}`, InvalidDigitError{})
+		})
+		t.Run("ok", func(t *testing.T) {
+			f2(t, `{"a":"1"}`, nil)
+		})
 	})
 }

@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"runtime/debug"
 	"testing"
+	"unsafe"
 
 	"github.com/stretchr/testify/require"
 )
@@ -98,7 +99,7 @@ func TestValDecoder_Native_Interface(t *testing.T) {
 		printValue(t, "p1", p1)
 		printValue(t, "p2", p2)
 		t.Log(">>>>>>>>>>>>>>>>>>>>>>")
-		checkStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
 		t.Log("<<<<< initValues <<<<<")
 		printValue(t, "p1", p1)
 		printValue(t, "p2", p2)
@@ -301,6 +302,97 @@ func TestValDecoder_Native_Interface(t *testing.T) {
 			field: "test",
 		}
 		f(t, `{}`, nil, &um1, &um2)
+	})
+	debug.FreeOSMemory()
+}
+
+type testIfaceDecoder struct {
+}
+
+func (*testIfaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
+	o, err := it.Read()
+	if err != nil {
+		return err
+	}
+	*(*interface{})(ptr) = o
+	return nil
+}
+
+func TestValDecoder_Native_Interface_Loop(t *testing.T) {
+	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
+		t.Log(">>>>> initValues >>>>>")
+		printValue(t, "p1", p1)
+		printValue(t, "p2", p2)
+		t.Log(">>>>>>>>>>>>>>>>>>>>>>")
+		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		t.Log("<<<<< initValues <<<<<")
+		printValue(t, "p1", p1)
+		printValue(t, "p2", p2)
+		t.Log("<<<<<<<<<<<<<<<<<<<<<<")
+	}
+	/*
+	 * See comment of efaceDecoder
+	 */
+	t.Run("compatible with standard", func(t *testing.T) {
+		// we have different behavior with standard library for this test
+		skipTest(t, "eface looping")
+		var o1 interface{}
+		o1 = &o1
+		var o2 interface{}
+		o2 = &o2
+		f(t, `1`, nil, o1, o2)
+	})
+	t.Run("loop 1", func(t *testing.T) {
+		type iface interface{}
+		var o1 iface
+		o1 = &o1
+		err := DefaultDecoder.Unmarshal([]byte(`1`), o1)
+		require.Equal(t, EfaceLoopingError, err)
+	})
+	t.Run("loop 2", func(t *testing.T) {
+		// the standard lib does not deal with cross nested
+		type crossIface interface{}
+		var o1 interface{}
+		var o1o crossIface
+		o1 = &o1o
+		o1o = &o1
+		err := DefaultDecoder.Unmarshal([]byte(`1`), o1)
+		require.Equal(t, EfaceLoopingError, err)
+	})
+}
+
+func TestValDecoder_Native_Interface_Loop_WithDecoder(t *testing.T) {
+	t.Run("eface decoder", func(t *testing.T) {
+		type crossIface interface{}
+		var o1 interface{}
+		var o1o crossIface
+		o1 = &o1o
+		o1o = &o1
+		dec := NewDecoder(&DecoderOption{
+			ValDecoders: map[reflect.Type]ValDecoder{
+				reflect.TypeOf((*interface{})(nil)).Elem(): (*testIfaceDecoder)(nil),
+			},
+		})
+		err := dec.Unmarshal([]byte(`"abc"`), o1)
+		require.NoError(t, err)
+		printValue(t, ">>", o1)
+		require.Equal(t, "abc", o1)
+	})
+	t.Run("eface decoder 2", func(t *testing.T) {
+		type crossIface interface{}
+		var o1 interface{}
+		var o1o crossIface
+		o1 = &o1o
+		o1o = &o1
+		dec := NewDecoder(&DecoderOption{
+			ValDecoders: map[reflect.Type]ValDecoder{
+				reflect.TypeOf((*crossIface)(nil)).Elem(): (*testIfaceDecoder)(nil),
+			},
+		})
+		err := dec.Unmarshal([]byte(`"abc"`), o1)
+		require.NoError(t, err)
+		printValue(t, ">>", o1)
+		require.Equal(t, "abc", o1o)
 	})
 	debug.FreeOSMemory()
 }

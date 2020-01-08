@@ -7,11 +7,9 @@ import (
 	"unsafe"
 )
 
-const numKinds = reflect.UnsafePointer + 1
-
 var (
 	globalValDecoders = map[rtype]ValDecoder{}
-	kindMap           = [numKinds]rtype{}
+	decoderKindMap    = [numKinds]rtype{}
 	kindDecoders      = [numKinds]ValDecoder{}
 	keyDecoders       = [numKinds]ValDecoder{}
 )
@@ -21,10 +19,10 @@ func createGlobalValDecoder(ptr interface{}, dec ValDecoder) {
 	globalValDecoders[ef.rtype] = dec
 }
 
-func mapKind(ptr interface{}, dec ValDecoder) {
+func mapDecoderKind(ptr interface{}, dec ValDecoder) {
 	ef := (*eface)(unsafe.Pointer(&ptr))
 	kind := reflect.TypeOf(ptr).Elem().Kind()
-	kindMap[kind] = ef.rtype
+	decoderKindMap[kind] = ef.rtype
 	kindDecoders[kind] = dec
 }
 
@@ -35,64 +33,71 @@ func mapKeyDecoder(ptr interface{}, dec ValDecoder) {
 }
 
 func init() {
-	// json lib types
+	// standard json library types
 	createGlobalValDecoder((*json.Number)(nil), (*jsonNumberDecoder)(nil))
 	createGlobalValDecoder((*json.RawMessage)(nil), (*jsonRawMessageDecoder)(nil))
 
 	// kind mapping
-	mapKind((*bool)(nil), (*boolDecoder)(nil))
-	mapKind((*string)(nil), (*stringDecoder)(nil))
+	mapDecoderKind((*bool)(nil), (*boolDecoder)(nil))
+	mapDecoderKind((*string)(nil), (*stringDecoder)(nil))
 	if strconv.IntSize == 32 {
-		mapKind((*int)(nil), (*int32Decoder)(nil))
-		mapKind((*uint)(nil), (*uint32Decoder)(nil))
+		mapDecoderKind((*int)(nil), (*int32Decoder)(nil))
+		mapDecoderKind((*uint)(nil), (*uint32Decoder)(nil))
 	} else {
-		mapKind((*int)(nil), (*int64Decoder)(nil))
-		mapKind((*uint)(nil), (*uint64Decoder)(nil))
+		mapDecoderKind((*int)(nil), (*int64Decoder)(nil))
+		mapDecoderKind((*uint)(nil), (*uint64Decoder)(nil))
 	}
 	if unsafe.Sizeof(uintptr(0)) == 4 {
-		mapKind((*uintptr)(nil), (*uint32Decoder)(nil))
+		mapDecoderKind((*uintptr)(nil), (*uint32Decoder)(nil))
 	} else {
-		mapKind((*uintptr)(nil), (*uint64Decoder)(nil))
+		mapDecoderKind((*uintptr)(nil), (*uint64Decoder)(nil))
 	}
-	mapKind((*int8)(nil), (*int8Decoder)(nil))
-	mapKind((*int16)(nil), (*int16Decoder)(nil))
-	mapKind((*int32)(nil), (*int32Decoder)(nil))
-	mapKind((*int64)(nil), (*int64Decoder)(nil))
-	mapKind((*uint8)(nil), (*uint8Decoder)(nil))
-	mapKind((*uint16)(nil), (*uint16Decoder)(nil))
-	mapKind((*uint32)(nil), (*uint32Decoder)(nil))
-	mapKind((*uint64)(nil), (*uint64Decoder)(nil))
-	mapKind((*float32)(nil), (*float32Decoder)(nil))
-	mapKind((*float64)(nil), (*float64Decoder)(nil))
+	mapDecoderKind((*int8)(nil), (*int8Decoder)(nil))
+	mapDecoderKind((*int16)(nil), (*int16Decoder)(nil))
+	mapDecoderKind((*int32)(nil), (*int32Decoder)(nil))
+	mapDecoderKind((*int64)(nil), (*int64Decoder)(nil))
+	mapDecoderKind((*uint8)(nil), (*uint8Decoder)(nil))
+	mapDecoderKind((*uint16)(nil), (*uint16Decoder)(nil))
+	mapDecoderKind((*uint32)(nil), (*uint32Decoder)(nil))
+	mapDecoderKind((*uint64)(nil), (*uint64Decoder)(nil))
+	mapDecoderKind((*float32)(nil), (*float32Decoder)(nil))
+	mapDecoderKind((*float64)(nil), (*float64Decoder)(nil))
 
 	// object key decoders
-	mapKeyDecoder((*string)(nil), (*stringKeyDecoder)(nil))
+	mapKeyDecoder((*string)(nil), (*stringDecoder)(nil))
 	if strconv.IntSize == 32 {
-		mapKeyDecoder((*int)(nil), (*int32KeyDecoder)(nil))
+		mapKeyDecoder((*int)(nil), (*int32Decoder)(nil))
+		mapKeyDecoder((*uint)(nil), (*uint32Decoder)(nil))
 	} else {
-		mapKeyDecoder((*int)(nil), (*int64KeyDecoder)(nil))
+		mapKeyDecoder((*int)(nil), (*int64Decoder)(nil))
+		mapKeyDecoder((*uint)(nil), (*uint64Decoder)(nil))
 	}
-	mapKeyDecoder((*int8)(nil), (*int8KeyDecoder)(nil))
-	mapKeyDecoder((*int16)(nil), (*int16KeyDecoder)(nil))
-	mapKeyDecoder((*int32)(nil), (*int32KeyDecoder)(nil))
-	mapKeyDecoder((*int64)(nil), (*int64KeyDecoder)(nil))
-	mapKeyDecoder((*uint8)(nil), (*uint8KeyDecoder)(nil))
-	mapKeyDecoder((*uint16)(nil), (*uint16KeyDecoder)(nil))
-	mapKeyDecoder((*uint32)(nil), (*uint32KeyDecoder)(nil))
-	mapKeyDecoder((*uint64)(nil), (*uint64KeyDecoder)(nil))
+	mapKeyDecoder((*int8)(nil), (*int8Decoder)(nil))
+	mapKeyDecoder((*int16)(nil), (*int16Decoder)(nil))
+	mapKeyDecoder((*int32)(nil), (*int32Decoder)(nil))
+	mapKeyDecoder((*int64)(nil), (*int64Decoder)(nil))
+	mapKeyDecoder((*uint8)(nil), (*uint8Decoder)(nil))
+	mapKeyDecoder((*uint16)(nil), (*uint16Decoder)(nil))
+	mapKeyDecoder((*uint32)(nil), (*uint32Decoder)(nil))
+	mapKeyDecoder((*uint64)(nil), (*uint64Decoder)(nil))
 	if unsafe.Sizeof(uintptr(0)) == 4 {
-		mapKeyDecoder((*uintptr)(nil), (*uint32KeyDecoder)(nil))
+		mapKeyDecoder((*uintptr)(nil), (*uint32Decoder)(nil))
 	} else {
-		mapKeyDecoder((*uintptr)(nil), (*uint64KeyDecoder)(nil))
+		mapKeyDecoder((*uintptr)(nil), (*uint64Decoder)(nil))
 	}
 }
 
+type DecOpts struct {
+	MapKey bool
+	Quoted bool
+}
+
 type ValDecoder interface {
-	Decode(ptr unsafe.Pointer, it *Iterator) error
+	Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error
 }
 
 type notSupportedDecoder string
 
-func (dec notSupportedDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (dec notSupportedDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	return TypeNotSupportedError(dec)
 }

@@ -13,7 +13,7 @@ type testStringKind string
 type testStringKindDecoder struct {
 }
 
-func (*testStringKindDecoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*testStringKindDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	s, err := it.ReadString()
 	if err != nil {
 		return err

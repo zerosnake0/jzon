@@ -60,14 +60,9 @@ func (it *Iterator) readUint32(c byte) (ret uint32, err error) {
 	}
 }
 
-func (it *Iterator) ReadInt32() (int32, error) {
-	c, _, err := it.nextToken()
-	if err != nil {
-		return 0, err
-	}
-	it.head += 1
+func (it *Iterator) readInt32(c byte) (int32, error) {
 	if c == '-' {
-		c, err = it.nextByte()
+		c, err := it.nextByte()
 		if err != nil {
 			return 0, err
 		}
@@ -96,4 +91,13 @@ func (it *Iterator) ReadInt32() (int32, error) {
 		}
 		return int32(v), nil
 	}
+}
+
+func (it *Iterator) ReadInt32() (int32, error) {
+	c, _, err := it.nextToken()
+	if err != nil {
+		return 0, err
+	}
+	it.head += 1
+	return it.readInt32(c)
 }

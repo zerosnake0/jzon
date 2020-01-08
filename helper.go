@@ -1,3 +1,10 @@
 package jzon
 
-const charNum = 256
+import (
+	"reflect"
+)
+
+const (
+	charNum  = 256
+	numKinds = reflect.UnsafePointer + 1
+)

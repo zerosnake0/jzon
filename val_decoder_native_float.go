@@ -8,7 +8,7 @@ import (
 type float32Decoder struct {
 }
 
-func (*float32Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*float32Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func (*float32Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
 type float64Decoder struct {
 }
 
-func (*float64Decoder) Decode(ptr unsafe.Pointer, it *Iterator) error {
+func (*float64Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, _, err := it.nextToken()
 	if err != nil {
 		return err

@@ -29,5 +29,7 @@ func getFullByteSlice() []byte {
 }
 
 func releaseByteSlice(b []byte) {
-	bytesPool.Put(b)
+	if cap(b) != 0 {
+		bytesPool.Put(b)
+	}
 }

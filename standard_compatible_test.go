@@ -3,12 +3,13 @@ package jzon
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
+	"unsafe"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -41,27 +42,49 @@ func nestedObjectWithArray(count int) string {
 		strings.Repeat("} ", count)
 }
 
+type printValueKey struct {
+	rtype rtype
+	ptr   uintptr
+}
+
+func (pk printValueKey) String() string {
+	return fmt.Sprintf("<%x %x>", pk.rtype, pk.ptr)
+}
+
 func printValue(t *testing.T, prefix string, o interface{}) {
 	prefix += " "
 	if o == nil {
 		t.Logf(prefix + "nil")
 		return
 	}
+	visited := map[printValueKey]bool{}
 	oV := reflect.ValueOf(o)
 	for indent := prefix; ; indent += "  " {
+		i := oV.Interface()
+		ef := (*eface)(unsafe.Pointer(&i))
+		vk := printValueKey{ef.rtype, uintptr(ef.data)}
+
 		k := oV.Kind()
-		t.Logf(indent+"%+v %+v", oV.Type(), oV)
+		t.Logf(indent+"%+v %+v %v", oV.Type(), oV, vk)
+
 		if k != reflect.Interface && k != reflect.Ptr {
 			break
 		}
 		if oV.IsNil() {
 			break
 		}
+
+		if visited[vk] {
+			t.Logf(indent + "  visited...")
+			break
+		}
+		visited[vk] = true
+
 		oV = oV.Elem()
 	}
 }
 
-func checkStandard(t *testing.T, decoder *Decoder, data string, ex error, exp, got interface{}) {
+func checkDecodeWithStandard(t *testing.T, decoder *Decoder, data string, ex error, exp, got interface{}) {
 	b := []byte(data)
 	expErr := json.Unmarshal(b, exp)
 	gotErr := decoder.Unmarshal(b, got)
@@ -74,7 +97,7 @@ func checkStandard(t *testing.T, decoder *Decoder, data string, ex error, exp, g
 		"exp %+v\ngot %+v", expErr, gotErr)
 	require.Equalf(t, noError, ex == nil, "exp err: %v\ngot err: %v", ex, gotErr)
 	if ex != nil {
-		if assert.ObjectsAreEqual(reflect.TypeOf(errors.New("")), reflect.TypeOf(ex)) {
+		if reflect.TypeOf(errors.New("")) == reflect.TypeOf(ex) {
 			require.Equalf(t, ex, gotErr, "exp err:%v\ngot err:%v", ex, gotErr)
 		} else {
 			require.IsTypef(t, ex, gotErr, "exp err:%v\ngot err:%v", ex, gotErr)
@@ -97,4 +120,20 @@ func checkStandard(t *testing.T, decoder *Decoder, data string, ex error, exp, g
 	gotI := gotV.Elem().Interface()
 	printValue(t, "got", gotI)
 	require.Equalf(t, expI, gotI, "exp %+v\ngot %+v", expI, gotI)
+}
+
+func TestValid(t *testing.T) {
+	f := func(t *testing.T, s string) {
+		data := localStringToBytes(s)
+		require.Equal(t, json.Valid(data), Valid(data))
+	}
+	t.Run("empty", func(t *testing.T) {
+		f(t, "")
+	})
+	t.Run("empty object", func(t *testing.T) {
+		f(t, "{}")
+	})
+	t.Run("data remained", func(t *testing.T) {
+		f(t, "{}1")
+	})
 }

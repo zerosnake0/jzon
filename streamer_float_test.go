@@ -1,7 +1,6 @@
 package jzon
 
 import (
-	"encoding/json"
 	"math"
 	"testing"
 
@@ -32,11 +31,9 @@ func TestStreamer_Float32_Error(t *testing.T) {
 
 func TestStreamer_Float32(t *testing.T) {
 	f := func(t *testing.T, f float32) {
-		exp, err := json.Marshal(f)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, f, func(s *Streamer) {
 			s.Float32(f)
-		})
+		}, nil)
 	}
 	t.Run("1.2e-3", func(t *testing.T) {
 		f(t, 1.2e-3)
@@ -79,11 +76,9 @@ func TestStreamer_Float64_Error(t *testing.T) {
 
 func TestStreamer_Float64(t *testing.T) {
 	f := func(t *testing.T, f float64) {
-		exp, err := json.Marshal(f)
-		require.NoError(t, err)
-		testStreamer(t, string(exp), func(s *Streamer) {
+		checkEncodeWithStandard(t, f, func(s *Streamer) {
 			s.Float64(f)
-		})
+		}, nil)
 	}
 	t.Run("1.2e-3", func(t *testing.T) {
 		f(t, 1.2e-3)
