@@ -3,13 +3,16 @@ package jzon
 import (
 	"encoding/json"
 	"errors"
+	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestValEncoder_JsonMarshaler_Error(t *testing.T) {
 	t.Run("chain error", func(t *testing.T) {
 		testStreamerChainError(t, func(s *Streamer) {
-			jsonMarshalerEncoder(0).Encode(nil, s, nil)
+			(*jsonMarshalerEncoder)(nil).Encode(nil, s, nil)
 		})
 	})
 	t.Run("chain error (dynamic)", func(t *testing.T) {
@@ -277,43 +280,143 @@ func TestValEncoder_JsonMarshaler_OmitEmpty(t *testing.T) {
 		}, nil)
 	})
 	t.Run("indirect json marshaler", func(t *testing.T) {
-
-	})
-	t.Run("direct json marshaler", func(t *testing.T) {
-		type st struct {
-			A testMapJsonMarshaler `json:",omitempty"`
-		}
-		t.Run("nil", func(t *testing.T) {
-			checkEncodeValueWithStandard(t, st{}, nil)
-		})
-		t.Run("zero", func(t *testing.T) {
+		t.Run("bool", func(t *testing.T) {
+			type st struct {
+				A testBoolJsonMarshaler `json:",omitempty"`
+			}
+			require.True(t, ifaceIndir(rtypeOfType(reflect.TypeOf(st{}).Field(0).Type)))
 			checkEncodeValueWithStandard(t, st{
-				A: testMapJsonMarshaler{},
+				A: true,
+			}, nil)
+			checkEncodeValueWithStandard(t, st{
+				A: false,
 			}, nil)
 		})
-		t.Run("non zero", func(t *testing.T) {
+		t.Run("array", func(t *testing.T) {
+			type st struct {
+				A testIndirectArrayMarshaler `json:",omitempty"`
+			}
+			require.True(t, ifaceIndir(rtypeOfType(reflect.TypeOf(st{}).Field(0).Type)))
+			checkEncodeValueWithStandard(t, st{}, nil)
 			checkEncodeValueWithStandard(t, st{
-				A: testMapJsonMarshaler{1: 2},
+				A: testIndirectArrayMarshaler{2},
+			}, nil)
+		})
+		t.Run("slice", func(t *testing.T) {
+			type st struct {
+				A testSliceMarshaler `json:",omitempty"`
+			}
+			require.True(t, ifaceIndir(rtypeOfType(reflect.TypeOf(st{}).Field(0).Type)))
+			t.Run("nil", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, st{}, nil)
+			})
+			t.Run("empty", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, st{
+					A: testSliceMarshaler{},
+				}, nil)
+			})
+			t.Run("non empty", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, st{
+					A: testSliceMarshaler{4, 5, 6},
+				}, nil)
+			})
+		})
+		t.Run("struct", func(t *testing.T) {
+			type st struct {
+				A testIndirectStructMarshaler `json:",omitempty"`
+			}
+			require.True(t, ifaceIndir(rtypeOfType(reflect.TypeOf(st{}).Field(0).Type)))
+			checkEncodeValueWithStandard(t, st{}, nil)
+			checkEncodeValueWithStandard(t, st{
+				A: testIndirectStructMarshaler{1},
+			}, nil)
+		})
+	})
+	t.Run("direct json marshaler", func(t *testing.T) {
+		t.Run("array", func(t *testing.T) {
+			type st struct {
+				A testDirectArrayMarshaler `json:",omitempty"`
+			}
+			require.False(t, ifaceIndir(rtypeOfType(reflect.TypeOf(st{}).Field(0).Type)))
+			checkEncodeValueWithStandard(t, st{}, nil)
+			i := 123
+			checkEncodeValueWithStandard(t, st{
+				A: testDirectArrayMarshaler{&i},
+			}, nil)
+		})
+		t.Run("map", func(t *testing.T) {
+			type st struct {
+				A testMapJsonMarshaler `json:",omitempty"`
+			}
+			require.False(t, ifaceIndir(rtypeOfType(reflect.TypeOf(st{}).Field(0).Type)))
+			t.Run("nil", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, st{}, nil)
+			})
+			t.Run("zero", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, st{
+					A: testMapJsonMarshaler{},
+				}, nil)
+			})
+			t.Run("non zero", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, st{
+					A: testMapJsonMarshaler{1: 2},
+				}, nil)
+			})
+		})
+		t.Run("struct", func(t *testing.T) {
+			type st struct {
+				A testDirectStructMarshaler `json:",omitempty"`
+			}
+			require.False(t, ifaceIndir(rtypeOfType(reflect.TypeOf(st{}).Field(0).Type)))
+			checkEncodeValueWithStandard(t, st{}, nil)
+			i := 2
+			checkEncodeValueWithStandard(t, st{
+				A: testDirectStructMarshaler{&i},
 			}, nil)
 		})
 	})
 	t.Run("pointer json marshaler", func(t *testing.T) {
-		type st struct {
-			A testJsonMarshaler2 `json:",omitempty"`
-		}
-		t.Run("no data", func(t *testing.T) {
-			skipTest(t, "incompatible with std")
-			checkEncodeValueWithStandard(t, &st{
-				A: testJsonMarshaler2{},
-			}, nil)
+		t.Run("value field", func(t *testing.T) {
+			type st struct {
+				A testJsonMarshaler2 `json:",omitempty"`
+			}
+			t.Run("no data", func(t *testing.T) {
+				skipTest(t, "incompatible with std")
+				checkEncodeValueWithStandard(t, &st{
+					A: testJsonMarshaler2{},
+				}, nil)
+			})
+			t.Run("with data", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, &st{
+					A: testJsonMarshaler2{
+						data: "true",
+					},
+				}, nil)
+			})
 		})
-		t.Run("with data", func(t *testing.T) {
-			checkEncodeValueWithStandard(t, &st{
-				A: testJsonMarshaler2{
-					data: "true",
-				},
-			}, nil)
+		t.Run("pointer field", func(t *testing.T) {
+			type st struct {
+				A *testJsonMarshaler2 `json:",omitempty"`
+			}
+			t.Run("nil", func(t *testing.T) {
+				skipTest(t, "incompatible with std")
+				checkEncodeValueWithStandard(t, &st{}, nil)
+			})
+			t.Run("no data", func(t *testing.T) {
+				skipTest(t, "incompatible with std")
+				checkEncodeValueWithStandard(t, &st{
+					A: &testJsonMarshaler2{},
+				}, nil)
+			})
+			t.Run("with data", func(t *testing.T) {
+				checkEncodeValueWithStandard(t, &st{
+					A: &testJsonMarshaler2{
+						data: "true",
+					},
+				}, nil)
+			})
 		})
+
 	})
 	t.Run("dynamic json marshaler", func(t *testing.T) {
 		type st struct {

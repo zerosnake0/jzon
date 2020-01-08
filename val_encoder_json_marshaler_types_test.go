@@ -2,31 +2,35 @@ package jzon
 
 import (
 	"fmt"
+	"strconv"
 )
 
-// byte
-type testMarshalByte byte
+// bool
+type testBoolJsonMarshaler bool
 
-func (tb testMarshalByte) MarshalJSON() ([]byte, error) {
-	return []byte{'"', '1', byte(tb), '"'}, nil
+func (b testBoolJsonMarshaler) MarshalJSON() ([]byte, error) {
+	if b {
+		return []byte("true"), nil
+	} else {
+		return []byte("false"), nil
+	}
 }
 
-type testMarshalByte2 byte
+// array
+type testIndirectArrayMarshaler [1]int
 
-func (tb *testMarshalByte2) MarshalJSON() ([]byte, error) {
-	return []byte{'"', '2', byte(*tb), '"'}, nil
+func (arr testIndirectArrayMarshaler) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf(`"%d"`, arr[0]*2)
+	return []byte(s), nil
 }
 
-type testMarshalByte3 byte
+type testDirectArrayMarshaler [1]*int
 
-func (tb testMarshalByte3) MarshalText() ([]byte, error) {
-	return []byte{'"', '3', byte(tb), '"'}, nil
-}
-
-type testMarshalByte4 byte
-
-func (tb *testMarshalByte4) MarshalText() ([]byte, error) {
-	return []byte{'"', '4', byte(*tb), '"'}, nil
+func (arr testDirectArrayMarshaler) MarshalJSON() ([]byte, error) {
+	if arr[0] == nil {
+		return []byte(`"nil"`), nil
+	}
+	return []byte(strconv.Itoa(*arr[0])), nil
 }
 
 // map
@@ -37,7 +41,34 @@ func (m testMapJsonMarshaler) MarshalJSON() ([]byte, error) {
 	return []byte(s), nil
 }
 
+// slice
+type testSliceMarshaler []byte
+
+func (s testSliceMarshaler) MarshalJSON() ([]byte, error) {
+	str := strconv.Itoa(len(s))
+	return []byte(str), nil
+}
+
 // struct
+type testIndirectStructMarshaler struct {
+	A int
+}
+
+func (s testIndirectStructMarshaler) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.Itoa(s.A)), nil
+}
+
+type testDirectStructMarshaler struct {
+	A *int
+}
+
+func (s testDirectStructMarshaler) MarshalJSON() ([]byte, error) {
+	if s.A == nil {
+		return []byte(`"nil"`), nil
+	}
+	return []byte(strconv.Itoa(*s.A)), nil
+}
+
 type testJsonMarshaler struct {
 	data string
 	err  error

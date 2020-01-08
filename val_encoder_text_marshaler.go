@@ -10,13 +10,16 @@ var (
 	textMarshalerType = reflect.TypeOf((*encoding.TextMarshaler)(nil)).Elem()
 )
 
-type textMarshalerEncoder rtype
-
-func (enc textMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	return false
+type textMarshalerEncoder struct {
+	isEmpty isEmptyFunc
+	rtype   rtype
 }
 
-func (enc textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (enc *textMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	return enc.isEmpty(ptr)
+}
+
+func (enc *textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}
@@ -24,7 +27,7 @@ func (enc textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *En
 		s.Null()
 		return
 	}
-	obj := packEFace(rtype(enc), ptr)
+	obj := packEFace(enc.rtype, ptr)
 	marshaler := obj.(encoding.TextMarshaler)
 	b, err := marshaler.MarshalText()
 	if err != nil {
@@ -34,13 +37,16 @@ func (enc textMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *En
 	s.String(localByteToString(b))
 }
 
-type directTextMarshalerEncoder rtype
-
-func (enc directTextMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	return *(*unsafe.Pointer)(ptr) == nil
+type directTextMarshalerEncoder struct {
+	isEmpty isEmptyFunc
+	rtype   rtype
 }
 
-func (enc directTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (enc *directTextMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+	return enc.isEmpty(*(*unsafe.Pointer)(ptr))
+}
+
+func (enc *directTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}
@@ -48,7 +54,7 @@ func (enc directTextMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, op
 		s.Null()
 		return
 	}
-	obj := packEFace(rtype(enc), *(*unsafe.Pointer)(ptr))
+	obj := packEFace(enc.rtype, *(*unsafe.Pointer)(ptr))
 	marshaler := obj.(encoding.TextMarshaler)
 	b, err := marshaler.MarshalText()
 	if err != nil {

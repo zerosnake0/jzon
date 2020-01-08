@@ -37,10 +37,9 @@ func init() {
 	isEmptyFunctions[reflect.Float32] = (*float32Encoder)(nil).IsEmpty
 	isEmptyFunctions[reflect.Float64] = (*float64Encoder)(nil).IsEmpty
 	isEmptyFunctions[reflect.Array] = (*arrayEncoder)(nil).IsEmpty
-	isEmptyFunctions[reflect.Interface] = (*efaceEncoder)(nil).IsEmpty
 	isEmptyFunctions[reflect.Map] = (*directMapEncoder)(nil).IsEmpty
 	isEmptyFunctions[reflect.Slice] = (*sliceEncoder)(nil).IsEmpty
 	isEmptyFunctions[reflect.Struct] = (*structEncoder)(nil).IsEmpty
+	// Interface
 	// Ptr
-	// Struct
 }

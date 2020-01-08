@@ -139,7 +139,10 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		// check json.Marshaler interface
 		if typ.Implements(jsonMarshalerType) {
 			if ifaceIndir(rType) {
-				v := jsonMarshalerEncoder(rType)
+				v := &jsonMarshalerEncoder{
+					isEmpty: isEmptyFunctions[kind],
+					rtype:   rType,
+				}
 				internalCache[rType] = v
 				cache[rType] = v
 				continue
@@ -171,7 +174,10 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 		// check encoding.TextMarshaler interface
 		if typ.Implements(textMarshalerType) {
 			if ifaceIndir(rType) {
-				v := textMarshalerEncoder(rType)
+				v := &textMarshalerEncoder{
+					isEmpty: isEmptyFunctions[kind],
+					rtype:   rType,
+				}
 				internalCache[rType] = v
 				cache[rType] = v
 				continue
@@ -191,7 +197,10 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				}
 				continue
 			}
-			v := directTextMarshalerEncoder(rType)
+			v := &directTextMarshalerEncoder{
+				isEmpty: isEmptyFunctions[kind],
+				rtype:   rType,
+			}
 			internalCache[rType] = v
 			cache[rType] = &directEncoder{v}
 			continue
