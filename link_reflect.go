@@ -14,18 +14,21 @@ import (
 func unsafe_New(rtype rtype) unsafe.Pointer
 
 //go:linkname typedmemclrpartial reflect.typedmemclrpartial
+//go:noescape
 func typedmemclrpartial(t rtype, ptr unsafe.Pointer, off, size uintptr)
 
 //go:linkname unsafe_NewArray reflect.unsafe_NewArray
 func unsafe_NewArray(rtype rtype, length int) unsafe.Pointer
 
 //go:linkname typedslicecopy reflect.typedslicecopy
+//go:noescape
 func typedslicecopy(rtyp rtype, dst, src reflect.SliceHeader) int
 
 //go:linkname makemap reflect.makemap
 func makemap(rtype rtype, cap int) unsafe.Pointer
 
 //go:linkname typedmemmove reflect.typedmemmove
+//go:noescape
 func typedmemmove(rtype rtype, dst, src unsafe.Pointer)
 
 //go:linkname mapassign reflect.mapassign
