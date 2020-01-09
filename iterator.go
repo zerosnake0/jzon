@@ -26,6 +26,8 @@ type Iterator struct {
 	// eface checkpoint
 	lastEfaceOffset int
 	lastEfacePtr    uintptr
+
+	Context interface{} // custom iteration context
 }
 
 func NewIterator() *Iterator {
@@ -50,6 +52,7 @@ func (it *Iterator) reset() {
 	it.tail = 0
 	it.lastEfacePtr = 0
 	it.lastEfaceOffset = 0
+	it.Context = nil
 }
 
 /*
@@ -81,6 +84,7 @@ func (it *Iterator) Reset(r io.Reader) {
 	it.tail = 0
 	it.lastEfacePtr = 0
 	it.lastEfaceOffset = 0
+	it.Context = nil
 }
 
 func (it *Iterator) ResetBytes(data []byte) {
@@ -95,6 +99,7 @@ func (it *Iterator) ResetBytes(data []byte) {
 	it.tail = len(data)
 	it.lastEfacePtr = 0
 	it.lastEfaceOffset = 0
+	it.Context = nil
 }
 
 func (it *Iterator) Buffer() []byte {

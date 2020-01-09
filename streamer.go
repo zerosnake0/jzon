@@ -12,6 +12,8 @@ type Streamer struct {
 
 	Error error
 	poped bool
+
+	Context interface{} // custom stream context
 }
 
 func NewStreamer() *Streamer {
@@ -27,6 +29,7 @@ func (s *Streamer) reset() {
 	s.Error = nil
 	s.poped = false
 	s.buffer = s.buffer[:0]
+	s.Context = nil
 }
 
 func (s *Streamer) Reset(w io.Writer) {
