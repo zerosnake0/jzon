@@ -82,25 +82,49 @@ func TestValDecoder_Native_Array(t *testing.T) {
 			B string
 			C []byte
 		}
-		arr1 := [...]st{{
-			A: 1,
-			B: "a",
-			C: []byte("b"),
-		}, {
-			A: 2,
-			B: "c",
-			C: []byte("d"),
-		}}
-		arr2 := [...]st{{
-			A: 1,
-			B: "a",
-			C: []byte("b"),
-		}, {
-			A: 2,
-			B: "c",
-			C: []byte("d"),
-		}}
-		f(t, ` [ { } ]`, nil, &arr1, &arr2)
+		t.Run("empty", func(t *testing.T) {
+			arr1 := [...]st{{
+				A: 1,
+				B: "a",
+				C: []byte("b"),
+			}, {
+				A: 2,
+				B: "c",
+				C: []byte("d"),
+			}}
+			arr2 := [...]st{{
+				A: 1,
+				B: "a",
+				C: []byte("b"),
+			}, {
+				A: 2,
+				B: "c",
+				C: []byte("d"),
+			}}
+			f(t, ` [ ] `, nil, &arr1, &arr2)
+		})
+		t.Run("non empty", func(t *testing.T) {
+			arr1 := [...]st{{
+				A: 1,
+				B: "a",
+				C: []byte("b"),
+			}, {
+				A: 2,
+				B: "c",
+				C: []byte("d"),
+			}}
+			arr2 := [...]st{{
+				A: 1,
+				B: "a",
+				C: []byte("b"),
+			}, {
+				A: 2,
+				B: "c",
+				C: []byte("d"),
+			}}
+			f(t, ` [ { } ] `, nil, &arr1, &arr2)
+		})
+
 	})
 	debug.FreeOSMemory()
 }
