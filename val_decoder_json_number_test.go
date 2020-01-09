@@ -40,6 +40,7 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 		f2(t, `"abc`, io.EOF)
 	})
 	t.Run("string", func(t *testing.T) {
+		// TODO: this will be invalid in the future version of golang?
 		f2(t, `"abc"`, nil)
 	})
 	t.Run("invalid number", func(t *testing.T) {
