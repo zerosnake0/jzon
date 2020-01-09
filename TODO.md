@@ -5,8 +5,8 @@
 - [x] Decoder option `UseNumber`
 - [x] Decoder option `DisallowUnknownFields`
 - [x] tag option `quoted`
-- [ ] json/text marshaler (pointer receiver) for values
-- [ ] tag option `omitempty`
+- [x] json/text marshaler (pointer receiver) for values
+- [x] tag option `omitempty`
 
 # Improvement
 
@@ -20,4 +20,4 @@
 
 # Benchmark with other library
 
-- [ ] jsoniter
+- [x] jsoniter
