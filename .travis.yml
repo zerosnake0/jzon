@@ -17,6 +17,10 @@ after_success:
   - bash <(curl -s https://codecov.io/bash)
 
 jobs:
+  allow_failures:
+    - if: branch != master
+      go: tip
+
   exclude:
     - if: branch = master
       go: tip
