@@ -15,6 +15,7 @@ func newArrayDecoder(arrType reflect.Type) *arrayDecoderBuilder {
 	return &arrayDecoderBuilder{
 		decoder: &arrayDecoder{
 			rtype:    rtypeOfType(arrType),
+			size:     arrType.Size(),
 			elemSize: elem.Size(),
 			length:   arrType.Len(),
 			// elemRType: rtypeOfType(elem),
@@ -26,6 +27,7 @@ func newArrayDecoder(arrType reflect.Type) *arrayDecoderBuilder {
 
 type arrayDecoder struct {
 	rtype    rtype
+	size     uintptr
 	elemSize uintptr
 	length   int
 	// elemRType rtype
@@ -51,18 +53,20 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 		return err
 	}
 	count := 0
-	childPtr := uintptr(ptr)
+	var offset uintptr = 0
 	if c == ']' {
 		it.head += 1
 	} else {
 		for {
 			if count < dec.length {
-				elemPtr := unsafe.Pointer(childPtr)
+				// newer golang version seems to disallow direct
+				// uintptr to unsafe.Pointer convert
+				elemPtr := add(ptr, offset, "count < dec.length")
 				if err := dec.elemDec.Decode(elemPtr, it, nil); err != nil {
 					return err
 				}
 				count += 1
-				childPtr += dec.elemSize
+				offset += dec.elemSize
 			} else {
 				if err := it.Skip(); err != nil {
 					return err
@@ -83,9 +87,8 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 	}
 	if count < dec.length {
 		// should be safe (?)
-		off := uintptr(count) * dec.elemSize
-		typedmemclrpartial(dec.rtype, add(ptr, off, "count < dec.length"),
-			off, uintptr(dec.length-count)*dec.elemSize)
+		typedmemclrpartial(dec.rtype, add(ptr, offset, "count < dec.length"),
+			offset, dec.size-offset)
 	}
 	return nil
 }
