@@ -83,9 +83,9 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 	}
 	if count < dec.length {
 		// should be safe (?)
-		typedmemclrpartial(dec.rtype, unsafe.Pointer(childPtr),
-			uintptr(count)*dec.elemSize,
-			uintptr(dec.length-count)*dec.elemSize)
+		off := uintptr(count) * dec.elemSize
+		typedmemclrpartial(dec.rtype, add(ptr, off, "count < dec.length"),
+			off, uintptr(dec.length-count)*dec.elemSize)
 	}
 	return nil
 }
