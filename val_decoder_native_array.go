@@ -14,10 +14,10 @@ func newArrayDecoder(arrType reflect.Type) *arrayDecoderBuilder {
 	elem := arrType.Elem()
 	return &arrayDecoderBuilder{
 		decoder: &arrayDecoder{
-			rtype:     rtypeOfType(arrType),
-			elemSize:  elem.Size(),
-			length:    arrType.Len(),
-			elemRType: rtypeOfType(elem),
+			rtype:    rtypeOfType(arrType),
+			elemSize: elem.Size(),
+			length:   arrType.Len(),
+			// elemRType: rtypeOfType(elem),
 		},
 		elemPtrRType: rtypeOfType(reflect.PtrTo(elem)),
 	}
@@ -25,10 +25,10 @@ func newArrayDecoder(arrType reflect.Type) *arrayDecoderBuilder {
 }
 
 type arrayDecoder struct {
-	rtype     rtype
-	elemSize  uintptr
-	length    int
-	elemRType rtype
+	rtype    rtype
+	elemSize uintptr
+	length   int
+	// elemRType rtype
 
 	elemDec ValDecoder
 }
@@ -83,7 +83,7 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 	}
 	if count < dec.length {
 		// should be safe (?)
-		typedmemclrpartial(dec.elemRType, unsafe.Pointer(childPtr),
+		typedmemclrpartial(dec.rtype, unsafe.Pointer(childPtr),
 			uintptr(count)*dec.elemSize,
 			uintptr(dec.length-count)*dec.elemSize)
 	}
