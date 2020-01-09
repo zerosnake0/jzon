@@ -2,8 +2,7 @@ package jzon
 
 import "unsafe"
 
-type jsonNumberDecoder struct {
-}
+type jsonNumberDecoder struct{}
 
 func (*jsonNumberDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 	c, vt, err := it.nextToken()

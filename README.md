@@ -1,4 +1,5 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/zerosnake0/jzon)](https://goreportcard.com/report/github.com/zerosnake0/jzon)
+[![Build Status](https://travis-ci.org/zerosnake0/jzon.svg?branch=master)](https://travis-ci.org/zerosnake0/jzon)
 
 # jzon
 
