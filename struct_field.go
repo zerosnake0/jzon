@@ -18,9 +18,10 @@ type field struct {
 	index   []int
 	offsets []offset
 
-	name      string
-	nameBytes []byte                 // []byte(name)
-	equalFold func(s, t []byte) bool // bytes.EqualFold or equivalent
+	name           string
+	nameBytes      []byte // []byte(name)
+	nameBytesLower []byte
+	equalFold      func(s, t []byte) bool // bytes.EqualFold or equivalent
 
 	tagged    bool
 	quoted    bool
