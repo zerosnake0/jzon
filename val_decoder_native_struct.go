@@ -27,13 +27,14 @@ type decoderFields struct {
 func (df *decoderFields) init(size int) {
 	df.list = make([]decoderFieldInfo, 0, size)
 	df.nameIndex = make(map[string]int, size)
+	df.nameIndexUpper = make(map[string]int, size)
 }
 
 func (df *decoderFields) add(f *field, dec ValDecoder) {
 	df.nameIndex[f.name] = len(df.list)
 	nameUpper := string(f.nameBytesUpper)
-	if _, ok := df.nameIndex[nameUpper]; !ok {
-		df.nameIndex[nameUpper] = len(df.list)
+	if _, ok := df.nameIndexUpper[nameUpper]; !ok {
+		df.nameIndexUpper[nameUpper] = len(df.list)
 	}
 	df.list = append(df.list, decoderFieldInfo{
 		offsets: f.offsets,
