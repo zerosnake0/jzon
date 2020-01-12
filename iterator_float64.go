@@ -22,7 +22,7 @@ func (it *Iterator) readFloat64(c byte) (float64, error) {
 }
 
 func (it *Iterator) ReadFloat64() (float64, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}

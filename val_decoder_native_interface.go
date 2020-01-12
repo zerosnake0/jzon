@@ -69,7 +69,7 @@ func (dec *efaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 		return nil
 	}
 	// obj is pointer
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ type ifaceDecoder struct {
 }
 
 func (dec *ifaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}

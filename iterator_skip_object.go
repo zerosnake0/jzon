@@ -1,7 +1,7 @@
 package jzon
 
 func skipObjectWithStack(it *Iterator, _ byte) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -18,7 +18,7 @@ func skipObjectWithStack(it *Iterator, _ byte) error {
 		if err != nil {
 			return err
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return err
 		}
@@ -38,7 +38,7 @@ func skipObjectWithStack(it *Iterator, _ byte) error {
 		if err = skipFunctions[c](it, c); err != nil {
 			return err
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return err
 		}
@@ -49,7 +49,7 @@ func skipObjectWithStack(it *Iterator, _ byte) error {
 		if c != ',' {
 			return UnexpectedByteError{got: c, exp: '}', exp2: ','}
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return err
 		}
@@ -57,7 +57,7 @@ func skipObjectWithStack(it *Iterator, _ byte) error {
 }
 
 func (it *Iterator) SkipObject() error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}

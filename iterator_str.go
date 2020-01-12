@@ -88,6 +88,7 @@ func (it *Iterator) readEscapedChar(b []byte) ([]byte, error) {
 	if err != nil {
 		return b, err
 	}
+Retry:
 	if utf16.IsSurrogate(r) {
 		c, err := it.nextByte()
 		if err != nil {
@@ -118,7 +119,8 @@ func (it *Iterator) readEscapedChar(b []byte) ([]byte, error) {
 		combined := utf16.DecodeRune(r, r2)
 		if combined == runeError {
 			b = appendRune(b, r)
-			return appendRune(b, r2), nil
+			r = r2
+			goto Retry
 		}
 		return appendRune(b, combined), nil
 	} else {
@@ -160,7 +162,7 @@ func (it *Iterator) readStringAsSlice(buf []byte) (_ []byte, err error) {
 }
 
 func (it *Iterator) expectQuote() error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -195,7 +197,7 @@ func (it *Iterator) ReadString() (ret string, err error) {
 	return it.readString()
 }
 
-// From jsoniter
+// From unicode/utf8 (which is also used by jsoniter)
 const (
 	t1 = 0x00 // 0000 0000
 	tx = 0x80 // 1000 0000

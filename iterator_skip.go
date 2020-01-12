@@ -33,7 +33,7 @@ func init() {
 func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 	var c byte
 	for {
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return err
 		}
@@ -51,7 +51,7 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 				if c != ',' {
 					return UnexpectedByteError{got: c, exp: ','}
 				}
-				c, _, err = it.nextToken()
+				c, err = it.nextToken()
 				if err != nil {
 					return err
 				}
@@ -64,7 +64,7 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 			if err != nil {
 				return err
 			}
-			c, _, err = it.nextToken()
+			c, err = it.nextToken()
 			if err != nil {
 				return err
 			}
@@ -95,7 +95,7 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 				if c != ',' {
 					return UnexpectedByteError{got: c, exp: ','}
 				}
-				c, _, err = it.nextToken()
+				c, err = it.nextToken()
 				if err != nil {
 					return err
 				}
@@ -119,7 +119,7 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 }
 
 func (it *Iterator) Skip() error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}

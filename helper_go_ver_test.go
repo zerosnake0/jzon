@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"log"
 	"runtime"
 	"strconv"
 	"strings"
@@ -9,6 +10,10 @@ import (
 var (
 	goVersion = newGoVersionInfo(runtime.Version())
 )
+
+func init() {
+	log.Println("the current go version is:", runtime.Version())
+}
 
 type goVersionInfo struct {
 	Major int

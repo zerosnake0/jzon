@@ -1,6 +1,6 @@
 package jzon
 
-type ValueType int32
+type ValueType int
 
 const (
 	WhiteSpaceValue ValueType = iota

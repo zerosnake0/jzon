@@ -6,11 +6,10 @@ import (
 )
 
 // bool decoder
-type boolDecoder struct {
-}
+type boolDecoder struct{}
 
 func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -38,7 +37,7 @@ func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) erro
 			return UnexpectedByteError{got: c}
 		}
 		it.head += 1
-		c, _, err := it.nextToken()
+		c, err := it.nextToken()
 		if err != nil {
 			return err
 		}
@@ -67,11 +66,10 @@ func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) erro
 }
 
 // string decoder
-type stringDecoder struct {
-}
+type stringDecoder struct{}
 
 func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -111,7 +109,7 @@ func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) er
 				return BadQuotedStringError(s)
 			}
 			// check eof
-			_, _, err = subIt.nextToken()
+			_, err = subIt.nextToken()
 			if err != io.EOF {
 				return BadQuotedStringError(s)
 			}

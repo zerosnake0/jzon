@@ -102,6 +102,10 @@ type EncOpts struct {
 	Quoted bool
 }
 
+func (opts *EncOpts) noescape() *EncOpts {
+	return (*EncOpts)(noescape(unsafe.Pointer(opts)))
+}
+
 type keyEncoder interface {
 	Encode(ptr unsafe.Pointer, s *Streamer)
 }

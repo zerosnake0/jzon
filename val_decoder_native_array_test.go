@@ -76,6 +76,56 @@ func TestValDecoder_Native_Array(t *testing.T) {
 		arr2 := [...]int{1, 2}
 		f(t, ` [ 2 , 3 , "test"]`, nil, &arr1, &arr2)
 	})
+	t.Run("big element", func(t *testing.T) {
+		type st struct {
+			A int
+			B string
+			C []byte
+		}
+		t.Run("empty", func(t *testing.T) {
+			arr1 := [...]st{{
+				A: 1,
+				B: "a",
+				C: []byte("b"),
+			}, {
+				A: 2,
+				B: "c",
+				C: []byte("d"),
+			}}
+			arr2 := [...]st{{
+				A: 1,
+				B: "a",
+				C: []byte("b"),
+			}, {
+				A: 2,
+				B: "c",
+				C: []byte("d"),
+			}}
+			f(t, ` [ ] `, nil, &arr1, &arr2)
+		})
+		t.Run("non empty", func(t *testing.T) {
+			arr1 := [...]st{{
+				A: 1,
+				B: "a",
+				C: []byte("b"),
+			}, {
+				A: 2,
+				B: "c",
+				C: []byte("d"),
+			}}
+			arr2 := [...]st{{
+				A: 1,
+				B: "a",
+				C: []byte("b"),
+			}, {
+				A: 2,
+				B: "c",
+				C: []byte("d"),
+			}}
+			f(t, ` [ { } ] `, nil, &arr1, &arr2)
+		})
+
+	})
 	debug.FreeOSMemory()
 }
 

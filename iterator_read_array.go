@@ -1,7 +1,7 @@
 package jzon
 
 func readArrayWithStack(it *Iterator, _ byte) (interface{}, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func readArrayWithStack(it *Iterator, _ byte) (interface{}, error) {
 			return nil, err
 		}
 		topObj = append(topObj, o)
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return nil, err
 		}
@@ -51,7 +51,7 @@ func readArrayWithStack(it *Iterator, _ byte) (interface{}, error) {
 		if c != ',' {
 			return nil, UnexpectedByteError{got: c, exp: ',', exp2: ']'}
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return nil, err
 		}

@@ -70,8 +70,6 @@ func encodeString(buffer []byte, str string, safeSet []string) []byte {
 			r, size := utf8.DecodeRuneInString(str[i:])
 			if r == utf8.RuneError && size == 1 {
 				buffer = append(buffer, str[offset:i]...)
-				// we must have size == 1 here
-				// because the input is not empty
 				buffer = append(buffer, '\\', 'u',
 					'f', 'f', 'f', 'd')
 				i += 1

@@ -7,7 +7,7 @@ import (
 type skipDecoder struct{}
 
 func (*skipDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func (*skipDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
 type emptyObjectDecoder struct{}
 
 func (*emptyObjectDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (*emptyObjectDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) 
 	case 'n':
 		return it.expectBytes("ull")
 	case '{':
-		c, _, err := it.nextToken()
+		c, err := it.nextToken()
 		if err != nil {
 			return err
 		}

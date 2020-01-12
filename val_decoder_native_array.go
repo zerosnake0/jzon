@@ -15,9 +15,10 @@ func newArrayDecoder(arrType reflect.Type) *arrayDecoderBuilder {
 	return &arrayDecoderBuilder{
 		decoder: &arrayDecoder{
 			rtype:    rtypeOfType(arrType),
+			size:     arrType.Size(),
 			elemSize: elem.Size(),
 			length:   arrType.Len(),
-			// 	elemRType:    rtypeOfType(elem),
+			// elemRType: rtypeOfType(elem),
 		},
 		elemPtrRType: rtypeOfType(reflect.PtrTo(elem)),
 	}
@@ -26,15 +27,16 @@ func newArrayDecoder(arrType reflect.Type) *arrayDecoderBuilder {
 
 type arrayDecoder struct {
 	rtype    rtype
+	size     uintptr
 	elemSize uintptr
 	length   int
-	// elemRType    rtype
+	// elemRType rtype
 
 	elemDec ValDecoder
 }
 
 func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -46,29 +48,31 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 		return UnexpectedByteError{got: c, exp: '[', exp2: 'n'}
 	}
 	it.head += 1
-	c, _, err = it.nextToken()
+	c, err = it.nextToken()
 	if err != nil {
 		return err
 	}
 	count := 0
-	childPtr := uintptr(ptr)
+	var offset uintptr = 0
 	if c == ']' {
 		it.head += 1
 	} else {
 		for {
 			if count < dec.length {
-				elemPtr := unsafe.Pointer(childPtr)
+				// newer golang version seems to disallow direct
+				// uintptr to unsafe.Pointer convert
+				elemPtr := add(ptr, offset, "count < dec.length")
 				if err := dec.elemDec.Decode(elemPtr, it, nil); err != nil {
 					return err
 				}
 				count += 1
-				childPtr += dec.elemSize
+				offset += dec.elemSize
 			} else {
 				if err := it.Skip(); err != nil {
 					return err
 				}
 			}
-			c, _, err = it.nextToken()
+			c, err = it.nextToken()
 			if err != nil {
 				return err
 			}
@@ -83,9 +87,8 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 	}
 	if count < dec.length {
 		// should be safe (?)
-		typedmemclrpartial(dec.rtype, unsafe.Pointer(childPtr),
-			uintptr(count)*dec.elemSize,
-			uintptr(dec.length-count)*dec.elemSize)
+		typedmemclrpartial(dec.rtype, add(ptr, offset, "count < dec.length"),
+			offset, dec.size-offset)
 	}
 	return nil
 }

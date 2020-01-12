@@ -180,7 +180,7 @@ func (it *Iterator) expectBytes(s string) error {
 }
 
 // Read until the first valid token is found, only the whitespaces are consumed
-func (it *Iterator) nextToken() (ret byte, vt ValueType, err error) {
+func (it *Iterator) nextToken() (ret byte, err error) {
 	for {
 		i := it.head
 		for ; i < it.tail; i++ {
@@ -190,20 +190,20 @@ func (it *Iterator) nextToken() (ret byte, vt ValueType, err error) {
 				continue
 			}
 			it.head = i
-			return c, vt, nil
+			return c, nil
 		}
 		// the head and tail will be reset by readMore
 		it.head = i
 		if err := it.readMore(); err != nil {
-			return 0, InvalidValue, err
+			return 0, err
 		}
 	}
 }
 
 // Read until the first valid token is found, only the whitespaces are consumed
-func (it *Iterator) NextValueType() (vt ValueType, err error) {
-	_, vt, err = it.nextToken()
-	return
+func (it *Iterator) NextValueType() (ValueType, error) {
+	v, err := it.nextToken()
+	return valueTypeMap[v], err
 }
 
 func (it *Iterator) Unmarshal(data []byte, obj interface{}) error {
@@ -212,7 +212,7 @@ func (it *Iterator) Unmarshal(data []byte, obj interface{}) error {
 	if err != nil {
 		return err
 	}
-	_, _, err = it.nextToken()
+	_, err = it.nextToken()
 	if err == nil {
 		return DataRemainedError
 	}
@@ -228,6 +228,6 @@ func (it *Iterator) Valid(data []byte) bool {
 	if err != nil {
 		return false
 	}
-	_, _, err = it.nextToken()
+	_, err = it.nextToken()
 	return err == io.EOF
 }

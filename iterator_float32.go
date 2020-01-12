@@ -6,7 +6,7 @@ import (
 )
 
 func (it *Iterator) ReadFloat32() (float32, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}

@@ -1,7 +1,7 @@
 package jzon
 
 func (it *Iterator) ReadNull() error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}

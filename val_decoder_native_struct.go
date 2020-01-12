@@ -11,49 +11,63 @@ type structDecoderBuilder struct {
 }
 
 type decoderFieldInfo struct {
-	offsets   []offset
-	nameBytes []byte                 // []byte(name)
-	equalFold func(s, t []byte) bool // bytes.EqualFold or equivalent
-	quoted    bool
-	decoder   ValDecoder
+	offsets []offset
+	// nameBytes []byte                 // []byte(name)
+	// equalFold func(s, t []byte) bool // bytes.EqualFold or equivalent
+	quoted  bool
+	decoder ValDecoder
 }
 
 type decoderFields struct {
-	list      []decoderFieldInfo
-	nameIndex map[string]int
+	list           []decoderFieldInfo
+	nameIndex      map[string]int
+	nameIndexUpper map[string]int
 }
 
 func (df *decoderFields) init(size int) {
 	df.list = make([]decoderFieldInfo, 0, size)
 	df.nameIndex = make(map[string]int, size)
+	df.nameIndexUpper = make(map[string]int, size)
 }
 
 func (df *decoderFields) add(f *field, dec ValDecoder) {
 	df.nameIndex[f.name] = len(df.list)
+	nameUpper := string(f.nameBytesUpper)
+	if _, ok := df.nameIndexUpper[nameUpper]; !ok {
+		df.nameIndexUpper[nameUpper] = len(df.list)
+	}
 	df.list = append(df.list, decoderFieldInfo{
-		offsets:   f.offsets,
-		nameBytes: f.nameBytes,
-		equalFold: f.equalFold,
-		quoted:    f.quoted,
-		decoder:   dec,
+		offsets: f.offsets,
+		// nameBytes: f.nameBytes,
+		// equalFold: f.equalFold,
+		quoted:  f.quoted,
+		decoder: dec,
 	})
 }
 
-func (df *decoderFields) find(key []byte, caseSensitive bool) *decoderFieldInfo {
+func (df *decoderFields) find(key []byte, caseSensitive bool) (*decoderFieldInfo, []byte) {
 	if i, ok := df.nameIndex[localByteToString(key)]; ok {
-		return &df.list[i]
+		return &df.list[i], key
 	}
 	if caseSensitive {
-		return nil
+		return nil, key
 	}
-	// TODO: performance of this?
-	for i := range df.list {
-		ff := &df.list[i]
-		if ff.equalFold(ff.nameBytes, key) {
-			return ff
-		}
+	l := len(key)
+	// use the same buffer
+	upper := toUpper(key, key)
+	i, ok := df.nameIndexUpper[localByteToString(upper[l:])]
+	if ok {
+		return &df.list[i], upper
 	}
-	return nil
+	return nil, upper
+	// // TODO: performance of this?
+	// for i := range df.list {
+	// 	ff := &df.list[i]
+	// 	if ff.equalFold(ff.nameBytes, key) {
+	// 		return ff
+	// 	}
+	// }
+	// return nil
 }
 
 type structDecoder struct {
@@ -72,7 +86,7 @@ func (dec *Decoder) newStructDecoder(typ reflect.Type) *structDecoderBuilder {
 }
 
 func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (err error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -85,7 +99,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 		return UnexpectedByteError{got: c, exp2: 'n', exp: '{'}
 	}
 	it.head += 1
-	c, _, err = it.nextToken()
+	c, err = it.nextToken()
 	if err != nil {
 		return
 	}
@@ -103,7 +117,8 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 		if err != nil {
 			return err
 		}
-		stField := dec.fields.find(field, it.decoder.caseSensitive)
+		stField, fieldOut := dec.fields.find(field, it.decoder.caseSensitive)
+		it.tmpBuffer = fieldOut
 		if stField != nil {
 			curPtr := add(ptr, stField.offsets[0].val, "struct field")
 			for _, offset := range stField.offsets[1:] {
@@ -120,7 +135,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 			opt := DecOpts{
 				Quoted: stField.quoted,
 			}
-			if err = stField.decoder.Decode(curPtr, it, &opt); err != nil {
+			if err = stField.decoder.Decode(curPtr, it, opt.noescape()); err != nil {
 				return err
 			}
 		} else {
@@ -131,7 +146,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 				return err
 			}
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return err
 		}
@@ -141,7 +156,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 			return nil
 		case ',':
 			it.head += 1
-			c, _, err = it.nextToken()
+			c, err = it.nextToken()
 			if err != nil {
 				return err
 			}

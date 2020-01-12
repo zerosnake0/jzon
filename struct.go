@@ -154,6 +154,7 @@ func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) struct
 						field.tagged = true
 					}
 					field.nameBytes = []byte(field.name)
+					field.nameBytesUpper = toUpper(field.nameBytes, nil)
 					field.equalFold = foldFunc(field.nameBytes)
 
 					// Only strings, floats, integers, and booleans can be quoted.

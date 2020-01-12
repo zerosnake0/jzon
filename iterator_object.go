@@ -9,7 +9,7 @@ func (it *Iterator) readObjectFieldAsSlice(buf []byte) (
 	if err != nil {
 		return
 	}
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return
 	}
@@ -25,7 +25,10 @@ func (it *Iterator) readObjectFieldAsSlice(buf []byte) (
 func (it *Iterator) readObjectField() (bool, string, error) {
 	more, field, err := it.readObjectFieldAsSlice(it.tmpBuffer[:0])
 	it.tmpBuffer = field
-	return more, string(field), err
+	if err != nil {
+		return false, "", err
+	}
+	return more, string(field), nil
 }
 
 func (it *Iterator) skipObjectField() (bool, error) {
@@ -35,7 +38,7 @@ func (it *Iterator) skipObjectField() (bool, error) {
 }
 
 func (it *Iterator) ReadObjectBegin() (more bool, field string, err error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return
 	}
@@ -44,7 +47,7 @@ func (it *Iterator) ReadObjectBegin() (more bool, field string, err error) {
 		return
 	}
 	it.head += 1
-	c, _, err = it.nextToken()
+	c, err = it.nextToken()
 	if err != nil {
 		return
 	}
@@ -63,7 +66,7 @@ func (it *Iterator) ReadObjectBegin() (more bool, field string, err error) {
 }
 
 func (it *Iterator) ReadObjectMore() (more bool, field string, err error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return
 	}
@@ -73,7 +76,7 @@ func (it *Iterator) ReadObjectMore() (more bool, field string, err error) {
 		return
 	case ',':
 		it.head += 1
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return
 		}
@@ -90,7 +93,7 @@ func (it *Iterator) ReadObjectMore() (more bool, field string, err error) {
 }
 
 func (it *Iterator) ReadObjectCB(cb func(it *Iterator, field string) error) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -98,7 +101,7 @@ func (it *Iterator) ReadObjectCB(cb func(it *Iterator, field string) error) erro
 		return UnexpectedByteError{got: c, exp: '{'}
 	}
 	it.head += 1
-	c, _, err = it.nextToken()
+	c, err = it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -118,7 +121,7 @@ func (it *Iterator) ReadObjectCB(cb func(it *Iterator, field string) error) erro
 		if err := cb(it, field); err != nil {
 			return err
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return err
 		}
@@ -128,7 +131,7 @@ func (it *Iterator) ReadObjectCB(cb func(it *Iterator, field string) error) erro
 			return nil
 		case ',':
 			it.head += 1
-			c, _, err = it.nextToken()
+			c, err = it.nextToken()
 			if err != nil {
 				return err
 			}

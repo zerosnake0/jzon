@@ -5,12 +5,12 @@ import "unsafe"
 type jsonNumberDecoder struct{}
 
 func (*jsonNumberDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
-	c, vt, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
 	var s string
-	switch vt {
+	switch valueTypeMap[c] {
 	case StringValue:
 		it.head += 1
 		s, err = it.readString()

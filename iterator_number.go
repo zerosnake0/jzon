@@ -19,11 +19,11 @@ func (it *Iterator) readNumberAsString(c byte) (n string, err error) {
 }
 
 func (it *Iterator) ReadNumber() (n Number, err error) {
-	c, vt, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return
 	}
-	if vt != NumberValue {
+	if valueTypeMap[c] != NumberValue {
 		err = UnexpectedByteError{got: c}
 		return
 	}

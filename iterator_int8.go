@@ -12,7 +12,7 @@ const (
 )
 
 func (it *Iterator) ReadUint8() (uint8, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}
@@ -99,7 +99,7 @@ func (it *Iterator) readInt8(c byte) (int8, error) {
 }
 
 func (it *Iterator) ReadInt8() (int8, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}

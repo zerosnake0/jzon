@@ -9,7 +9,7 @@ type uint8Decoder struct {
 }
 
 func (*uint8Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ type uint16Decoder struct {
 }
 
 func (*uint16Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ type uint32Decoder struct {
 }
 
 func (*uint32Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ type uint64Decoder struct {
 }
 
 func (*uint64Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}

@@ -9,7 +9,7 @@ type float32Decoder struct {
 }
 
 func (*float32Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ type float64Decoder struct {
 }
 
 func (*float64Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}

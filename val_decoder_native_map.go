@@ -54,7 +54,7 @@ type mapDecoder struct {
 }
 
 func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 		return UnexpectedByteError{got: c, exp: '{', exp2: 'n'}
 	}
 	it.head += 1
-	c, _, err = it.nextToken()
+	c, err = it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -89,10 +89,10 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 		opt := DecOpts{
 			MapKey: true,
 		}
-		if err = dec.keyDec.Decode(key, it, &opt); err != nil {
+		if err = dec.keyDec.Decode(key, it, opt.noescape()); err != nil {
 			return err
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return err
 		}
@@ -105,7 +105,7 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 			return err
 		}
 		mapassign(dec.rtype, *(*unsafe.Pointer)(ptr), key, val)
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return err
 		}

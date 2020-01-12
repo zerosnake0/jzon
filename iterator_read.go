@@ -44,7 +44,7 @@ func init() {
 }
 
 func (it *Iterator) Read() (interface{}, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func readWithStack(it *Iterator, top stackElement, s *stack, ns *nodeStack) (
 	_ interface{}, err error) {
 	var c byte
 	for {
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +75,7 @@ func readWithStack(it *Iterator, top stackElement, s *stack, ns *nodeStack) (
 				if c != ',' {
 					return nil, UnexpectedByteError{got: c, exp: ','}
 				}
-				c, _, err = it.nextToken()
+				c, err = it.nextToken()
 				if err != nil {
 					return nil, err
 				}
@@ -88,7 +88,7 @@ func readWithStack(it *Iterator, top stackElement, s *stack, ns *nodeStack) (
 			if err != nil {
 				return nil, err
 			}
-			c, _, err = it.nextToken()
+			c, err = it.nextToken()
 			if err != nil {
 				return nil, err
 			}
@@ -124,7 +124,7 @@ func readWithStack(it *Iterator, top stackElement, s *stack, ns *nodeStack) (
 				if c != ',' {
 					return nil, UnexpectedByteError{got: c, exp: ','}
 				}
-				c, _, err = it.nextToken()
+				c, err = it.nextToken()
 				if err != nil {
 					return nil, err
 				}
