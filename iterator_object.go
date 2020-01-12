@@ -25,7 +25,10 @@ func (it *Iterator) readObjectFieldAsSlice(buf []byte) (
 func (it *Iterator) readObjectField() (bool, string, error) {
 	more, field, err := it.readObjectFieldAsSlice(it.tmpBuffer[:0])
 	it.tmpBuffer = field
-	return more, string(field), err
+	if err != nil {
+		return false, "", err
+	}
+	return more, string(field), nil
 }
 
 func (it *Iterator) skipObjectField() (bool, error) {
