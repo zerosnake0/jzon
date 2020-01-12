@@ -162,7 +162,7 @@ func (it *Iterator) readStringAsSlice(buf []byte) (_ []byte, err error) {
 }
 
 func (it *Iterator) expectQuote() error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}

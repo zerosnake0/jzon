@@ -26,7 +26,7 @@ type pointerDecoder struct {
 }
 
 func (dec *pointerDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}

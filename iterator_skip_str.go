@@ -71,7 +71,7 @@ func skipString(it *Iterator, _ byte) error {
 }
 
 func (it *Iterator) SkipString() error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,7 @@ package jzon
 
 // No copy version
 func (it *Iterator) SkipRaw() ([]byte, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return nil, err
 	}

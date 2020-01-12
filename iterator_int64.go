@@ -13,7 +13,7 @@ const (
 )
 
 func (it *Iterator) ReadUint64() (uint64, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}
@@ -95,7 +95,7 @@ func (it *Iterator) readInt64(c byte) (int64, error) {
 }
 
 func (it *Iterator) ReadInt64() (int64, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}

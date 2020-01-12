@@ -86,7 +86,7 @@ func (dec *Decoder) newStructDecoder(typ reflect.Type) *structDecoderBuilder {
 }
 
 func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (err error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 		return UnexpectedByteError{got: c, exp2: 'n', exp: '{'}
 	}
 	it.head += 1
-	c, _, err = it.nextToken()
+	c, err = it.nextToken()
 	if err != nil {
 		return
 	}
@@ -146,7 +146,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 				return err
 			}
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return err
 		}
@@ -156,7 +156,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 			return nil
 		case ',':
 			it.head += 1
-			c, _, err = it.nextToken()
+			c, err = it.nextToken()
 			if err != nil {
 				return err
 			}

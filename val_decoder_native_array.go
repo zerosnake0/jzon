@@ -36,7 +36,7 @@ type arrayDecoder struct {
 }
 
 func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 		return UnexpectedByteError{got: c, exp: '[', exp2: 'n'}
 	}
 	it.head += 1
-	c, _, err = it.nextToken()
+	c, err = it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 					return err
 				}
 			}
-			c, _, err = it.nextToken()
+			c, err = it.nextToken()
 			if err != nil {
 				return err
 			}

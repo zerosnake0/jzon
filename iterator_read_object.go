@@ -1,7 +1,7 @@
 package jzon
 
 func readObjectWithStack(it *Iterator, _ byte) (interface{}, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +19,7 @@ func readObjectWithStack(it *Iterator, _ byte) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return nil, err
 		}
@@ -53,7 +53,7 @@ func readObjectWithStack(it *Iterator, _ byte) (interface{}, error) {
 			return nil, err
 		}
 		topObj[field] = o
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return nil, err
 		}
@@ -64,7 +64,7 @@ func readObjectWithStack(it *Iterator, _ byte) (interface{}, error) {
 		if c != ',' {
 			return nil, UnexpectedByteError{got: c, exp: '}', exp2: ','}
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return nil, err
 		}

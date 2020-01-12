@@ -144,11 +144,11 @@ func skipNumber(it *Iterator, c byte) (err error) {
 }
 
 func (it *Iterator) SkipNumber() error {
-	c, vt, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
-	if vt != NumberValue {
+	if valueTypeMap[c] != NumberValue {
 		return UnexpectedByteError{got: c}
 	}
 	it.head += 1

@@ -13,7 +13,7 @@ const (
 )
 
 func (it *Iterator) ReadUint32() (uint32, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}
@@ -94,7 +94,7 @@ func (it *Iterator) readInt32(c byte) (int32, error) {
 }
 
 func (it *Iterator) ReadInt32() (int32, error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}

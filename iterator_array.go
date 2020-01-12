@@ -14,7 +14,7 @@ package jzon
  * }
  */
 func (it *Iterator) ReadArrayBegin() (ret bool, err error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return false, err
 	}
@@ -22,7 +22,7 @@ func (it *Iterator) ReadArrayBegin() (ret bool, err error) {
 		return false, UnexpectedByteError{got: c, exp: '['}
 	}
 	it.head += 1
-	c, _, err = it.nextToken()
+	c, err = it.nextToken()
 	if err != nil {
 		return false, err
 	}
@@ -34,7 +34,7 @@ func (it *Iterator) ReadArrayBegin() (ret bool, err error) {
 }
 
 func (it *Iterator) ReadArrayMore() (ret bool, err error) {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return false, err
 	}
@@ -51,7 +51,7 @@ func (it *Iterator) ReadArrayMore() (ret bool, err error) {
 }
 
 func (it *Iterator) ReadArrayCB(cb func(*Iterator) error) error {
-	c, _, err := it.nextToken()
+	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (it *Iterator) ReadArrayCB(cb func(*Iterator) error) error {
 		return UnexpectedByteError{got: c, exp: '['}
 	}
 	it.head += 1
-	c, _, err = it.nextToken()
+	c, err = it.nextToken()
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (it *Iterator) ReadArrayCB(cb func(*Iterator) error) error {
 		if err := cb(it); err != nil {
 			return err
 		}
-		c, _, err = it.nextToken()
+		c, err = it.nextToken()
 		if err != nil {
 			return err
 		}
