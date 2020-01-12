@@ -183,24 +183,25 @@ func checkEncodeWithStandardInternal(t *testing.T, jsonOpt func(*json.Encoder), 
 	if err != nil {
 		t.Logf("json err: %v", err)
 		t.Logf("jzon err: %v", streamer.Error)
-		expErrType, ok := expErr.(reflect.Type)
-		if ok {
+		switch x := expErr.(type) {
+		case reflect.Type:
 			gotErrType := reflect.TypeOf(streamer.Error)
-			if expErrType.Kind() == reflect.Interface {
-				require.True(t, gotErrType.Implements(expErrType), "exp err:%v\ngot err:%v",
-					expErrType, streamer.Error)
+			if x.Kind() == reflect.Interface {
+				require.True(t, gotErrType.Implements(x), "exp err:%v\ngot err:%v",
+					x, streamer.Error)
 			} else {
-				require.Equal(t, expErrType, gotErrType, "exp err:%v\ngot err:%v",
-					expErrType, streamer.Error)
+				require.Equal(t, x, gotErrType, "exp err:%v\ngot err:%v",
+					x, streamer.Error)
 			}
-		} else {
-			if reflect.TypeOf(errors.New("")) == reflect.TypeOf(expErr) {
-				require.Equalf(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
-					expErr, streamer.Error)
-			} else {
-				require.IsTypef(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
-					expErr, streamer.Error)
-			}
+		case error:
+			checkError(t, x, streamer.Error)
+			// if reflect.TypeOf(errors.New("")) == reflect.TypeOf(expErr) {
+			// 	require.Equalf(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
+			// 		expErr, streamer.Error)
+			// } else {
+			// 	require.IsTypef(t, expErr, streamer.Error, "exp err:%v\ngot err:%v",
+			// 		expErr, streamer.Error)
+			// }
 		}
 		require.Error(t, streamer.Error, "json.Marshal error: %v", err)
 	} else {
@@ -214,8 +215,7 @@ func checkEncodeWithStandardInternal(t *testing.T, jsonOpt func(*json.Encoder), 
 	}
 }
 
-func checkEncodeValueWithStandard(t *testing.T, obj interface{},
-	expErr interface{}) {
+func checkEncodeValueWithStandard(t *testing.T, obj interface{}, expErr interface{}) {
 	checkEncodeWithStandard(t, obj, func(s *Streamer) {
 		s.Value(obj)
 	}, expErr)

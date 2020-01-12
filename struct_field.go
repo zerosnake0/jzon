@@ -20,7 +20,7 @@ type field struct {
 
 	name           string
 	nameBytes      []byte // []byte(name)
-	nameBytesLower []byte
+	nameBytesUpper []byte
 	equalFold      func(s, t []byte) bool // bytes.EqualFold or equivalent
 
 	tagged    bool
