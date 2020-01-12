@@ -32,9 +32,19 @@ func (it *Iterator) readObjectField() (bool, string, error) {
 }
 
 func (it *Iterator) skipObjectField() (bool, error) {
-	more, field, err := it.readObjectFieldAsSlice(it.tmpBuffer[:0])
-	it.tmpBuffer = field
-	return more, err
+	err := skipString(it, '"')
+	if err != nil {
+		return false, err
+	}
+	c, err := it.nextToken()
+	if err != nil {
+		return false, err
+	}
+	if c != ':' {
+		return false, UnexpectedByteError{got: c, exp: ':'}
+	}
+	it.head += 1
+	return true, nil
 }
 
 func (it *Iterator) ReadObjectBegin() (more bool, field string, err error) {
