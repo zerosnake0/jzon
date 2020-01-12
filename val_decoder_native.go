@@ -6,8 +6,7 @@ import (
 )
 
 // bool decoder
-type boolDecoder struct {
-}
+type boolDecoder struct{}
 
 func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
 	c, _, err := it.nextToken()
@@ -67,8 +66,7 @@ func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) erro
 }
 
 // string decoder
-type stringDecoder struct {
-}
+type stringDecoder struct{}
 
 func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
 	c, _, err := it.nextToken()

@@ -135,7 +135,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 			opt := DecOpts{
 				Quoted: stField.quoted,
 			}
-			if err = stField.decoder.Decode(curPtr, it, &opt); err != nil {
+			if err = stField.decoder.Decode(curPtr, it, opt.noescape()); err != nil {
 				return err
 			}
 		} else {

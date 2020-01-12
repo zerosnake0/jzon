@@ -98,7 +98,7 @@ OuterLoop:
 		opt := EncOpts{
 			Quoted: fi.quoted,
 		}
-		fi.encoder.Encode(curPtr, s, &opt)
+		fi.encoder.Encode(curPtr, s, opt.noescape())
 		if s.Error != nil {
 			return
 		}

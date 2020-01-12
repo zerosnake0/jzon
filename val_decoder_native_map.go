@@ -89,7 +89,7 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 		opt := DecOpts{
 			MapKey: true,
 		}
-		if err = dec.keyDec.Decode(key, it, &opt); err != nil {
+		if err = dec.keyDec.Decode(key, it, opt.noescape()); err != nil {
 			return err
 		}
 		c, _, err = it.nextToken()

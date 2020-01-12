@@ -92,6 +92,10 @@ type DecOpts struct {
 	Quoted bool
 }
 
+func (opts *DecOpts) noescape() *DecOpts {
+	return (*DecOpts)(noescape(unsafe.Pointer(opts)))
+}
+
 type ValDecoder interface {
 	Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error
 }
