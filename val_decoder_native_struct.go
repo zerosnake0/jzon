@@ -76,7 +76,7 @@ type structDecoder struct {
 
 func (dec *Decoder) newStructDecoder(typ reflect.Type) *structDecoderBuilder {
 	fields := describeStruct(typ, dec.tag, dec.onlyTaggedField)
-	if fields.count() == 0 {
+	if len(fields) == 0 {
 		return nil
 	}
 	return &structDecoderBuilder{

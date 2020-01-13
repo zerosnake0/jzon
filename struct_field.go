@@ -31,14 +31,7 @@ type field struct {
 	// rtype   rtype
 }
 
-type structFields struct {
-	list      []field
-	nameIndex map[string]int
-}
-
-func (sf *structFields) count() int {
-	return len(sf.list)
-}
+type structFields []field
 
 // byIndex sorts field by index sequence.
 type byIndex []field

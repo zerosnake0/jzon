@@ -155,8 +155,8 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate type
 					cache[rType] = (*skipDecoder)(nil)
 				}
 			} else {
-				for i := range w.fields.list {
-					fi := &w.fields.list[i]
+				for i := range w.fields {
+					fi := &w.fields[i]
 					typesToCreate.push(fi.ptrType)
 				}
 				cache[rType] = w.decoder
@@ -199,9 +199,9 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate type
 		case *pointerDecoderBuilder:
 			x.decoder.elemDec = cache[x.ptrRType]
 		case *structDecoderBuilder:
-			x.decoder.fields.init(len(x.fields.list))
-			for i := range x.fields.list {
-				fi := &x.fields.list[i]
+			x.decoder.fields.init(len(x.fields))
+			for i := range x.fields {
+				fi := &x.fields[i]
 				fiPtrRType := rtypeOfType(fi.ptrType)
 				x.decoder.fields.add(fi, cache[fiPtrRType])
 			}

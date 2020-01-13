@@ -12,7 +12,7 @@ type structEncoderBuilder struct {
 
 func (enc *Encoder) newStructEncoder(typ reflect.Type) *structEncoderBuilder {
 	fields := describeStruct(typ, enc.tag, enc.onlyTaggedField)
-	if fields.count() == 0 {
+	if len(fields) == 0 {
 		return nil
 	}
 	return &structEncoderBuilder{
