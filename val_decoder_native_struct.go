@@ -11,11 +11,11 @@ type structDecoderBuilder struct {
 }
 
 type decoderFieldInfo struct {
-	offsets []offset
-	// nameBytes []byte                 // []byte(name)
-	// equalFold func(s, t []byte) bool // bytes.EqualFold or equivalent
-	quoted  bool
-	decoder ValDecoder
+	offsets   []offset
+	nameBytes []byte                 // []byte(name)
+	equalFold func(s, t []byte) bool // bytes.EqualFold or equivalent
+	quoted    bool
+	decoder   ValDecoder
 }
 
 type decoderFields struct {
@@ -37,11 +37,11 @@ func (df *decoderFields) add(f *field, dec ValDecoder) {
 		df.nameIndexUpper[nameUpper] = len(df.list)
 	}
 	df.list = append(df.list, decoderFieldInfo{
-		offsets: f.offsets,
-		// nameBytes: f.nameBytes,
-		// equalFold: f.equalFold,
-		quoted:  f.quoted,
-		decoder: dec,
+		offsets:   f.offsets,
+		nameBytes: f.nameBytes,
+		equalFold: f.equalFold,
+		quoted:    f.quoted,
+		decoder:   dec,
 	})
 }
 
@@ -53,21 +53,24 @@ func (df *decoderFields) find(key, buf []byte, caseSensitive bool) (*decoderFiel
 		return nil, buf
 	}
 	l := len(buf)
-	// use the same buffer
-	upper := toUpper(key, buf)
-	i, ok := df.nameIndexUpper[localByteToString(upper[l:])]
-	if ok {
-		return &df.list[i], upper
+	// TODO: compare performance
+	if true {
+		// use the same buffer
+		upper := toUpper(key, buf)
+		i, ok := df.nameIndexUpper[localByteToString(upper[l:])]
+		if ok {
+			return &df.list[i], upper
+		}
+		return nil, upper
+	} else {
+		for i := range df.list {
+			ff := &df.list[i]
+			if ff.equalFold(ff.nameBytes, key) {
+				return ff, buf
+			}
+		}
+		return nil, buf
 	}
-	return nil, upper
-	// // TODO: performance of this?
-	// for i := range df.list {
-	// 	ff := &df.list[i]
-	// 	if ff.equalFold(ff.nameBytes, key) {
-	// 		return ff
-	// 	}
-	// }
-	// return nil
 }
 
 type structDecoder struct {
