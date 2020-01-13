@@ -3,9 +3,8 @@ package jzon
 // use after the first `"` is consumed
 // will read the object field as well as the colon
 // more must be true when err is nil
-func (it *Iterator) readObjectFieldAsSlice(buf []byte) (
-	more bool, field []byte, err error) {
-	field, err = it.readStringAsSlice(buf)
+func (it *Iterator) readObjectFieldAsSlice() (more bool, field []byte, err error) {
+	field, err = it.readStringAsSlice()
 	if err != nil {
 		return
 	}
@@ -23,8 +22,7 @@ func (it *Iterator) readObjectFieldAsSlice(buf []byte) (
 }
 
 func (it *Iterator) readObjectField() (bool, string, error) {
-	more, field, err := it.readObjectFieldAsSlice(it.tmpBuffer[:0])
-	it.tmpBuffer = field
+	more, field, err := it.readObjectFieldAsSlice()
 	if err != nil {
 		return false, "", err
 	}

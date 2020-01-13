@@ -129,11 +129,47 @@ Retry:
 }
 
 // internal, call only after a '"' is consumed
-func (it *Iterator) readStringAsSlice(buf []byte) (_ []byte, err error) {
+// the result is either a part of the original data
+// or a part of the temp buffer, should be copied if
+// the data needs to be saved
+func (it *Iterator) readStringAsSlice() (_ []byte, err error) {
+	for i := it.head; i < it.tail; i++ {
+		c := it.buffer[i]
+		if c < ' ' { // json.org
+			return nil, InvalidStringCharError{c: c}
+		}
+		if c == '"' {
+			buf := it.buffer[it.head:i]
+			it.head = i + 1
+			return buf, nil
+		} else if c == '\\' {
+			buf := append(it.tmpBuffer[:0], it.buffer[it.head:i]...)
+			it.head = i + 1
+			buf, err = it.readEscapedChar(buf)
+			if err != nil {
+				it.tmpBuffer = buf
+				return nil, err
+			}
+			i = it.head
+			buf, err = it.readStringAsSliceSlow(buf)
+			it.tmpBuffer = buf
+			return buf, err
+		}
+	}
+	buf := append(it.tmpBuffer[:0], it.buffer[it.head:it.tail]...)
+	buf, err = it.readStringAsSliceSlow(buf)
+	it.tmpBuffer = buf
+	return buf, err
+}
+
+func (it *Iterator) readStringAsSliceSlow(buf []byte) (_ []byte, err error) {
 	for {
 		i := it.head
 		for i < it.tail {
 			c := it.buffer[i]
+			if c < ' ' { // json.org
+				return buf, InvalidStringCharError{c: c}
+			}
 			if c == '"' {
 				buf = append(buf, it.buffer[it.head:i]...)
 				it.head = i + 1
@@ -146,8 +182,6 @@ func (it *Iterator) readStringAsSlice(buf []byte) (_ []byte, err error) {
 					return buf, err
 				}
 				i = it.head
-			} else if c < ' ' { // json.org
-				return buf, InvalidStringCharError{c: c}
 			} else {
 				i++
 			}
@@ -173,17 +207,29 @@ func (it *Iterator) expectQuote() error {
 	return nil
 }
 
-func (it *Iterator) ReadStringAsSlice(buf []byte) (_ []byte, err error) {
+// The returned slice can only be used temporarily, a copy must be made
+// if the result needs to be saved
+func (it *Iterator) ReadStringAsSlice() (_ []byte, err error) {
 	if err = it.expectQuote(); err != nil {
 		return
 	}
-	return it.readStringAsSlice(buf)
+	return it.readStringAsSlice()
+}
+
+func (it *Iterator) ReadStringAndAppend(buf []byte) (_ []byte, err error) {
+	if err = it.expectQuote(); err != nil {
+		return
+	}
+	s, err := it.readStringAsSlice()
+	if err != nil {
+		return
+	}
+	return append(buf, s...), nil
 }
 
 // internal, call only after a '"' is consumed
 func (it *Iterator) readString() (ret string, err error) {
-	buf, err := it.readStringAsSlice(it.tmpBuffer[:0])
-	it.tmpBuffer = buf
+	buf, err := it.readStringAsSlice()
 	if err == nil {
 		ret = string(buf)
 	}

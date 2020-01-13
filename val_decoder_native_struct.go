@@ -45,16 +45,16 @@ func (df *decoderFields) add(f *field, dec ValDecoder) {
 	})
 }
 
-func (df *decoderFields) find(key []byte, caseSensitive bool) (*decoderFieldInfo, []byte) {
+func (df *decoderFields) find(key, buf []byte, caseSensitive bool) (*decoderFieldInfo, []byte) {
 	if i, ok := df.nameIndex[localByteToString(key)]; ok {
-		return &df.list[i], key
+		return &df.list[i], buf
 	}
 	if caseSensitive {
-		return nil, key
+		return nil, buf
 	}
-	l := len(key)
+	l := len(buf)
 	// use the same buffer
-	upper := toUpper(key, key)
+	upper := toUpper(key, buf)
 	i, ok := df.nameIndexUpper[localByteToString(upper[l:])]
 	if ok {
 		return &df.list[i], upper
@@ -112,12 +112,11 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 	}
 	it.head += 1
 	for {
-		_, field, err := it.readObjectFieldAsSlice(it.tmpBuffer[:0])
-		it.tmpBuffer = field
+		_, field, err := it.readObjectFieldAsSlice()
 		if err != nil {
 			return err
 		}
-		stField, fieldOut := dec.fields.find(field, it.decoder.caseSensitive)
+		stField, fieldOut := dec.fields.find(field, it.tmpBuffer, it.decoder.caseSensitive)
 		it.tmpBuffer = fieldOut
 		if stField != nil {
 			curPtr := add(ptr, stField.offsets[0].val, "struct field")

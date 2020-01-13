@@ -6,6 +6,24 @@ import (
 	"io"
 )
 
+// for fast reset
+type iteratorEmbedded struct {
+	/*
+	 * The following attributes must be able to set zero by memset
+	 */
+	capture bool
+	offset  int
+
+	// the current index position
+	head int
+
+	// eface checkpoint
+	lastEfaceOffset int
+	lastEfacePtr    uintptr
+
+	Context interface{} // custom iteration context
+}
+
 type Iterator struct {
 	decoder *Decoder
 
@@ -16,18 +34,10 @@ type Iterator struct {
 	// which include utf8 conversion
 	tmpBuffer []byte
 
-	capture bool
-	offset  int
-
-	// the current index position
-	head int
+	// the current tail position in buffer
 	tail int
 
-	// eface checkpoint
-	lastEfaceOffset int
-	lastEfacePtr    uintptr
-
-	Context interface{} // custom iteration context
+	iteratorEmbedded
 }
 
 func NewIterator() *Iterator {
@@ -46,13 +56,10 @@ func (it *Iterator) reset() {
 		releaseByteSlice(it.buffer)
 		it.buffer = nil
 	}
-	it.capture = false
-	it.offset = 0
-	it.head = 0
 	it.tail = 0
-	it.lastEfacePtr = 0
-	it.lastEfaceOffset = 0
-	it.Context = nil
+
+	// fast reset
+	it.iteratorEmbedded = iteratorEmbedded{}
 }
 
 /*
@@ -78,13 +85,10 @@ func (it *Iterator) Reset(r io.Reader) {
 	}
 	it.reader = r
 	it.buffer = b
-	it.capture = false
-	it.offset = 0
-	it.head = 0
 	it.tail = 0
-	it.lastEfacePtr = 0
-	it.lastEfaceOffset = 0
-	it.Context = nil
+
+	// fast reset
+	it.iteratorEmbedded = iteratorEmbedded{}
 }
 
 func (it *Iterator) ResetBytes(data []byte) {
@@ -93,13 +97,10 @@ func (it *Iterator) ResetBytes(data []byte) {
 	}
 	it.reader = nil
 	it.buffer = data
-	it.capture = false
-	it.offset = 0
-	it.head = 0
 	it.tail = len(data)
-	it.lastEfacePtr = 0
-	it.lastEfaceOffset = 0
-	it.Context = nil
+
+	// fast reset
+	it.iteratorEmbedded = iteratorEmbedded{}
 }
 
 func (it *Iterator) Buffer() []byte {
@@ -185,9 +186,10 @@ func (it *Iterator) nextToken() (ret byte, err error) {
 		i := it.head
 		for ; i < it.tail; i++ {
 			c := it.buffer[i]
-			vt := valueTypeMap[c]
-			if vt == WhiteSpaceValue {
-				continue
+			if c <= ' ' {
+				if valueTypeMap[c] == WhiteSpaceValue {
+					continue
+				}
 			}
 			it.head = i
 			return c, nil
