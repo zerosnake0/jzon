@@ -60,12 +60,10 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 			if c != '"' {
 				return UnexpectedByteError{got: c, exp: '"'}
 			}
-			_, err := it.skipObjectField()
-			if err != nil {
+			if err = it.skipObjectField(); err != nil {
 				return err
 			}
-			c, err = it.nextToken()
-			if err != nil {
+			if c, err = it.nextToken(); err != nil {
 				return err
 			}
 			it.head += 1

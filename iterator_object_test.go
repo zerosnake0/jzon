@@ -295,8 +295,7 @@ func TestIterator_Object_skipObjectField(t *testing.T) {
 	must := require.New(t)
 
 	withIterator(` key" : `, func(it *Iterator) {
-		more, err := it.skipObjectField()
+		err := it.skipObjectField()
 		must.NoError(err)
-		must.True(more)
 	})
 }

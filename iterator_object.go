@@ -28,20 +28,20 @@ func (it *Iterator) readObjectField() (string, error) {
 	return string(field), nil
 }
 
-func (it *Iterator) skipObjectField() (bool, error) {
+func (it *Iterator) skipObjectField() error {
 	err := skipString(it, '"')
 	if err != nil {
-		return false, err
+		return err
 	}
 	c, err := it.nextToken()
 	if err != nil {
-		return false, err
+		return err
 	}
 	if c != ':' {
-		return false, UnexpectedByteError{got: c, exp: ':'}
+		return UnexpectedByteError{got: c, exp: ':'}
 	}
 	it.head += 1
-	return true, nil
+	return nil
 }
 
 func (it *Iterator) ReadObjectBegin() (_ bool, _ string, err error) {

@@ -14,8 +14,7 @@ func skipObjectWithStack(it *Iterator, _ byte) error {
 			return UnexpectedByteError{got: c, exp: '"'}
 		}
 		it.head += 1
-		_, err := it.skipObjectField()
-		if err != nil {
+		if err = it.skipObjectField(); err != nil {
 			return err
 		}
 		c, err = it.nextToken()
