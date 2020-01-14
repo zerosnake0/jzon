@@ -22,7 +22,7 @@ func (dec textUnmarshalerDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *De
 	switch c {
 	case '"':
 		it.head += 1
-		b, err := it.readStringAsSlice(nil)
+		b, err := it.readStringAsSlice()
 		if err != nil {
 			return err
 		}

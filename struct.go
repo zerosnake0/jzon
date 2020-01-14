@@ -297,9 +297,5 @@ func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) struct
 	fields = out
 	sort.Sort(byIndex(fields))
 
-	nameIndex := make(map[string]int, len(fields))
-	for i, field := range fields {
-		nameIndex[field.name] = i
-	}
-	return structFields{fields, nameIndex}
+	return fields
 }

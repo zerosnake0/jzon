@@ -6,28 +6,39 @@ import (
 	"io"
 )
 
-type Iterator struct {
-	decoder *Decoder
-
-	reader io.Reader
-	buffer []byte
-
-	// a temp buffer is needed for string reading
-	// which include utf8 conversion
-	tmpBuffer []byte
-
+// for fast reset
+type iteratorEmbedded struct {
+	/*
+	 * The following attributes must be able to set zero by memset
+	 */
 	capture bool
 	offset  int
 
 	// the current index position
 	head int
-	tail int
 
 	// eface checkpoint
 	lastEfaceOffset int
 	lastEfacePtr    uintptr
 
 	Context interface{} // custom iteration context
+}
+
+type Iterator struct {
+	decoder *Decoder
+
+	reader io.Reader
+	buffer []byte
+	fixbuf []byte
+
+	// a temp buffer is needed for string reading
+	// which include utf8 conversion
+	tmpBuffer []byte
+
+	// the current tail position in buffer
+	tail int
+
+	iteratorEmbedded
 }
 
 func NewIterator() *Iterator {
@@ -39,20 +50,12 @@ func ReturnIterator(it *Iterator) {
 }
 
 func (it *Iterator) reset() {
-	if it.reader == nil {
-		it.buffer = nil
-	} else { // it.reader != nil
-		it.reader = nil
-		releaseByteSlice(it.buffer)
-		it.buffer = nil
-	}
-	it.capture = false
-	it.offset = 0
-	it.head = 0
+	it.reader = nil
+	it.buffer = nil
 	it.tail = 0
-	it.lastEfacePtr = 0
-	it.lastEfaceOffset = 0
-	it.Context = nil
+
+	// fast reset
+	it.iteratorEmbedded = iteratorEmbedded{}
 }
 
 /*
@@ -70,36 +73,21 @@ func (it *Iterator) Reset(r io.Reader) {
 		it.ResetBytes(v.Bytes())
 		return
 	}
-	var b []byte
-	if it.reader == nil {
-		b = getFullByteSlice()
-	} else {
-		b = it.buffer
-	}
 	it.reader = r
-	it.buffer = b
-	it.capture = false
-	it.offset = 0
-	it.head = 0
+	it.buffer = it.fixbuf[:cap(it.fixbuf)]
 	it.tail = 0
-	it.lastEfacePtr = 0
-	it.lastEfaceOffset = 0
-	it.Context = nil
+
+	// fast reset
+	it.iteratorEmbedded = iteratorEmbedded{}
 }
 
 func (it *Iterator) ResetBytes(data []byte) {
-	if it.reader != nil && it.buffer != nil {
-		releaseByteSlice(it.buffer)
-	}
 	it.reader = nil
 	it.buffer = data
-	it.capture = false
-	it.offset = 0
-	it.head = 0
 	it.tail = len(data)
-	it.lastEfacePtr = 0
-	it.lastEfaceOffset = 0
-	it.Context = nil
+
+	// fast reset
+	it.iteratorEmbedded = iteratorEmbedded{}
 }
 
 func (it *Iterator) Buffer() []byte {
@@ -122,6 +110,8 @@ func (it *Iterator) readMore() error {
 			n, err = it.reader.Read(buf[:])
 			it.buffer = append(it.buffer[:it.tail], buf[:n]...)
 			it.tail += n
+			// save internal buffer for reuse
+			it.fixbuf = it.buffer
 		} else {
 			if it.head != it.tail { // debug, to be removed
 				panic(fmt.Errorf("head %d, tail %d", it.head, it.tail))
@@ -185,9 +175,10 @@ func (it *Iterator) nextToken() (ret byte, err error) {
 		i := it.head
 		for ; i < it.tail; i++ {
 			c := it.buffer[i]
-			vt := valueTypeMap[c]
-			if vt == WhiteSpaceValue {
-				continue
+			if c <= ' ' {
+				if valueTypeMap[c] == WhiteSpaceValue {
+					continue
+				}
 			}
 			it.head = i
 			return c, nil

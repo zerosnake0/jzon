@@ -18,6 +18,7 @@ func NewIteratorPool() *IteratorPool {
 			New: func() interface{} {
 				return &Iterator{
 					tmpBuffer: make([]byte, 64),
+					fixbuf:    make([]byte, 64),
 				}
 			},
 		},

@@ -117,3 +117,23 @@ func TestValDecoder_Native_Slice_Memory(t *testing.T) {
 		t.Logf("please check if the memory has been freed")
 	})
 }
+
+func TestValDecoder_Native_Slice_AllocateError(t *testing.T) {
+	type bigSt struct {
+		A string
+		B string
+		C string
+		D string
+		E string
+	}
+	var arr []bigSt
+	err := Unmarshal([]byte(`[{
+		"E": "test0"
+	}, {
+		"E": "test1"
+	}]`), &arr)
+	require.NoError(t, err)
+	require.Len(t, arr, 2)
+	require.Equal(t, "test0", arr[0].E)
+	require.Equal(t, "test1", arr[1].E)
+}

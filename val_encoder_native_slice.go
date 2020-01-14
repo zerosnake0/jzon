@@ -26,7 +26,7 @@ type sliceEncoder struct {
 }
 
 func (*sliceEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	sh := (*reflect.SliceHeader)(ptr)
+	sh := (*sliceHeader)(ptr)
 	return sh.Data == 0 || sh.Len == 0
 }
 
@@ -38,7 +38,7 @@ func (enc *sliceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {
 		s.Null()
 		return
 	}
-	sh := (*reflect.SliceHeader)(ptr)
+	sh := (*sliceHeader)(ptr)
 	if sh.Data == 0 {
 		s.Null()
 		return

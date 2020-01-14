@@ -276,8 +276,8 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				internalCache[rType] = v
 				cache[rType] = v
 			} else {
-				for i := range w.fields.list {
-					fi := &w.fields.list[i]
+				for i := range w.fields {
+					fi := &w.fields[i]
 					typesToCreate.push(fi.ptrType)
 				}
 				internalCache[rType] = w.encoder
@@ -347,9 +347,9 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 			x.encoder.elemEncoder = internalCache.preferPtrEncoder(x.elemType)
 			cache[rType] = x.encoder
 		case *structEncoderBuilder:
-			x.encoder.fields.init(len(x.fields.list))
-			for i := range x.fields.list {
-				fi := &x.fields.list[i]
+			x.encoder.fields.init(len(x.fields))
+			for i := range x.fields {
+				fi := &x.fields[i]
 				v := internalCache.preferPtrEncoder(fi.ptrType.Elem())
 				x.encoder.fields.add(fi, enc.escapeHtml, v)
 			}

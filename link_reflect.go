@@ -1,7 +1,6 @@
 package jzon
 
 import (
-	"reflect"
 	"unsafe"
 )
 
@@ -22,7 +21,7 @@ func unsafe_NewArray(rtype rtype, length int) unsafe.Pointer
 
 //go:linkname typedslicecopy reflect.typedslicecopy
 //go:noescape
-func typedslicecopy(rtyp rtype, dst, src reflect.SliceHeader) int
+func typedslicecopy(rtyp rtype, dst, src sliceHeader) int
 
 //go:linkname makemap reflect.makemap
 func makemap(rtype rtype, cap int) unsafe.Pointer
@@ -55,10 +54,10 @@ func mapiterinit(rtype rtype, m unsafe.Pointer) *hiter
 //go:linkname mapiternext reflect.mapiternext
 func mapiternext(it *hiter)
 
-func unsafeMakeSlice(rtype rtype, length, cap int) unsafe.Pointer {
-	return unsafe.Pointer(&reflect.SliceHeader{
+func unsafeMakeSlice(elemRType rtype, length, cap int) unsafe.Pointer {
+	return unsafe.Pointer(&sliceHeader{
 		// TODO: is this safe?
-		Data: uintptr(unsafe_NewArray(rtype, cap)),
+		Data: uintptr(unsafe_NewArray(elemRType, cap)),
 		Len:  length,
 		Cap:  cap,
 	})
@@ -75,8 +74,8 @@ func add(p unsafe.Pointer, x uintptr, whySafe string) unsafe.Pointer {
 }
 
 // see reflect.grow
-func unsafeGrowSlice(rtype, elemRType rtype, ptr unsafe.Pointer, newLength int) unsafe.Pointer {
-	sh := (*reflect.SliceHeader)(ptr)
+func unsafeGrowSlice(elemRType rtype, ptr unsafe.Pointer, newLength int) unsafe.Pointer {
+	sh := (*sliceHeader)(ptr)
 	if newLength < sh.Cap {
 		sh.Len = newLength
 		return ptr
@@ -93,13 +92,13 @@ func unsafeGrowSlice(rtype, elemRType rtype, ptr unsafe.Pointer, newLength int) 
 			}
 		}
 	}
-	newHeader := (*reflect.SliceHeader)(unsafeMakeSlice(rtype, newLength, newCap))
+	newHeader := (*sliceHeader)(unsafeMakeSlice(elemRType, newLength, newCap))
 	typedslicecopy(elemRType, *newHeader, *sh)
 	return unsafe.Pointer(newHeader)
 }
 
 func unsafeSliceChildPtr(ptr unsafe.Pointer, elemSize uintptr, index int) unsafe.Pointer {
-	sh := (*reflect.SliceHeader)(ptr)
+	sh := (*sliceHeader)(ptr)
 	return add(unsafe.Pointer(sh.Data), uintptr(index)*elemSize, "index < len")
 }
 
