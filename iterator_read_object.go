@@ -15,7 +15,7 @@ func readObjectWithStack(it *Iterator, _ byte) (interface{}, error) {
 			return nil, UnexpectedByteError{got: c, exp: '"'}
 		}
 		it.head += 1
-		_, field, err := it.readObjectField()
+		field, err := it.readObjectField()
 		if err != nil {
 			return nil, err
 		}

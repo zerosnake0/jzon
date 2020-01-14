@@ -115,7 +115,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 	}
 	it.head += 1
 	for {
-		_, field, err := it.readObjectFieldAsSlice()
+		field, err := it.readObjectFieldAsSlice()
 		if err != nil {
 			return err
 		}
