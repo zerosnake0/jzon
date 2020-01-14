@@ -29,6 +29,7 @@ type Iterator struct {
 
 	reader io.Reader
 	buffer []byte
+	fixbuf []byte
 
 	// a temp buffer is needed for string reading
 	// which include utf8 conversion
@@ -49,13 +50,8 @@ func ReturnIterator(it *Iterator) {
 }
 
 func (it *Iterator) reset() {
-	if it.reader == nil {
-		it.buffer = nil
-	} else { // it.reader != nil
-		it.reader = nil
-		releaseByteSlice(it.buffer)
-		it.buffer = nil
-	}
+	it.reader = nil
+	it.buffer = nil
 	it.tail = 0
 
 	// fast reset
@@ -77,14 +73,8 @@ func (it *Iterator) Reset(r io.Reader) {
 		it.ResetBytes(v.Bytes())
 		return
 	}
-	var b []byte
-	if it.reader == nil {
-		b = getFullByteSlice()
-	} else {
-		b = it.buffer
-	}
 	it.reader = r
-	it.buffer = b
+	it.buffer = it.fixbuf[:cap(it.fixbuf)]
 	it.tail = 0
 
 	// fast reset
@@ -92,9 +82,6 @@ func (it *Iterator) Reset(r io.Reader) {
 }
 
 func (it *Iterator) ResetBytes(data []byte) {
-	if it.reader != nil && it.buffer != nil {
-		releaseByteSlice(it.buffer)
-	}
 	it.reader = nil
 	it.buffer = data
 	it.tail = len(data)
@@ -123,6 +110,8 @@ func (it *Iterator) readMore() error {
 			n, err = it.reader.Read(buf[:])
 			it.buffer = append(it.buffer[:it.tail], buf[:n]...)
 			it.tail += n
+			// save internal buffer for reuse
+			it.fixbuf = it.buffer
 		} else {
 			if it.head != it.tail { // debug, to be removed
 				panic(fmt.Errorf("head %d, tail %d", it.head, it.tail))
