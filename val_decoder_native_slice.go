@@ -43,7 +43,7 @@ func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 		if err = it.expectBytes("ull"); err != nil {
 			return err
 		}
-		sh := (*reflect.SliceHeader)(ptr)
+		sh := (*sliceHeader)(ptr)
 		sh.Len = 0
 		sh.Cap = 0
 		sh.Data = 0
@@ -83,7 +83,7 @@ func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 		it.head += 1
 	} else {
 		for length := 1; ; length++ {
-			newPtr = unsafeGrowSlice(dec.rtype, dec.elemRType, newPtr, length)
+			newPtr = unsafeGrowSlice(dec.elemRType, newPtr, length)
 			// must get the address every time
 			childPtr := unsafeSliceChildPtr(newPtr, dec.elemSize, length-1)
 			if err = dec.elemDec.Decode(childPtr, it, nil); err != nil {
@@ -102,6 +102,6 @@ func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 			}
 		}
 	}
-	*(*reflect.SliceHeader)(ptr) = *(*reflect.SliceHeader)(newPtr)
+	*(*sliceHeader)(ptr) = *(*sliceHeader)(newPtr)
 	return nil
 }

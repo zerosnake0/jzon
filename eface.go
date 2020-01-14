@@ -24,3 +24,19 @@ func rtypeOfType(typ reflect.Type) rtype {
 	ef := (*eface)(unsafe.Pointer(&typ))
 	return rtype(ef.data)
 }
+
+type stringHeader = reflect.StringHeader
+type sliceHeader = reflect.SliceHeader
+
+/*
+type stringHeader struct {
+	Data unsafe.Pointer
+	Len  int
+}
+
+type sliceHeader struct {
+	Data unsafe.Pointer
+	Len  int
+	Cap  int
+}
+*/

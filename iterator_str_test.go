@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"reflect"
 	"testing"
 	"unsafe"
 
@@ -270,8 +269,8 @@ func TestIterator_Str_ReadStringAsSlice(t *testing.T) {
 			buf := make([]byte, 0, 32)
 			ret, err := it.ReadStringAndAppend(buf)
 			require.NoError(t, err)
-			p1 := (*reflect.SliceHeader)(unsafe.Pointer(&buf))
-			p2 := (*reflect.SliceHeader)(unsafe.Pointer(&ret))
+			p1 := (*sliceHeader)(unsafe.Pointer(&buf))
+			p2 := (*sliceHeader)(unsafe.Pointer(&ret))
 			require.Equal(t, p1.Data, p2.Data)
 			require.Equal(t, p1.Cap, p2.Cap)
 			require.Equal(t, []byte("abc"), ret)
