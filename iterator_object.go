@@ -44,7 +44,7 @@ func (it *Iterator) skipObjectField() (bool, error) {
 	return true, nil
 }
 
-func (it *Iterator) ReadObjectBegin() (more bool, field string, err error) {
+func (it *Iterator) ReadObjectBegin() (_ bool, _ string, err error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return
@@ -65,16 +65,19 @@ func (it *Iterator) ReadObjectBegin() (more bool, field string, err error) {
 		return
 	case '"':
 		it.head += 1
-		field, err = it.readObjectField()
-		more = err == nil
-		return
+		var fieldBytes []byte
+		fieldBytes, err = it.readObjectFieldAsSlice()
+		if err != nil {
+			return
+		}
+		return true, string(fieldBytes), nil
 	default:
 		err = UnexpectedByteError{got: c, exp: '}', exp2: '"'}
 		return
 	}
 }
 
-func (it *Iterator) ReadObjectMore() (more bool, field string, err error) {
+func (it *Iterator) ReadObjectMore() (_ bool, _ string, err error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return
@@ -94,9 +97,12 @@ func (it *Iterator) ReadObjectMore() (more bool, field string, err error) {
 			return
 		}
 		it.head += 1
-		field, err = it.readObjectField()
-		more = err == nil
-		return
+		var fieldBytes []byte
+		fieldBytes, err = it.readObjectFieldAsSlice()
+		if err != nil {
+			return
+		}
+		return true, string(fieldBytes), nil
 	default:
 		err = UnexpectedByteError{got: c, exp: '}', exp2: ','}
 		return
