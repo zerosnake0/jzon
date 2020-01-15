@@ -94,6 +94,22 @@ func (it *Iterator) Buffer() []byte {
 	return it.buffer[:it.tail]
 }
 
+func (it *Iterator) errorLocation() []byte {
+	var (
+		head int
+		tail int
+	)
+	if it.head > 20 {
+		head = it.head - 20
+	}
+	if it.tail-it.head < 20 {
+		tail = it.tail
+	} else {
+		tail = it.head + 20
+	}
+	return it.buffer[head:tail]
+}
+
 // make sure that it.head == it.tail before call
 func (it *Iterator) readMore() error {
 	if it.reader == nil {
