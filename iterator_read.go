@@ -84,7 +84,7 @@ func readWithStack(it *Iterator, top stackElement, s *stack, ns *nodeStack) (
 			if c != '"' {
 				return nil, UnexpectedByteError{got: c, exp: '"'}
 			}
-			_, field, err := it.readObjectField()
+			field, err := it.readObjectField()
 			if err != nil {
 				return nil, err
 			}

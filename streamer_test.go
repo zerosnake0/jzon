@@ -297,85 +297,89 @@ func TestStreamer(t *testing.T) {
 			s.Bool(false)
 		})
 	})
-	t.Run("array (empty)", func(t *testing.T) {
-		testStreamer(t, "[]", func(s *Streamer) {
-			s.ArrayStart().ArrayEnd()
+	t.Run("array", func(t *testing.T) {
+		t.Run("empty", func(t *testing.T) {
+			testStreamer(t, "[]", func(s *Streamer) {
+				s.ArrayStart().ArrayEnd()
+			})
+		})
+		t.Run("nested 1", func(t *testing.T) {
+			count := 10
+			s := strings.ReplaceAll(nestedArray1(count), " ", "")
+			testStreamer(t, s, func(s *Streamer) {
+				for i := 0; i < count; i++ {
+					s.ArrayStart()
+				}
+				s.ArrayStart().ArrayEnd()
+				for i := 0; i < count; i++ {
+					s.ArrayEnd()
+				}
+			})
+		})
+		t.Run("nested 2", func(t *testing.T) {
+			count := 10
+			s := strings.ReplaceAll(nestedArray2(count), " ", "")
+			testStreamer(t, s, func(s *Streamer) {
+				for i := 0; i < count; i++ {
+					s.ArrayStart().
+						ArrayStart().ArrayEnd()
+				}
+				s.ArrayStart().ArrayEnd()
+				for i := 0; i < count; i++ {
+					s.ArrayEnd()
+				}
+			})
+		})
+		t.Run("nested with object", func(t *testing.T) {
+			count := 10
+			s := strings.ReplaceAll(nestedArrayWithObject(count), " ", "")
+			testStreamer(t, s, func(s *Streamer) {
+				for i := 0; i < count; i++ {
+					s.ArrayStart().
+						ObjectStart().ObjectEnd()
+				}
+				s.ArrayStart().ArrayEnd()
+				for i := 0; i < count; i++ {
+					s.ArrayEnd()
+				}
+			})
 		})
 	})
-	t.Run("array (nested 1)", func(t *testing.T) {
-		count := 10
-		s := strings.ReplaceAll(nestedArray1(count), " ", "")
-		testStreamer(t, s, func(s *Streamer) {
-			for i := 0; i < count; i++ {
-				s.ArrayStart()
-			}
-			s.ArrayStart().ArrayEnd()
-			for i := 0; i < count; i++ {
-				s.ArrayEnd()
-			}
+	t.Run("object", func(t *testing.T) {
+		t.Run("empty", func(t *testing.T) {
+			testStreamer(t, "{}", func(s *Streamer) {
+				s.ObjectStart().ObjectEnd()
+			})
 		})
-	})
-	t.Run("array (nested 2)", func(t *testing.T) {
-		count := 10
-		s := strings.ReplaceAll(nestedArray2(count), " ", "")
-		testStreamer(t, s, func(s *Streamer) {
-			for i := 0; i < count; i++ {
-				s.ArrayStart().
-					ArrayStart().ArrayEnd()
-			}
-			s.ArrayStart().ArrayEnd()
-			for i := 0; i < count; i++ {
-				s.ArrayEnd()
-			}
+		t.Run("nested", func(t *testing.T) {
+			count := 5
+			s := strings.ReplaceAll(nestedObject(count), " ", "")
+			testStreamer(t, s, func(s *Streamer) {
+				for i := 0; i < count; i++ {
+					s.ObjectStart().
+						Field("a").ObjectStart().ObjectEnd().
+						Field("b")
+				}
+				s.ObjectStart().ObjectEnd()
+				for i := 0; i < count; i++ {
+					s.ObjectEnd()
+				}
+			})
 		})
-	})
-	t.Run("array (nested with object)", func(t *testing.T) {
-		count := 10
-		s := strings.ReplaceAll(nestedArrayWithObject(count), " ", "")
-		testStreamer(t, s, func(s *Streamer) {
-			for i := 0; i < count; i++ {
-				s.ArrayStart().
-					ObjectStart().ObjectEnd()
-			}
-			s.ArrayStart().ArrayEnd()
-			for i := 0; i < count; i++ {
-				s.ArrayEnd()
-			}
-		})
-	})
-	t.Run("object (empty)", func(t *testing.T) {
-		testStreamer(t, "{}", func(s *Streamer) {
-			s.ObjectStart().ObjectEnd()
-		})
-	})
-	t.Run("object (nested)", func(t *testing.T) {
-		count := 5
-		s := strings.ReplaceAll(nestedObject(count), " ", "")
-		testStreamer(t, s, func(s *Streamer) {
-			for i := 0; i < count; i++ {
-				s.ObjectStart().
-					Field("a").ObjectStart().ObjectEnd().
-					Field("b")
-			}
-			s.ObjectStart().ObjectEnd()
-			for i := 0; i < count; i++ {
-				s.ObjectEnd()
-			}
-		})
-	})
-	t.Run("object (nested with array)", func(t *testing.T) {
-		count := 5
-		s := strings.ReplaceAll(nestedObjectWithArray(count), " ", "")
-		testStreamer(t, s, func(s *Streamer) {
-			for i := 0; i < count; i++ {
-				s.ObjectStart().
-					Field("a").ArrayStart().ArrayEnd().
-					Field("b")
-			}
-			s.ArrayStart().ArrayEnd()
-			for i := 0; i < count; i++ {
-				s.ObjectEnd()
-			}
+		t.Run("nested with array", func(t *testing.T) {
+			count := 5
+			s := strings.ReplaceAll(nestedObjectWithArray(count), " ", "")
+			testStreamer(t, s, func(s *Streamer) {
+				for i := 0; i < count; i++ {
+					s.ObjectStart().
+						Field("a").ArrayStart().ArrayEnd().
+						Field("b")
+				}
+				s.ArrayStart().ArrayEnd()
+				for i := 0; i < count; i++ {
+					s.ObjectEnd()
+				}
+			})
 		})
 	})
 }

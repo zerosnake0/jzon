@@ -43,6 +43,10 @@ func newMapDecoder(mapType reflect.Type) *mapDecoderBuilder {
 	}
 }
 
+func (builder *mapDecoderBuilder) build(cache decoderCache) {
+	builder.decoder.valDec = cache[builder.valPtrRType]
+}
+
 type mapDecoder struct {
 	rtype rtype
 

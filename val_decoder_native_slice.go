@@ -23,6 +23,10 @@ func newSliceDecoder(sliceType reflect.Type) *sliceDecoderBuilder {
 	}
 }
 
+func (builder *sliceDecoderBuilder) build(cache decoderCache) {
+	builder.decoder.elemDec = cache[builder.elemPtrRType]
+}
+
 type sliceDecoder struct {
 	elemKind  reflect.Kind
 	elemRType rtype

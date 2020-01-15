@@ -5,6 +5,15 @@ import (
 	"fmt"
 )
 
+type DecodeError struct {
+	reason   error
+	location string
+}
+
+func (e *DecodeError) Error() string {
+	return fmt.Sprintf("%s (near %s)", e.reason.Error(), e.location)
+}
+
 // DataRemainedError
 var DataRemainedError = errors.New("expecting EOF, but there is still data")
 

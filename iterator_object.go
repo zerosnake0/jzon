@@ -2,8 +2,7 @@ package jzon
 
 // use after the first `"` is consumed
 // will read the object field as well as the colon
-// more must be true when err is nil
-func (it *Iterator) readObjectFieldAsSlice() (more bool, field []byte, err error) {
+func (it *Iterator) readObjectFieldAsSlice() (field []byte, err error) {
 	field, err = it.readStringAsSlice()
 	if err != nil {
 		return
@@ -17,35 +16,35 @@ func (it *Iterator) readObjectFieldAsSlice() (more bool, field []byte, err error
 		return
 	}
 	it.head += 1
-	more = true
 	return
 }
 
-func (it *Iterator) readObjectField() (bool, string, error) {
-	more, field, err := it.readObjectFieldAsSlice()
+// called only when a '"' is consumed
+func (it *Iterator) readObjectField() (string, error) {
+	field, err := it.readObjectFieldAsSlice()
 	if err != nil {
-		return false, "", err
+		return "", err
 	}
-	return more, string(field), nil
+	return string(field), nil
 }
 
-func (it *Iterator) skipObjectField() (bool, error) {
+func (it *Iterator) skipObjectField() error {
 	err := skipString(it, '"')
 	if err != nil {
-		return false, err
+		return err
 	}
 	c, err := it.nextToken()
 	if err != nil {
-		return false, err
+		return err
 	}
 	if c != ':' {
-		return false, UnexpectedByteError{got: c, exp: ':'}
+		return UnexpectedByteError{got: c, exp: ':'}
 	}
 	it.head += 1
-	return true, nil
+	return nil
 }
 
-func (it *Iterator) ReadObjectBegin() (more bool, field string, err error) {
+func (it *Iterator) ReadObjectBegin() (_ bool, _ string, err error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return
@@ -66,14 +65,19 @@ func (it *Iterator) ReadObjectBegin() (more bool, field string, err error) {
 		return
 	case '"':
 		it.head += 1
-		return it.readObjectField()
+		var fieldBytes []byte
+		fieldBytes, err = it.readObjectFieldAsSlice()
+		if err != nil {
+			return
+		}
+		return true, string(fieldBytes), nil
 	default:
 		err = UnexpectedByteError{got: c, exp: '}', exp2: '"'}
 		return
 	}
 }
 
-func (it *Iterator) ReadObjectMore() (more bool, field string, err error) {
+func (it *Iterator) ReadObjectMore() (_ bool, _ string, err error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return
@@ -93,7 +97,12 @@ func (it *Iterator) ReadObjectMore() (more bool, field string, err error) {
 			return
 		}
 		it.head += 1
-		return it.readObjectField()
+		var fieldBytes []byte
+		fieldBytes, err = it.readObjectFieldAsSlice()
+		if err != nil {
+			return
+		}
+		return true, string(fieldBytes), nil
 	default:
 		err = UnexpectedByteError{got: c, exp: '}', exp2: ','}
 		return
@@ -122,7 +131,7 @@ func (it *Iterator) ReadObjectCB(cb func(it *Iterator, field string) error) erro
 	}
 	it.head += 1
 	for {
-		_, field, err := it.readObjectField()
+		field, err := it.readObjectField()
 		if err != nil {
 			return err
 		}

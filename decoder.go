@@ -68,6 +68,9 @@ func NewDecoder(opt *DecoderOption) *Decoder {
 func (dec *Decoder) Unmarshal(data []byte, obj interface{}) error {
 	it := dec.NewIterator()
 	err := it.Unmarshal(data, obj)
+	if err != nil {
+		err = it.WrapError(err)
+	}
 	dec.ReturnIterator(it)
 	return err
 }
@@ -101,8 +104,12 @@ func (dec *Decoder) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder 
 	return newCache[rType]
 }
 
+type decoderBuilder interface {
+	build(cache decoderCache)
+}
+
 func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate typeQueue) {
-	rebuildMap := map[rtype]interface{}{}
+	rebuildMap := map[rtype]decoderBuilder{}
 	for ptrType := typesToCreate.pop(); ptrType != nil; ptrType = typesToCreate.pop() {
 		rType := rtypeOfType(ptrType)
 		if _, ok := cache[rType]; ok { // check if visited
@@ -146,19 +153,34 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate type
 				cache[rType] = (*ifaceDecoder)(nil)
 			}
 		case reflect.Struct:
-			w := dec.newStructDecoder(elem)
-			if w == nil {
-				// no field to unmarshal
+			fields := describeStruct(elem, dec.tag, dec.onlyTaggedField)
+			numFields := len(fields)
+			if numFields == 0 {
 				if dec.disallowUnknownFields {
 					cache[rType] = (*emptyObjectDecoder)(nil)
 				} else {
 					cache[rType] = (*skipDecoder)(nil)
 				}
+				continue
+			}
+			for i := range fields {
+				fi := &fields[i]
+				typesToCreate.push(fi.ptrType)
+			}
+			if numFields == 1 {
+				w := newOneFieldStructDecoder(&fields[0], dec.caseSensitive)
+				cache[rType] = w.decoder
+				rebuildMap[rType] = w
+			} else if numFields <= 10 {
+				// TODO: determinate the threshold, several factors may be involved:
+				// TODO:   1. number of fields
+				// TODO:   2. (average) field length
+				// TODO:   3. field similarity
+				w := newSmallStructDecoder(fields)
+				cache[rType] = w.decoder
+				rebuildMap[rType] = w
 			} else {
-				for i := range w.fields {
-					fi := &w.fields[i]
-					typesToCreate.push(fi.ptrType)
-				}
+				w := newStructDecoder(fields)
 				cache[rType] = w.decoder
 				rebuildMap[rType] = w
 			}
@@ -195,22 +217,6 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate type
 	}
 	// rebuild some decoders
 	for _, builder := range rebuildMap {
-		switch x := builder.(type) {
-		case *pointerDecoderBuilder:
-			x.decoder.elemDec = cache[x.ptrRType]
-		case *structDecoderBuilder:
-			x.decoder.fields.init(len(x.fields))
-			for i := range x.fields {
-				fi := &x.fields[i]
-				fiPtrRType := rtypeOfType(fi.ptrType)
-				x.decoder.fields.add(fi, cache[fiPtrRType])
-			}
-		case *arrayDecoderBuilder:
-			x.decoder.elemDec = cache[x.elemPtrRType]
-		case *sliceDecoderBuilder:
-			x.decoder.elemDec = cache[x.elemPtrRType]
-		case *mapDecoderBuilder:
-			x.decoder.valDec = cache[x.valPtrRType]
-		}
+		builder.build(cache)
 	}
 }

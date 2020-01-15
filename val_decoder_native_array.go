@@ -22,7 +22,10 @@ func newArrayDecoder(arrType reflect.Type) *arrayDecoderBuilder {
 		},
 		elemPtrRType: rtypeOfType(reflect.PtrTo(elem)),
 	}
+}
 
+func (builder *arrayDecoderBuilder) build(cache decoderCache) {
+	builder.decoder.elemDec = cache[builder.elemPtrRType]
 }
 
 type arrayDecoder struct {

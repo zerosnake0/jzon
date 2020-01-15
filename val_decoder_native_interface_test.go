@@ -347,7 +347,7 @@ func TestValDecoder_Native_Interface_Loop(t *testing.T) {
 		var o1 iface
 		o1 = &o1
 		err := DefaultDecoder.Unmarshal([]byte(`1`), o1)
-		require.Equal(t, EfaceLoopingError, err)
+		checkError(t, EfaceLoopingError, err)
 	})
 	t.Run("loop 2", func(t *testing.T) {
 		// the standard lib does not deal with cross nested
@@ -357,7 +357,7 @@ func TestValDecoder_Native_Interface_Loop(t *testing.T) {
 		o1 = &o1o
 		o1o = &o1
 		err := DefaultDecoder.Unmarshal([]byte(`1`), o1)
-		require.Equal(t, EfaceLoopingError, err)
+		checkError(t, EfaceLoopingError, err)
 	})
 }
 
