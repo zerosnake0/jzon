@@ -11,13 +11,15 @@ import (
 
 func TestValEncoder_JsonMarshaler_Error(t *testing.T) {
 	t.Run("chain error", func(t *testing.T) {
-		testStreamerChainError(t, func(s *Streamer) {
-			(*jsonMarshalerEncoder)(nil).Encode(nil, s, nil)
+		t.Run("", func(t *testing.T) {
+			testStreamerChainError(t, func(s *Streamer) {
+				(*jsonMarshalerEncoder)(nil).Encode(nil, s, nil)
+			})
 		})
-	})
-	t.Run("chain error (dynamic)", func(t *testing.T) {
-		testStreamerChainError(t, func(s *Streamer) {
-			(*dynamicJsonMarshalerEncoder)(nil).Encode(nil, s, nil)
+		t.Run("dynamic", func(t *testing.T) {
+			testStreamerChainError(t, func(s *Streamer) {
+				(*dynamicJsonMarshalerEncoder)(nil).Encode(nil, s, nil)
+			})
 		})
 	})
 }

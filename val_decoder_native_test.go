@@ -38,23 +38,31 @@ func TestValDecoder_Native_Bool(t *testing.T) {
 	t.Run("null", func(t *testing.T) {
 		f2(t, "null", nil)
 	})
-	t.Run("invalid true (init true)", func(t *testing.T) {
-		f2(t, `tru`, io.EOF)
+	t.Run("invalid true", func(t *testing.T) {
+		t.Run("init true", func(t *testing.T) {
+			f2(t, `tru`, io.EOF)
+		})
+		t.Run("init false", func(t *testing.T) {
+			f3(t, `tru`, io.EOF)
+		})
 	})
-	t.Run("valid true (init true)", func(t *testing.T) {
-		f2(t, `true`, nil)
+	t.Run("valid true", func(t *testing.T) {
+		t.Run("init true", func(t *testing.T) {
+			f2(t, `true`, nil)
+		})
+		t.Run("init false", func(t *testing.T) {
+			f3(t, `true`, nil)
+		})
 	})
-	t.Run("invalid true (init false)", func(t *testing.T) {
-		f3(t, `tru`, io.EOF)
+	t.Run("invalid false", func(t *testing.T) {
+		t.Run("init true", func(t *testing.T) {
+			f2(t, `fals`, io.EOF)
+		})
 	})
-	t.Run("valid true (init false)", func(t *testing.T) {
-		f3(t, `true`, nil)
-	})
-	t.Run("invalid false (init true)", func(t *testing.T) {
-		f2(t, `fals`, io.EOF)
-	})
-	t.Run("valid false (init true)", func(t *testing.T) {
-		f2(t, `false`, nil)
+	t.Run("valid false", func(t *testing.T) {
+		t.Run("init true", func(t *testing.T) {
+			f2(t, `false`, nil)
+		})
 	})
 }
 

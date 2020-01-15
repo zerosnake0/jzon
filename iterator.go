@@ -110,6 +110,16 @@ func (it *Iterator) errorLocation() []byte {
 	return it.buffer[head:tail]
 }
 
+func (it *Iterator) WrapError(err error) *DecodeError {
+	if e, ok := err.(*DecodeError); ok {
+		return e
+	}
+	return &DecodeError{
+		reason:   err,
+		location: string(it.errorLocation()),
+	}
+}
+
 // make sure that it.head == it.tail before call
 func (it *Iterator) readMore() error {
 	if it.reader == nil {

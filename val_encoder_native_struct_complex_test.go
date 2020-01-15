@@ -22,7 +22,7 @@ func TestValEncoder_Native_Struct_Complex_OneField(t *testing.T) {
 			A: nil,
 		}, nil)
 	})
-	t.Run("direct (array)", func(t *testing.T) {
+	t.Run("direct array", func(t *testing.T) {
 		type st struct {
 			A [1]*int
 		}

@@ -96,7 +96,7 @@ func TestValEncoder_TextMarshaler(t *testing.T) {
 }
 
 func TestValEncoder_DynamicTextMarshaler(t *testing.T) {
-	t.Run("marshaler (nil)", func(t *testing.T) {
+	t.Run("marshaler nil", func(t *testing.T) {
 		// TODO: This test should be automatically fixed in the future golang version
 		v := "go1.13.6"
 		if goVersion.LessEqual(v) {

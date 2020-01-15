@@ -1,7 +1,6 @@
 package jzon
 
 import (
-	"fmt"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -70,7 +69,7 @@ func (dec *Decoder) Unmarshal(data []byte, obj interface{}) error {
 	it := dec.NewIterator()
 	err := it.Unmarshal(data, obj)
 	if err != nil {
-		err = fmt.Errorf("%s (near %s)", err.Error(), it.errorLocation())
+		err = it.WrapError(err)
 	}
 	dec.ReturnIterator(it)
 	return err
