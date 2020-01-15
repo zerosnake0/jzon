@@ -104,8 +104,12 @@ func (dec *Decoder) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder 
 	return newCache[rType]
 }
 
+type decoderBuilder interface {
+	build(cache decoderCache)
+}
+
 func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate typeQueue) {
-	rebuildMap := map[rtype]interface{}{}
+	rebuildMap := map[rtype]decoderBuilder{}
 	for ptrType := typesToCreate.pop(); ptrType != nil; ptrType = typesToCreate.pop() {
 		rType := rtypeOfType(ptrType)
 		if _, ok := cache[rType]; ok { // check if visited
@@ -149,19 +153,26 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate type
 				cache[rType] = (*ifaceDecoder)(nil)
 			}
 		case reflect.Struct:
-			w := dec.newStructDecoder(elem)
-			if w == nil {
-				// no field to unmarshal
+			fields := describeStruct(elem, dec.tag, dec.onlyTaggedField)
+			if len(fields) == 0 {
 				if dec.disallowUnknownFields {
 					cache[rType] = (*emptyObjectDecoder)(nil)
 				} else {
 					cache[rType] = (*skipDecoder)(nil)
 				}
-			} else {
-				for i := range w.fields {
-					fi := &w.fields[i]
-					typesToCreate.push(fi.ptrType)
-				}
+				continue
+			}
+			for i := range fields {
+				fi := &fields[i]
+				typesToCreate.push(fi.ptrType)
+			}
+			switch len(fields) {
+			case 1:
+				w := newOneFieldStructDecoderBuilder(&fields[0], dec.caseSensitive)
+				cache[rType] = w.decoder
+				rebuildMap[rType] = w
+			default:
+				w := newStructDecoder(fields)
 				cache[rType] = w.decoder
 				rebuildMap[rType] = w
 			}
@@ -198,22 +209,6 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate type
 	}
 	// rebuild some decoders
 	for _, builder := range rebuildMap {
-		switch x := builder.(type) {
-		case *pointerDecoderBuilder:
-			x.decoder.elemDec = cache[x.ptrRType]
-		case *structDecoderBuilder:
-			x.decoder.fields.init(len(x.fields))
-			for i := range x.fields {
-				fi := &x.fields[i]
-				fiPtrRType := rtypeOfType(fi.ptrType)
-				x.decoder.fields.add(fi, cache[fiPtrRType])
-			}
-		case *arrayDecoderBuilder:
-			x.decoder.elemDec = cache[x.elemPtrRType]
-		case *sliceDecoderBuilder:
-			x.decoder.elemDec = cache[x.elemPtrRType]
-		case *mapDecoderBuilder:
-			x.decoder.valDec = cache[x.valPtrRType]
-		}
+		builder.build(cache)
 	}
 }

@@ -19,6 +19,10 @@ func newPointerDecoder(typ reflect.Type) *pointerDecoderBuilder {
 	}
 }
 
+func (builder *pointerDecoderBuilder) build(cache decoderCache) {
+	builder.decoder.elemDec = cache[builder.ptrRType]
+}
+
 type pointerDecoder struct {
 	elemRType rtype
 

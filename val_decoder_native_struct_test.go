@@ -75,6 +75,13 @@ func TestValDecoder_Native_Struct_Mapping(t *testing.T) {
 			A string `json:"a"`
 		}{A: "test"})
 	})
+	t.Run("multiple same key", func(t *testing.T) {
+		f(t, ` { "a" : "abc" , "a" : "def" } `, nil, &struct {
+			A string `json:"a"`
+		}{A: "test"}, &struct {
+			A string `json:"a"`
+		}{A: "test"})
+	})
 	debug.FreeOSMemory()
 }
 

@@ -1,7 +1,6 @@
 package jzon
 
 import (
-	"reflect"
 	"unsafe"
 )
 
@@ -10,12 +9,35 @@ type structDecoderBuilder struct {
 	fields  structFields
 }
 
+func newStructDecoder(fields structFields) *structDecoderBuilder {
+	return &structDecoderBuilder{
+		decoder: &structDecoder{},
+		fields:  fields,
+	}
+}
+
+func (builder *structDecoderBuilder) build(cache decoderCache) {
+	builder.decoder.fields.init(len(builder.fields))
+	for i := range builder.fields {
+		fi := &builder.fields[i]
+		fiPtrRType := rtypeOfType(fi.ptrType)
+		builder.decoder.fields.add(fi, cache[fiPtrRType])
+	}
+}
+
 type decoderFieldInfo struct {
 	offsets   []offset
 	nameBytes []byte                 // []byte(name)
 	equalFold func(s, t []byte) bool // bytes.EqualFold or equivalent
 	quoted    bool
 	decoder   ValDecoder
+}
+
+func (dfi *decoderFieldInfo) initFrom(f *field) {
+	dfi.offsets = f.offsets
+	dfi.nameBytes = f.nameBytes
+	dfi.equalFold = f.equalFold
+	dfi.quoted = f.quoted
 }
 
 type decoderFields struct {
@@ -36,13 +58,10 @@ func (df *decoderFields) add(f *field, dec ValDecoder) {
 	if _, ok := df.nameIndexUpper[nameUpper]; !ok {
 		df.nameIndexUpper[nameUpper] = len(df.list)
 	}
-	df.list = append(df.list, decoderFieldInfo{
-		offsets:   f.offsets,
-		nameBytes: f.nameBytes,
-		equalFold: f.equalFold,
-		quoted:    f.quoted,
-		decoder:   dec,
-	})
+	var dfi decoderFieldInfo
+	dfi.initFrom(f)
+	dfi.decoder = dec
+	df.list = append(df.list, dfi)
 }
 
 func (df *decoderFields) find(key, buf []byte, caseSensitive bool) (*decoderFieldInfo, []byte) {
@@ -75,17 +94,6 @@ func (df *decoderFields) find(key, buf []byte, caseSensitive bool) (*decoderFiel
 
 type structDecoder struct {
 	fields decoderFields
-}
-
-func (dec *Decoder) newStructDecoder(typ reflect.Type) *structDecoderBuilder {
-	fields := describeStruct(typ, dec.tag, dec.onlyTaggedField)
-	if len(fields) == 0 {
-		return nil
-	}
-	return &structDecoderBuilder{
-		decoder: &structDecoder{},
-		fields:  fields,
-	}
 }
 
 func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (err error) {
