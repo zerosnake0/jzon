@@ -2,38 +2,57 @@ package jzon
 
 import (
 	"bytes"
-	"reflect"
 	"unsafe"
 )
 
-type oneFieldStructDecoderBuilder struct {
-	decoder      *oneFieldStructDecoder
-	fieldPtrType reflect.Type
+type smallStructDecoderBuilder struct {
+	decoder *smallStructDecoder
+	fields  []field
 }
 
-func newOneFieldStructDecoder(field *field, caseSensitive bool) *oneFieldStructDecoderBuilder {
-	var dfi decoderFieldInfo
-	dfi.initFrom(field)
-	if caseSensitive {
-		dfi.equalFold = bytes.Equal
+func newSmallStructDecoder(fields []field) *smallStructDecoderBuilder {
+	dfiList := make([]decoderFieldInfo, len(fields))
+	for i := range fields {
+		dfiList[i].initFrom(&fields[i])
 	}
-	return &oneFieldStructDecoderBuilder{
-		decoder: &oneFieldStructDecoder{
-			decoderFieldInfo: dfi,
+	return &smallStructDecoderBuilder{
+		decoder: &smallStructDecoder{
+			fields: dfiList,
 		},
-		fieldPtrType: field.ptrType,
+		fields: fields,
 	}
 }
 
-func (builder *oneFieldStructDecoderBuilder) build(cache decoderCache) {
-	builder.decoder.decoder = cache[rtypeOfType(builder.fieldPtrType)]
+func (builder *smallStructDecoderBuilder) build(cache decoderCache) {
+	for i := range builder.fields {
+		builder.decoder.fields[i].decoder = cache[rtypeOfType(builder.fields[i].ptrType)]
+	}
 }
 
-type oneFieldStructDecoder struct {
-	decoderFieldInfo
+type smallStructDecoder struct {
+	fields []decoderFieldInfo
 }
 
-func (dec *oneFieldStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (err error) {
+func (dec *smallStructDecoder) find(field []byte, caseSensitive bool) *decoderFieldInfo {
+	for i := range dec.fields {
+		ff := &dec.fields[i]
+		if bytes.Equal(ff.nameBytes, field) {
+			return ff
+		}
+	}
+	if caseSensitive {
+		return nil
+	}
+	for i := range dec.fields {
+		ff := &dec.fields[i]
+		if ff.equalFold(ff.nameBytes, field) {
+			return ff
+		}
+	}
+	return nil
+}
+
+func (dec *smallStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (err error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return err
@@ -64,9 +83,10 @@ func (dec *oneFieldStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *De
 		if err != nil {
 			return err
 		}
-		if dec.equalFold(field, dec.nameBytes) {
-			curPtr := add(ptr, dec.offsets[0].val, "struct field")
-			for _, offset := range dec.offsets[1:] {
+		stField := dec.find(field, it.decoder.caseSensitive)
+		if stField != nil {
+			curPtr := add(ptr, stField.offsets[0].val, "struct field")
+			for _, offset := range stField.offsets[1:] {
 				subPtr := *(*unsafe.Pointer)(curPtr)
 				if subPtr == nil {
 					if offset.rtype == 0 { // the ptr field is not exported
@@ -78,9 +98,9 @@ func (dec *oneFieldStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *De
 				curPtr = add(subPtr, offset.val, "struct field")
 			}
 			opt := DecOpts{
-				Quoted: dec.quoted,
+				Quoted: stField.quoted,
 			}
-			if err = dec.decoder.Decode(curPtr, it, opt.noescape()); err != nil {
+			if err = stField.decoder.Decode(curPtr, it, opt.noescape()); err != nil {
 				return err
 			}
 		} else {

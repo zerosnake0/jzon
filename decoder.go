@@ -154,7 +154,8 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate type
 			}
 		case reflect.Struct:
 			fields := describeStruct(elem, dec.tag, dec.onlyTaggedField)
-			if len(fields) == 0 {
+			numFields := len(fields)
+			if numFields == 0 {
 				if dec.disallowUnknownFields {
 					cache[rType] = (*emptyObjectDecoder)(nil)
 				} else {
@@ -166,12 +167,19 @@ func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate type
 				fi := &fields[i]
 				typesToCreate.push(fi.ptrType)
 			}
-			switch len(fields) {
-			case 1:
-				w := newOneFieldStructDecoderBuilder(&fields[0], dec.caseSensitive)
+			if numFields == 1 {
+				w := newOneFieldStructDecoder(&fields[0], dec.caseSensitive)
 				cache[rType] = w.decoder
 				rebuildMap[rType] = w
-			default:
+			} else if numFields <= 10 {
+				// TODO: determinate the threshold, several factors may be involved:
+				// TODO:   1. number of fields
+				// TODO:   2. (average) field length
+				// TODO:   3. field similarity
+				w := newSmallStructDecoder(fields)
+				cache[rType] = w.decoder
+				rebuildMap[rType] = w
+			} else {
 				w := newStructDecoder(fields)
 				cache[rType] = w.decoder
 				rebuildMap[rType] = w
