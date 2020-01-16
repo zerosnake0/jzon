@@ -169,7 +169,6 @@ func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) struct
 						}
 					}
 
-					// TODO: field name for encoder
 					fields = append(fields, field)
 					if count[f.typ] > 1 {
 						/* when we arrived here, we are inside a level, where there are at least
