@@ -47,8 +47,6 @@ func (s *Streamer) Flush() error {
 	// see comment of io.Writer
 	n, err := s.writer.Write(s.buffer)
 	if n < l {
-		// TODO: shall we accept the writers which
-		// TODO: do not implement Write method correctly?
 		copy(s.buffer, s.buffer[n:])
 		s.buffer = s.buffer[:l-n]
 	} else {

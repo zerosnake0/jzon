@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"runtime"
 )
 
 // for fast reset
@@ -129,7 +130,6 @@ func (it *Iterator) readMore() error {
 		n   int
 		err error
 	)
-	// TODO: risk of infinite loop?
 	for {
 		if it.capture {
 			var buf [bufferSize]byte
@@ -156,6 +156,9 @@ func (it *Iterator) readMore() error {
 		if n > 0 {
 			return nil
 		}
+		// n == 0 && err == nil
+		// the implementation of the reader is wrong
+		runtime.Gosched()
 	}
 }
 

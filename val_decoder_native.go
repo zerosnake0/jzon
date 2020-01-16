@@ -87,7 +87,6 @@ func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) er
 		}
 		l := len(s)
 		if l < 2 {
-			// TODO: custom error
 			return BadQuotedStringError(s)
 		}
 		switch s[0] {

@@ -20,6 +20,6 @@ func (*jsonNumberEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts)
 	if str == "" {
 		str = "0"
 	}
-	// TODO: the standard lib will check the validity
+	// TODO: the standard library will check the validity in future
 	s.RawString(str)
 }

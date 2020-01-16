@@ -119,7 +119,6 @@ type ValEncoder interface {
 type notSupportedEncoder string
 
 func (enc notSupportedEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	// TODO: error in interface?
 	return false
 }
 

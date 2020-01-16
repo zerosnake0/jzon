@@ -56,7 +56,6 @@ func mapiternext(it *hiter)
 
 func unsafeMakeSlice(elemRType rtype, length, cap int) unsafe.Pointer {
 	return unsafe.Pointer(&sliceHeader{
-		// TODO: is this safe?
 		Data: uintptr(unsafe_NewArray(elemRType, cap)),
 		Len:  length,
 		Cap:  cap,

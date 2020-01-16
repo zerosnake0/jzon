@@ -340,7 +340,7 @@ func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typ
 				cache[rType] = &directEncoder{x.encoder}
 			}
 		case *mapEncoderBuilder:
-			// TODO: key/value encoder
+			// TODO: key encoder
 			x.encoder.elemEncoder = internalCache[x.elemRType]
 			cache[rType] = &directEncoder{x.encoder}
 		case *sliceEncoderBuilder:
