@@ -68,7 +68,7 @@ func TestIterator_Float_ReadFloat32_LeadingZero(t *testing.T) {
 	t.Run("reader error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   "0",
 				err: e,
 			})
@@ -106,7 +106,7 @@ func TestIterator_Float_ReadFloat32_LeadingZero(t *testing.T) {
 	t.Run("fraction reader error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   "0.",
 				err: e,
 			})
@@ -117,7 +117,7 @@ func TestIterator_Float_ReadFloat32_LeadingZero(t *testing.T) {
 	t.Run("fraction reader error 2", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   "0.1",
 				err: e,
 			})
@@ -160,7 +160,7 @@ func TestIterator_Float_ReadFloat32_LeadingZero(t *testing.T) {
 	t.Run("exponent reader error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   "0.1e+1",
 				err: e,
 			})
@@ -216,7 +216,7 @@ func TestIterator_Float_ReadFloat32_NonLeadingZero(t *testing.T) {
 	t.Run("reader error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   "10",
 				err: e,
 			})

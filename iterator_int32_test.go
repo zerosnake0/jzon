@@ -71,7 +71,7 @@ func TestIterator_Int_ReadUint32(t *testing.T) {
 	t.Run("reader", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			var m uint32 = math.MaxUint32
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b: fmt.Sprint(m),
 			})
 			u, err := it.ReadUint32()

@@ -43,7 +43,7 @@ func TestIterator_Skip_SkipNumber(t *testing.T) {
 	t.Run("reader error after zero", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   " -0",
 				err: e,
 			})
@@ -108,7 +108,7 @@ func TestIterator_Skip_SkipNumber(t *testing.T) {
 	t.Run("non zero reader error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   " 1",
 				err: e,
 			})
@@ -147,7 +147,7 @@ func TestIterator_Skip_SkipNumber(t *testing.T) {
 	t.Run("fraction reader error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   " 1.2",
 				err: e,
 			})
@@ -182,7 +182,7 @@ func TestIterator_Skip_SkipNumber(t *testing.T) {
 	t.Run("exponent reader error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   " 0e+1",
 				err: e,
 			})

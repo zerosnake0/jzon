@@ -26,7 +26,7 @@ func TestIteratorPool(t *testing.T) {
 	}
 
 	f(func(it *Iterator) {
-		it.Reset(&oneByteReader{})
+		it.Reset(&stepByteReader{})
 	})
 
 	data := []byte("test")

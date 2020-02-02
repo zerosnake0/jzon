@@ -78,7 +78,7 @@ func TestIterator_Int_ReadUint8(t *testing.T) {
 	t.Run("reader", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			var m uint8 = math.MaxUint8
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b: fmt.Sprint(m),
 			})
 			u, err := it.ReadUint8()
