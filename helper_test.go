@@ -24,14 +24,15 @@ func withIterator(data string, cb func(it *Iterator)) {
 	cb(it)
 }
 
-type oneByteReader struct {
-	b   string
-	err error
+type stepByteReader struct {
+	b    string
+	step int
+	err  error
 }
 
-var _ io.Reader = &oneByteReader{}
+var _ io.Reader = &stepByteReader{}
 
-func (o *oneByteReader) Read(p []byte) (n int, err error) {
+func (o *stepByteReader) Read(p []byte) (n int, err error) {
 	if len(p) == 0 {
 		return 0, nil
 	}
@@ -41,9 +42,17 @@ func (o *oneByteReader) Read(p []byte) (n int, err error) {
 		}
 		return 0, io.EOF
 	}
-	p[0] = o.b[0]
-	o.b = o.b[1:]
-	return 1, nil
+	step := o.step
+	if step == 0 {
+		step = 1
+	} else {
+		if len(p) < step {
+			step = len(p)
+		}
+	}
+	n = copy(p[:step], o.b)
+	o.b = o.b[n:]
+	return n, nil
 }
 
 type repeatByteReader struct {

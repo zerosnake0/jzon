@@ -65,7 +65,7 @@ func TestIterator_Str_readU4(t *testing.T) {
 	})
 	t.Run("reader", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b: src,
 			})
 			s, err := it.ReadString()
@@ -194,7 +194,7 @@ func TestIterator_Str_readStringAsSlice(t *testing.T) {
 	t.Run("reader error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				err: e,
 			})
 			_, err := it.ReadString()
@@ -237,7 +237,7 @@ func TestIterator_Str_readStringAsSlice(t *testing.T) {
 	})
 	t.Run("reade err", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b: `"\n`,
 			})
 			_, err := it.ReadString()
@@ -246,13 +246,28 @@ func TestIterator_Str_readStringAsSlice(t *testing.T) {
 	})
 	t.Run("reader", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b: `"\n"`,
 			})
 			s, err := it.ReadString()
 			require.NoError(t, err)
 			require.Len(t, s, 1)
 			require.Equal(t, "\n", s)
+		})
+	})
+	t.Run("reader 2", func(t *testing.T) {
+		withIterator("", func(it *Iterator) {
+			it.Reset(&stepByteReader{
+				b:    `"abc"`,
+				step: 2,
+			})
+			vt, err := it.NextValueType()
+			require.NoError(t, err)
+			require.Equal(t, StringValue, vt)
+
+			s, err := it.ReadString()
+			require.NoError(t, err)
+			require.Equal(t, "abc", s)
 		})
 	})
 }

@@ -157,6 +157,10 @@ func (it *Iterator) readStringAsSlice() (_ []byte, err error) {
 		}
 	}
 	buf := append(it.tmpBuffer[:0], it.buffer[it.head:it.tail]...)
+	it.head = it.tail
+	if err := it.readMore(); err != nil {
+		return nil, err
+	}
 	buf, err = it.readStringAsSliceSlow(buf)
 	it.tmpBuffer = buf
 	return buf, err

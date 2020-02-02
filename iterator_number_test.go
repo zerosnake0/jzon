@@ -47,7 +47,7 @@ func TestIterator_Number_ReadNumber_LeadingZero(t *testing.T) {
 	t.Run("reader error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   " 0",
 				err: e,
 			})
@@ -91,7 +91,7 @@ func TestIterator_Number_ReadNumber_LeadingZero(t *testing.T) {
 	t.Run("fraction error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   " 0.12",
 				err: e,
 			})
@@ -134,7 +134,7 @@ func TestIterator_Number_ReadNumber_LeadingZero(t *testing.T) {
 	t.Run("exponent end error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   " 0.1e+2",
 				err: e,
 			})
@@ -162,7 +162,7 @@ func TestIterator_Number_ReadNumber_NonLeadingZero(t *testing.T) {
 	t.Run("reader error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   " 1",
 				err: e,
 			})
@@ -213,7 +213,7 @@ func TestIterator_Number_ReadNumber_NonLeadingZero(t *testing.T) {
 	t.Run("fraction error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   " 1.23",
 				err: e,
 			})
@@ -256,7 +256,7 @@ func TestIterator_Number_ReadNumber_NonLeadingZero(t *testing.T) {
 	t.Run("exponent end error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			e := errors.New("test")
-			it.Reset(&oneByteReader{
+			it.Reset(&stepByteReader{
 				b:   " 1.2e+3",
 				err: e,
 			})
