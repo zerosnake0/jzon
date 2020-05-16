@@ -1,6 +1,8 @@
 package jzon
 
-import "unsafe"
+import (
+	"unsafe"
+)
 
 type jsonNumberDecoder struct{}
 
@@ -13,10 +15,26 @@ func (*jsonNumberDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) e
 	switch valueTypeMap[c] {
 	case StringValue:
 		it.head += 1
-		s, err = it.readString()
+		c, err = it.nextByte()
 		if err != nil {
 			return err
 		}
+		if valueTypeMap[c] != NumberValue {
+			return InvalidDigitError{c}
+		}
+		it.head += 1
+		s, err = it.readNumberAsString(c)
+		if err != nil {
+			return err
+		}
+		c, err = it.nextByte()
+		if err != nil {
+			return err
+		}
+		if c != '"' {
+			return UnexpectedByteError{exp: '"', got: c}
+		}
+		it.head += 1
 		*((*string)(ptr)) = s
 		return nil
 	case NullValue:

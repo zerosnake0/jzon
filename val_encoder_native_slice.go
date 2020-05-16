@@ -30,6 +30,8 @@ func (*sliceEncoder) IsEmpty(ptr unsafe.Pointer) bool {
 	return sh.Data == 0 || sh.Len == 0
 }
 
+// Disable new -d=checkptr behaviour for Go 1.14
+//go:nocheckptr
 func (enc *sliceEncoder) Encode(ptr unsafe.Pointer, s *Streamer, _ *EncOpts) {
 	if s.Error != nil {
 		return

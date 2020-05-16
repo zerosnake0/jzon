@@ -226,8 +226,7 @@ func (it *Iterator) NextValueType() (ValueType, error) {
 	return valueTypeMap[v], err
 }
 
-func (it *Iterator) Unmarshal(data []byte, obj interface{}) error {
-	it.ResetBytes(data)
+func (it *Iterator) unmarshal(obj interface{}) error {
 	err := it.ReadVal(obj)
 	if err != nil {
 		return err
@@ -242,6 +241,11 @@ func (it *Iterator) Unmarshal(data []byte, obj interface{}) error {
 	return nil
 }
 
+func (it *Iterator) Unmarshal(data []byte, obj interface{}) error {
+	it.ResetBytes(data)
+	return it.unmarshal(obj)
+}
+
 func (it *Iterator) Valid(data []byte) bool {
 	it.ResetBytes(data)
 	err := it.Skip()
@@ -250,4 +254,9 @@ func (it *Iterator) Valid(data []byte) bool {
 	}
 	_, err = it.nextToken()
 	return err == io.EOF
+}
+
+func (it *Iterator) UnmarshalFromReader(r io.Reader, obj interface{}) error {
+	it.Reset(r)
+	return it.unmarshal(obj)
 }

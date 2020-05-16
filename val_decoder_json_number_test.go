@@ -37,11 +37,37 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 		f2(t, "null", nil)
 	})
 	t.Run("invalid string", func(t *testing.T) {
-		f2(t, `"abc`, io.EOF)
+		f2(t, `"-123.2e+1`, io.EOF)
+	})
+	t.Run("leading space", func(t *testing.T) {
+		v := "go1.13.11"
+		if goVersion.LessEqual(v) {
+			var n json.Number
+			err := Unmarshal([]byte(`" 1"`), &n)
+			checkError(t, InvalidDigitError{}, err)
+		} else {
+			f2(t, `" 1"`, InvalidDigitError{})
+		}
+	})
+	t.Run("trailing space", func(t *testing.T) {
+		v := "go1.13.11"
+		if goVersion.LessEqual(v) {
+			var n json.Number
+			err := Unmarshal([]byte(`"1 "`), &n)
+			checkError(t, UnexpectedByteError{}, err)
+		} else {
+			f2(t, `"1 "`, UnexpectedByteError{})
+		}
 	})
 	t.Run("string", func(t *testing.T) {
-		// TODO: this will be invalid in the future version of golang?
-		f2(t, `"abc"`, nil)
+		v := "go1.13.11"
+		if goVersion.LessEqual(v) {
+			var n json.Number
+			err := Unmarshal([]byte(`"abc"`), &n)
+			checkError(t, InvalidDigitError{}, err)
+		} else {
+			f2(t, `"abc"`, InvalidDigitError{})
+		}
 	})
 	t.Run("invalid number", func(t *testing.T) {
 		f2(t, `-0.e`, InvalidDigitError{})

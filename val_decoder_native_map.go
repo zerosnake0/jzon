@@ -22,11 +22,12 @@ func newMapDecoder(mapType reflect.Type) *mapDecoderBuilder {
 	keyKind := keyType.Kind()
 	// the string type is specially treated in order to be
 	// compatible with the standard lib
+	// the order of two first cases has been reversed in go1.14
 	switch {
-	case keyKind == reflect.String:
-		keyDecoder = keyDecoders[keyKind]
 	case keyPtrType.Implements(textUnmarshalerType):
 		keyDecoder = textUnmarshalerDecoder(rtypeOfType(keyPtrType))
+	case keyKind == reflect.String:
+		keyDecoder = keyDecoders[keyKind]
 	default:
 		if keyDecoder = keyDecoders[keyType.Kind()]; keyDecoder == nil {
 			return nil
