@@ -63,7 +63,7 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 		v := "go1.13.11"
 		if goVersion.LessEqual(v) {
 			var n json.Number
-			err := Unmarshal([]byte(`"1 "`), &n)
+			err := Unmarshal([]byte(`"abc"`), &n)
 			checkError(t, InvalidDigitError{}, err)
 		} else {
 			f2(t, `"abc"`, InvalidDigitError{})
