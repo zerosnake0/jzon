@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestValDecoder_JsonNumber(t *testing.T) {
@@ -42,7 +44,9 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 	t.Run("leading space", func(t *testing.T) {
 		v := "go1.13.11"
 		if goVersion.LessEqual(v) {
-			// f2(t, `"abc"`, nil)
+			var n json.Number
+			err := Unmarshal([]byte(`" 1"`), &n)
+			require.IsType(t, InvalidDigitError{}, err)
 		} else {
 			f2(t, `" 1"`, InvalidDigitError{})
 		}
@@ -50,7 +54,9 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 	t.Run("trailing space", func(t *testing.T) {
 		v := "go1.13.11"
 		if goVersion.LessEqual(v) {
-			// f2(t, `"abc"`, nil)
+			var n json.Number
+			err := Unmarshal([]byte(`"1 "`), &n)
+			require.IsType(t, UnexpectedByteError{}, err)
 		} else {
 			f2(t, `"1 "`, UnexpectedByteError{})
 		}
@@ -58,7 +64,9 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 	t.Run("string", func(t *testing.T) {
 		v := "go1.13.11"
 		if goVersion.LessEqual(v) {
-			// f2(t, `"abc"`, nil)
+			var n json.Number
+			err := Unmarshal([]byte(`"1 "`), &n)
+			require.IsType(t, InvalidDigitError{}, err)
 		} else {
 			f2(t, `"abc"`, InvalidDigitError{})
 		}
