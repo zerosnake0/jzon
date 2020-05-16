@@ -144,7 +144,7 @@ func TestValDecoder_Native_Map_KeyDecoder_TextUnmarshaler(t *testing.T) {
 		if goVersion.LessEqual(v) {
 			err := Unmarshal([]byte(` { "3" : "4" } `), &m2)
 			require.NoError(t, err)
-			require.Equal(t, "`4`", m2["`3`"])
+			require.Equal(t, testMapStringKey("`4`"), m2["`3`"])
 		} else {
 			f(t, ` { "3" : "4" } `, nil, &m1, &m2)
 		}

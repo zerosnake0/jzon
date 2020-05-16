@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestValDecoder_JsonNumber(t *testing.T) {
@@ -46,7 +44,7 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 		if goVersion.LessEqual(v) {
 			var n json.Number
 			err := Unmarshal([]byte(`" 1"`), &n)
-			require.IsType(t, InvalidDigitError{}, err)
+			checkError(t, InvalidDigitError{}, err)
 		} else {
 			f2(t, `" 1"`, InvalidDigitError{})
 		}
@@ -56,7 +54,7 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 		if goVersion.LessEqual(v) {
 			var n json.Number
 			err := Unmarshal([]byte(`"1 "`), &n)
-			require.IsType(t, UnexpectedByteError{}, err)
+			checkError(t, UnexpectedByteError{}, err)
 		} else {
 			f2(t, `"1 "`, UnexpectedByteError{})
 		}
@@ -66,7 +64,7 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 		if goVersion.LessEqual(v) {
 			var n json.Number
 			err := Unmarshal([]byte(`"1 "`), &n)
-			require.IsType(t, InvalidDigitError{}, err)
+			checkError(t, InvalidDigitError{}, err)
 		} else {
 			f2(t, `"abc"`, InvalidDigitError{})
 		}
