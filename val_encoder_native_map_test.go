@@ -131,7 +131,12 @@ func TestValEncoder_Native_Map_KeyEncoder_TextMarshaler(t *testing.T) {
 		t.Run("nil", func(t *testing.T) {
 			type key = *testTextMarshaler
 			m := map[key]int{nil: 1}
-			checkEncodeValueWithStandard(t, m, runtimeErrorType)
+			v := "go1.13.11"
+			if goVersion.LessEqual(v) {
+				checkEncodeValueWithStandard(t, m, runtimeErrorType)
+			} else {
+				checkEncodeValueWithStandard(t, m, nil)
+			}
 		})
 	})
 	t.Run("marshaler 2-non pointer", func(t *testing.T) {

@@ -112,14 +112,21 @@ func (enc directTextMarshalerKeyEncoder) Encode(ptr unsafe.Pointer, s *Streamer)
 		return
 	}
 	rtype := rtype(enc)
-	obj := packEFace(rtype, *(*unsafe.Pointer)(ptr))
-	marshaler := obj.(encoding.TextMarshaler)
-	b, err := marshaler.MarshalText()
-	if err != nil {
-		s.Error = err
-		return
+	// go1.14 ignore the error silently
+	// check `func (w *reflectWithString) resolve()` in encoding/json
+	ptr = *(*unsafe.Pointer)(ptr)
+	if ptr == nil {
+		s.String("")
+	} else {
+		obj := packEFace(rtype, ptr)
+		marshaler := obj.(encoding.TextMarshaler)
+		b, err := marshaler.MarshalText()
+		if err != nil {
+			s.Error = err
+			return
+		}
+		s.String(localByteToString(b))
 	}
-	s.String(localByteToString(b))
 	s.buffer = append(s.buffer, ':')
 	s.poped = false
 }
