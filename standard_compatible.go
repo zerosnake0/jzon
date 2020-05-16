@@ -1,5 +1,9 @@
 package jzon
 
+import (
+	"io"
+)
+
 func Unmarshal(data []byte, o interface{}) error {
 	return DefaultDecoder.Unmarshal(data, o)
 }
@@ -13,4 +17,8 @@ func Valid(data []byte) bool {
 	b := it.Valid(data)
 	ReturnIterator(it)
 	return b
+}
+
+func UnamrshalFromReader(r io.Reader, o interface{}) error {
+	return DefaultDecoder.UnmarshalFromReader(r, o)
 }

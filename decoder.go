@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"io"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -77,6 +78,16 @@ func (dec *Decoder) Unmarshal(data []byte, obj interface{}) error {
 
 func (dec *Decoder) UnmarshalFromString(s string, obj interface{}) error {
 	return dec.Unmarshal(localStringToBytes(s), obj)
+}
+
+func (dec *Decoder) UnmarshalFromReader(r io.Reader, obj interface{}) error {
+	it := dec.NewIterator()
+	err := it.UnmarshalFromReader(r, obj)
+	if err != nil {
+		err = it.WrapError(err)
+	}
+	dec.ReturnIterator(it)
+	return err
 }
 
 func (dec *Decoder) getDecoderFromCache(rType rtype) ValDecoder {
