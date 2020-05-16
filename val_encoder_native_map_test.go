@@ -6,6 +6,8 @@ import (
 	"math"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestValEncoder_Map_Error(t *testing.T) {
@@ -133,7 +135,9 @@ func TestValEncoder_Native_Map_KeyEncoder_TextMarshaler(t *testing.T) {
 			m := map[key]int{nil: 1}
 			v := "go1.13.11"
 			if goVersion.LessEqual(v) {
-				checkEncodeValueWithStandard(t, m, runtimeErrorType)
+				b, err := Marshal(m)
+				require.NoError(t, err)
+				require.Equal(t, `{"":1}`, string(b))
 			} else {
 				checkEncodeValueWithStandard(t, m, nil)
 			}
