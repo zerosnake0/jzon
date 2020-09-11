@@ -140,7 +140,7 @@ func TestValDecoder_Native_Map_KeyDecoder_TextUnmarshaler(t *testing.T) {
 		// the UnmarshalText of the key is ignored
 		m1 := map[testMapStringKey]testMapStringKey{testMapStringKey("1"): "2"}
 		m2 := map[testMapStringKey]testMapStringKey{testMapStringKey("1"): "2"}
-		v := "go1.13.11"
+		v := "go1.13.15"
 		if goVersion.LessEqual(v) {
 			err := Unmarshal([]byte(` { "3" : "4" } `), &m2)
 			require.NoError(t, err)

@@ -133,7 +133,7 @@ func TestValEncoder_Native_Map_KeyEncoder_TextMarshaler(t *testing.T) {
 		t.Run("nil", func(t *testing.T) {
 			type key = *testTextMarshaler
 			m := map[key]int{nil: 1}
-			v := "go1.13.11"
+			v := "go1.13.15"
 			if goVersion.LessEqual(v) {
 				b, err := Marshal(m)
 				require.NoError(t, err)
@@ -170,7 +170,7 @@ func TestValEncoder_Native_Map_KeyEncoder_TextMarshaler(t *testing.T) {
 		t.Run("nil", func(t *testing.T) {
 			type key = *testTextMarshaler2
 			m := map[key]int{nil: 1}
-			v := "go1.13.11"
+			v := "go1.13.15"
 			if goVersion.LessEqual(v) {
 				b, err := Marshal(m)
 				require.NoError(t, err)
