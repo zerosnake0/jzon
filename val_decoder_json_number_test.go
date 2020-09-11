@@ -40,7 +40,7 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 		f2(t, `"-123.2e+1`, io.EOF)
 	})
 	t.Run("leading space", func(t *testing.T) {
-		v := "go1.13.11"
+		v := "go1.13.15"
 		if goVersion.LessEqual(v) {
 			var n json.Number
 			err := Unmarshal([]byte(`" 1"`), &n)
@@ -50,7 +50,7 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 		}
 	})
 	t.Run("trailing space", func(t *testing.T) {
-		v := "go1.13.11"
+		v := "go1.13.15"
 		if goVersion.LessEqual(v) {
 			var n json.Number
 			err := Unmarshal([]byte(`"1 "`), &n)
@@ -60,7 +60,7 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 		}
 	})
 	t.Run("string", func(t *testing.T) {
-		v := "go1.13.11"
+		v := "go1.13.15"
 		if goVersion.LessEqual(v) {
 			var n json.Number
 			err := Unmarshal([]byte(`"abc"`), &n)
