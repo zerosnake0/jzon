@@ -19,6 +19,6 @@ func Valid(data []byte) bool {
 	return b
 }
 
-func UnamrshalFromReader(r io.Reader, o interface{}) error {
+func UnmarshalFromReader(r io.Reader, o interface{}) error {
 	return DefaultDecoder.UnmarshalFromReader(r, o)
 }
