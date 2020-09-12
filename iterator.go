@@ -7,6 +7,8 @@ import (
 	"runtime"
 )
 
+const bufferSize = 512
+
 // for fast reset
 type iteratorEmbedded struct {
 	/*

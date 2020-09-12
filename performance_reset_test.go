@@ -4,35 +4,29 @@ import (
 	"testing"
 )
 
-func resetBytes(it *Iterator, data []byte) {
-	if it.reader != nil && it.buffer != nil {
-		releaseByteSlice(it.buffer)
-	}
+func resetTestImpl(it *Iterator) {
 	it.reader = nil
-	it.buffer = data
+	it.buffer = nil
+	it.tail = 0
+
+	it.capture = false
 	it.offset = 0
 	it.head = 0
-	it.tail = len(data)
+	it.lastEfaceOffset = 0
+	it.lastEfacePtr = 0
+	it.Context = nil
 }
 
-func resetBytes2(it *Iterator, data []byte) {
-	if it.reader != nil && it.buffer != nil {
-		releaseByteSlice(it.buffer)
-	}
-	*it = Iterator{
-		buffer: data,
-		tail:   len(data),
-	}
-}
-
+// The current implementation is better in both:
+// - maintainability
+// - performance
 func Benchmark_Performance_Reset(b *testing.B) {
-	data := make([]byte, 128)
 	b.Run("impl", func(b *testing.B) {
 		b.ReportAllocs()
 		it := NewIterator()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			resetBytes(it, data)
+			it.reset()
 		}
 	})
 	b.Run("alter", func(b *testing.B) {
@@ -40,7 +34,7 @@ func Benchmark_Performance_Reset(b *testing.B) {
 		it := NewIterator()
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			resetBytes2(it, data)
+			resetTestImpl(it)
 		}
 	})
 }
