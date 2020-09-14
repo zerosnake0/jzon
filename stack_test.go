@@ -27,7 +27,7 @@ func TestStack(t *testing.T) {
 		require.Equal(t, stackElementNone, s.pop())
 	})
 	t.Run("nested 1", func(t *testing.T) {
-		s := stackPool.Get().(*stack)
+		s := stackPool.Get().(*stack).init()
 		count := 100
 		for i := 0; i < count; i++ {
 			if i&1 == 0 {
