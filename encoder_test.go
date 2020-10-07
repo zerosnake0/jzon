@@ -1,10 +1,11 @@
 package jzon
 
 import (
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
 	"unsafe"
+
+	"github.com/stretchr/testify/require"
 )
 
 type testIntEncoder struct{}
