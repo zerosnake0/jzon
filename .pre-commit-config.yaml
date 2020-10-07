@@ -10,4 +10,3 @@ repos:
     hooks:
       - id: gofmt
       - id: goimports
-      - id: go-vet
