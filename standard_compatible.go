@@ -19,10 +19,12 @@ func Valid(data []byte) bool {
 	return b
 }
 
+// NewDecoder returns a new decoder that reads from r.
 func NewDecoder(r io.Reader) *Decoder {
 	return DefaultDecoderConfig.NewDecoder(r)
 }
 
+// NewEncoder returns a new encoder that writes to w.
 func NewEncoder(w io.Writer) *Encoder {
 	return DefaultEncoderConfig.NewEncoder(w)
 }

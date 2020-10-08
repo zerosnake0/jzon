@@ -1,5 +1,6 @@
 package jzon
 
+// NewIterator returns a new iterator.
 func (decCfg *DecoderConfig) NewIterator() *Iterator {
 	it := defaultIteratorPool.BorrowIterator()
 	it.cfg = decCfg

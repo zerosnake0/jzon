@@ -1,5 +1,6 @@
 package jzon
 
+// NewStreamer returns a new streamer.
 func (encCfg *EncoderConfig) NewStreamer() *Streamer {
 	s := defaultStreamerPool.BorrowStreamer()
 	s.cfg = encCfg

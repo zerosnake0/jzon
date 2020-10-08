@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	// Default encoder config is compatible with standard lib
+	// DefaultEncoderConfig is compatible with standard lib
 	DefaultEncoderConfig = NewEncoderConfig(nil)
 )
 
+// EncoderOption can be used to customize the encoder config
 type EncoderOption struct {
 	ValEncoders map[reflect.Type]ValEncoder
 
@@ -39,6 +40,7 @@ func (cache encoderCache) preferPtrEncoder(typ reflect.Type) ValEncoder {
 	return &directEncoder{ptrEncoder}
 }
 
+// EncoderConfig is a frozen config for encoding
 type EncoderConfig struct {
 	cacheMu sync.Mutex
 	// the encoder cache, or root encoder cache
@@ -53,6 +55,8 @@ type EncoderConfig struct {
 	escapeHTML bool
 }
 
+// NewEncoderConfig returns a new encoder config
+// If the input option is nil, the default option will be applied
 func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 	encCfg := EncoderConfig{
 		tag:        "json",
@@ -77,6 +81,7 @@ func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 	return &encCfg
 }
 
+// Marshal behave like json.Marshal
 func (encCfg *EncoderConfig) Marshal(obj interface{}) ([]byte, error) {
 	s := encCfg.NewStreamer()
 	defer s.Release()
@@ -93,6 +98,7 @@ func (encCfg *EncoderConfig) Marshal(obj interface{}) ([]byte, error) {
 	return b, nil
 }
 
+// NewEncoder returns a new encoder that writes to w.
 func (encCfg *EncoderConfig) NewEncoder(w io.Writer) *Encoder {
 	s := encCfg.NewStreamer()
 	s.Reset(w)
