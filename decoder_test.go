@@ -24,7 +24,9 @@ type decFace interface {
 	// Token() (json.Token, error)
 
 	More() bool
+}
 
+type inputOffset interface {
 	InputOffset() int64
 }
 
@@ -53,18 +55,23 @@ func TestDecoder(t *testing.T) {
 				}
 				must.True(length >= len(b))
 
-				offset := dec.InputOffset()
-				// t.Logf("%T %d", dec, offset)
-				must.True(leftOffset <= offset, "%T %d > %d", dec, leftOffset, offset)
-				must.True(rightOffset >= offset, "%T %d < %d", dec, rightOffset, offset)
+				ofI, ofIok := dec.(inputOffset)
+				if ofIok {
+					offset := ofI.InputOffset()
+					// t.Logf("%T %d", dec, offset)
+					must.True(leftOffset <= offset, "%T %d > %d", dec, leftOffset, offset)
+					must.True(rightOffset >= offset, "%T %d < %d", dec, rightOffset, offset)
+				}
 
 				more := dec.More()
 				must.Equal(expMore, more, "%T", dec)
 
-				offset = dec.InputOffset()
-				// t.Logf("%T %d", dec, offset)
-				must.True(leftOffset <= offset, "%T %d > %d", dec, leftOffset, offset)
-				must.True(rightOffset >= offset, "%T %d < %d", dec, rightOffset, offset)
+				if ofIok {
+					offset := ofI.InputOffset()
+					// t.Logf("%T %d", dec, offset)
+					must.True(leftOffset <= offset, "%T %d > %d", dec, leftOffset, offset)
+					must.True(rightOffset >= offset, "%T %d < %d", dec, rightOffset, offset)
+				}
 			}
 
 			f := func(dec decFace) {
