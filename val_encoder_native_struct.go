@@ -23,11 +23,12 @@ func (encCfg *EncoderConfig) newStructEncoder(typ reflect.Type) *structEncoderBu
 
 // encoder field info
 type encoderFieldInfo struct {
-	offsets   []uintptr
-	rawField  []byte
-	quoted    bool
-	omitEmpty bool
-	encoder   ValEncoder
+	offsets      []uintptr
+	rawField     []byte
+	safeRawField []byte
+	quoted       bool
+	omitEmpty    bool
+	encoder      ValEncoder
 }
 
 type encoderFields struct {
@@ -38,23 +39,20 @@ func (ef *encoderFields) init(size int) {
 	ef.list = make([]encoderFieldInfo, 0, size)
 }
 
-func (ef *encoderFields) add(f *field, escapeHTML bool, enc ValEncoder) {
-	var rawField []byte
-	if escapeHTML {
-		rawField = encodeString(rawField, f.name, htmlSafeSet[:])
-	} else {
-		rawField = encodeString(rawField, f.name, safeSet[:])
-	}
+func (ef *encoderFields) add(f *field, enc ValEncoder) {
+	safeRawField := encodeString(nil, f.name, htmlSafeSet[:])
+	rawField := encodeString(nil, f.name, safeSet[:])
 	offsets := make([]uintptr, len(f.offsets))
 	for i := range f.offsets {
 		offsets[i] = f.offsets[i].val
 	}
 	ef.list = append(ef.list, encoderFieldInfo{
-		offsets:   offsets,
-		rawField:  rawField,
-		quoted:    f.quoted,
-		omitEmpty: f.omitEmpty,
-		encoder:   enc,
+		offsets:      offsets,
+		rawField:     rawField,
+		safeRawField: safeRawField,
+		quoted:       f.quoted,
+		omitEmpty:    f.omitEmpty,
+		encoder:      enc,
 	})
 }
 
@@ -94,7 +92,11 @@ OuterLoop:
 				continue
 			}
 		}
-		s.RawField(fi.rawField)
+		if s.escapeHTML {
+			s.RawField(fi.safeRawField)
+		} else {
+			s.RawField(fi.rawField)
+		}
 		opt := EncOpts{
 			Quoted: fi.quoted,
 		}

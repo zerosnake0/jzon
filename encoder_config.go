@@ -356,7 +356,7 @@ func (encCfg *EncoderConfig) createEncoderInternal(cache, internalCache encoderC
 			for i := range x.fields {
 				fi := &x.fields[i]
 				v := internalCache.preferPtrEncoder(fi.ptrType.Elem())
-				x.encoder.fields.add(fi, encCfg.escapeHTML, v)
+				x.encoder.fields.add(fi, v)
 			}
 			if ifaceIndir(rType) {
 				cache[rType] = x.encoder

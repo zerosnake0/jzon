@@ -18,7 +18,8 @@ type Streamer struct {
 	Context interface{} // custom stream context
 
 	// runtime
-	safeSet []string
+	escapeHTML bool
+	safeSet    []string
 	// prefix  string
 	// indent  string
 }
@@ -45,6 +46,7 @@ func (s *Streamer) Reset(w io.Writer) {
 }
 
 func (s *Streamer) EscapeHTML(on bool) {
+	s.escapeHTML = on
 	if on {
 		s.safeSet = htmlSafeSet[:]
 	} else {
