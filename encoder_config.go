@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	DefaultEncoder = NewEncoder(nil)
+	// Default encoder config is compatible with standard lib
+	DefaultEncoderConfig = NewEncoderConfig(nil)
 )
 
 type EncoderOption struct {
@@ -38,7 +39,7 @@ func (cache encoderCache) preferPtrEncoder(typ reflect.Type) ValEncoder {
 	}
 }
 
-type Encoder struct {
+type EncoderConfig struct {
 	cacheMu sync.Mutex
 	// the encoder cache, or root encoder cache
 	encoderCache atomic.Value
@@ -51,8 +52,8 @@ type Encoder struct {
 	onlyTaggedField bool
 }
 
-func NewEncoder(opt *EncoderOption) *Encoder {
-	enc := Encoder{
+func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
+	encCfg := EncoderConfig{
 		tag:        "json",
 		escapeHtml: true,
 	}
@@ -64,23 +65,23 @@ func NewEncoder(opt *EncoderOption) *Encoder {
 			cache[rtype] = valEnc
 			internalCache[rtype] = valEnc
 		}
-		enc.escapeHtml = opt.EscapeHTML
+		encCfg.escapeHtml = opt.EscapeHTML
 		if opt.Tag != "" {
-			enc.tag = opt.Tag
+			encCfg.tag = opt.Tag
 		}
-		enc.onlyTaggedField = opt.OnlyTaggedField
+		encCfg.onlyTaggedField = opt.OnlyTaggedField
 	}
-	enc.encoderCache.Store(cache)
-	enc.internalCache = internalCache
-	if enc.escapeHtml {
-		enc.safeSet = htmlSafeSet[:]
+	encCfg.encoderCache.Store(cache)
+	encCfg.internalCache = internalCache
+	if encCfg.escapeHtml {
+		encCfg.safeSet = htmlSafeSet[:]
 	} else {
-		enc.safeSet = safeSet[:]
+		encCfg.safeSet = safeSet[:]
 	}
-	return &enc
+	return &encCfg
 }
 
-func (enc *Encoder) Marshal(obj interface{}) ([]byte, error) {
+func (enc *EncoderConfig) Marshal(obj interface{}) ([]byte, error) {
 	s := enc.NewStreamer()
 	defer enc.ReturnStreamer(s)
 	s.Value(obj)
@@ -96,11 +97,11 @@ func (enc *Encoder) Marshal(obj interface{}) ([]byte, error) {
 	return b, nil
 }
 
-func (enc *Encoder) getEncoderFromCache(rtype rtype) ValEncoder {
+func (enc *EncoderConfig) getEncoderFromCache(rtype rtype) ValEncoder {
 	return enc.encoderCache.Load().(encoderCache)[rtype]
 }
 
-func (enc *Encoder) createEncoder(rtype rtype, typ reflect.Type) ValEncoder {
+func (enc *EncoderConfig) createEncoder(rtype rtype, typ reflect.Type) ValEncoder {
 	enc.cacheMu.Lock()
 	defer enc.cacheMu.Unlock()
 	cache := enc.encoderCache.Load().(encoderCache)
@@ -119,7 +120,7 @@ func (enc *Encoder) createEncoder(rtype rtype, typ reflect.Type) ValEncoder {
 	return newCache[rtype]
 }
 
-func (enc *Encoder) createEncoderInternal(cache, internalCache encoderCache, typesToCreate typeQueue) {
+func (enc *EncoderConfig) createEncoderInternal(cache, internalCache encoderCache, typesToCreate typeQueue) {
 	rebuildMap := map[rtype]interface{}{}
 	for typ := typesToCreate.pop(); typ != nil; typ = typesToCreate.pop() {
 		rType := rtypeOfType(typ)

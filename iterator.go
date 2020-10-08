@@ -28,7 +28,7 @@ type iteratorEmbedded struct {
 }
 
 type Iterator struct {
-	decoder *Decoder
+	cfg *DecoderConfig
 
 	reader io.Reader
 	buffer []byte
@@ -45,11 +45,11 @@ type Iterator struct {
 }
 
 func NewIterator() *Iterator {
-	return DefaultDecoder.NewIterator()
+	return DefaultDecoderConfig.NewIterator()
 }
 
 func ReturnIterator(it *Iterator) {
-	DefaultDecoder.ReturnIterator(it)
+	DefaultDecoderConfig.ReturnIterator(it)
 }
 
 func (it *Iterator) reset() {

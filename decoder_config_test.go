@@ -59,9 +59,9 @@ func (*testPtrDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) e
 	}
 }
 
-func TestDecoder_CustomDecoder(t *testing.T) {
+func TestDecoderConfig_CustomConfig(t *testing.T) {
 	t.Run("int", func(t *testing.T) {
-		dec := NewDecoder(&DecoderOption{
+		decCfg := NewDecoderConfig(&DecoderOption{
 			ValDecoders: map[reflect.Type]ValDecoder{
 				reflect.TypeOf(int(0)): (*testIntDecoder)(nil),
 			},
@@ -70,13 +70,13 @@ func TestDecoder_CustomDecoder(t *testing.T) {
 		t.Run("value", func(t *testing.T) {
 			t.Run("null", func(t *testing.T) {
 				var i int
-				err := dec.UnmarshalFromString("null", &i)
+				err := decCfg.UnmarshalFromString("null", &i)
 				require.NoError(t, err)
 				require.Equal(t, 1, i)
 			})
 			t.Run("not null", func(t *testing.T) {
 				var i int
-				err := dec.UnmarshalFromString("1", &i)
+				err := decCfg.UnmarshalFromString("1", &i)
 				require.NoError(t, err)
 				require.Equal(t, 2, i)
 			})
@@ -85,14 +85,14 @@ func TestDecoder_CustomDecoder(t *testing.T) {
 			t.Run("null on not null", func(t *testing.T) {
 				v := 1
 				i := &v
-				err := dec.UnmarshalFromString("null", &i)
+				err := decCfg.UnmarshalFromString("null", &i)
 				require.NoError(t, err)
 				require.Nil(t, i)
 			})
 			t.Run("not null", func(t *testing.T) {
 				v := -1
 				i := &v
-				err := dec.UnmarshalFromString("2", &i)
+				err := decCfg.UnmarshalFromString("2", &i)
 				require.NoError(t, err)
 				require.NotNil(t, i)
 				require.Equal(t, 4, v)
@@ -106,19 +106,19 @@ func TestDecoder_CustomDecoder(t *testing.T) {
 				t.Run("not present", func(t *testing.T) {
 					v := 1
 					st.A = v
-					err := dec.UnmarshalFromString(`{}`, &st)
+					err := decCfg.UnmarshalFromString(`{}`, &st)
 					require.NoError(t, err)
 					require.Equal(t, v, st.A)
 				})
 				t.Run("null", func(t *testing.T) {
 					st.A = -1
-					err := dec.UnmarshalFromString(`{"a":null}`, &st)
+					err := decCfg.UnmarshalFromString(`{"a":null}`, &st)
 					require.NoError(t, err)
 					require.Equal(t, 1, st.A)
 				})
 				t.Run("not null", func(t *testing.T) {
 					st.A = -1
-					err := dec.UnmarshalFromString(`{"a":1}`, &st)
+					err := decCfg.UnmarshalFromString(`{"a":1}`, &st)
 					require.NoError(t, err)
 					require.Equal(t, 2, st.A)
 				})
@@ -130,21 +130,21 @@ func TestDecoder_CustomDecoder(t *testing.T) {
 				t.Run("not present", func(t *testing.T) {
 					v := 123
 					st.A = &v
-					err := dec.UnmarshalFromString(`{}`, &st)
+					err := decCfg.UnmarshalFromString(`{}`, &st)
 					require.NoError(t, err)
 					require.Equal(t, &v, st.A)
 				})
 				t.Run("null on not null", func(t *testing.T) {
 					v := 123
 					st.A = &v
-					err := dec.UnmarshalFromString(`{"a":null}`, &st)
+					err := decCfg.UnmarshalFromString(`{"a":null}`, &st)
 					require.NoError(t, err)
 					require.Nil(t, st.A)
 				})
 				t.Run("not null", func(t *testing.T) {
 					v := 123
 					st.A = &v
-					err := dec.UnmarshalFromString(`{"a":1}`, &st)
+					err := decCfg.UnmarshalFromString(`{"a":1}`, &st)
 					require.NoError(t, err)
 					require.NotNil(t, st.A)
 					require.Equal(t, 2, *st.A)
@@ -153,7 +153,7 @@ func TestDecoder_CustomDecoder(t *testing.T) {
 		})
 	})
 	t.Run("ptr", func(t *testing.T) {
-		dec := NewDecoder(&DecoderOption{
+		decCfg := NewDecoderConfig(&DecoderOption{
 			ValDecoders: map[reflect.Type]ValDecoder{
 				reflect.TypeOf((*int)(nil)): (*testPtrDecoder)(nil),
 			},
@@ -162,14 +162,14 @@ func TestDecoder_CustomDecoder(t *testing.T) {
 		t.Run("value", func(t *testing.T) {
 			t.Run("null", func(t *testing.T) {
 				var i *int
-				err := dec.UnmarshalFromString("null", &i)
+				err := decCfg.UnmarshalFromString("null", &i)
 				require.NoError(t, err)
 				require.NotNil(t, i)
 				require.Equal(t, -1, *i)
 			})
 			t.Run("not null", func(t *testing.T) {
 				var i *int
-				err := dec.UnmarshalFromString("1", &i)
+				err := decCfg.UnmarshalFromString("1", &i)
 				require.NoError(t, err)
 				require.NotNil(t, i)
 				require.Equal(t, 2, *i)
@@ -183,21 +183,21 @@ func TestDecoder_CustomDecoder(t *testing.T) {
 				t.Run("null", func(t *testing.T) {
 					i := 123
 					st.A = &i
-					err := dec.UnmarshalFromString("null", &st)
+					err := decCfg.UnmarshalFromString("null", &st)
 					require.NoError(t, err)
 					require.Equal(t, &i, st.A)
 				})
 				t.Run("not present", func(t *testing.T) {
 					i := 123
 					st.A = &i
-					err := dec.UnmarshalFromString(`{}`, &st)
+					err := decCfg.UnmarshalFromString(`{}`, &st)
 					require.NoError(t, err)
 					require.Equal(t, &i, st.A)
 				})
 				t.Run("present as null", func(t *testing.T) {
 					i := 123
 					st.A = &i
-					err := dec.UnmarshalFromString(`{"a":null}`, &st)
+					err := decCfg.UnmarshalFromString(`{"a":null}`, &st)
 					require.NoError(t, err)
 					require.NotNil(t, st.A)
 					require.Equal(t, -1, *st.A)
@@ -205,7 +205,7 @@ func TestDecoder_CustomDecoder(t *testing.T) {
 				t.Run("present as not null", func(t *testing.T) {
 					i := 123
 					st.A = &i
-					err := dec.UnmarshalFromString(`{"a":1}`, &st)
+					err := decCfg.UnmarshalFromString(`{"a":1}`, &st)
 					require.NoError(t, err)
 					require.NotNil(t, st.A)
 					require.Equal(t, 2, *st.A)
@@ -218,7 +218,7 @@ func TestDecoder_CustomDecoder(t *testing.T) {
 				var v *int
 				st.A = &v
 				require.NotNil(t, st.A)
-				err := dec.UnmarshalFromString(`{"a":null}`, &st)
+				err := decCfg.UnmarshalFromString(`{"a":null}`, &st)
 				require.NoError(t, err)
 				require.Nil(t, st.A)
 			})

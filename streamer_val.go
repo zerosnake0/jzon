@@ -14,10 +14,10 @@ func (s *Streamer) value(obj interface{}, opts *EncOpts) *Streamer {
 		return s
 	}
 	ef := (*eface)(unsafe.Pointer(&obj))
-	enc := s.encoder.getEncoderFromCache(ef.rtype)
+	enc := s.cfg.getEncoderFromCache(ef.rtype)
 	if enc == nil {
 		typ := reflect.TypeOf(obj)
-		enc = s.encoder.createEncoder(ef.rtype, typ)
+		enc = s.cfg.createEncoder(ef.rtype, typ)
 	}
 	enc.Encode(ef.data, s, opts)
 	return s

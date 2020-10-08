@@ -5,11 +5,11 @@ import (
 )
 
 func Unmarshal(data []byte, o interface{}) error {
-	return DefaultDecoder.Unmarshal(data, o)
+	return DefaultDecoderConfig.Unmarshal(data, o)
 }
 
 func Marshal(o interface{}) ([]byte, error) {
-	return DefaultEncoder.Marshal(o)
+	return DefaultEncoderConfig.Marshal(o)
 }
 
 func Valid(data []byte) bool {
@@ -20,5 +20,5 @@ func Valid(data []byte) bool {
 }
 
 func UnmarshalFromReader(r io.Reader, o interface{}) error {
-	return DefaultDecoder.UnmarshalFromReader(r, o)
+	return DefaultDecoderConfig.UnmarshalFromReader(r, o)
 }

@@ -18,21 +18,21 @@ func (*testIntEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	s.Int(*(*int)(ptr) + 1)
 }
 
-func TestEncoder_CustomEncoder(t *testing.T) {
+func TestEncoderConfig_CustomConfig(t *testing.T) {
 	t.Run("int", func(t *testing.T) {
-		enc := NewEncoder(&EncoderOption{
+		encCfg := NewEncoderConfig(&EncoderOption{
 			ValEncoders: map[reflect.Type]ValEncoder{
 				reflect.TypeOf(int(0)): (*testIntEncoder)(nil),
 			},
 		})
 		t.Run("value", func(t *testing.T) {
-			b, err := enc.Marshal(1)
+			b, err := encCfg.Marshal(1)
 			require.NoError(t, err)
 			require.Equal(t, "2", string(b))
 		})
 		t.Run("pointer", func(t *testing.T) {
 			i := 1
-			b, err := enc.Marshal(&i)
+			b, err := encCfg.Marshal(&i)
 			require.NoError(t, err)
 			require.Equal(t, "2", string(b))
 		})
@@ -42,12 +42,12 @@ func TestEncoder_CustomEncoder(t *testing.T) {
 					I int `json:",omitempty"`
 				}
 				t.Run("zero", func(t *testing.T) {
-					b, err := enc.Marshal(st{})
+					b, err := encCfg.Marshal(st{})
 					require.NoError(t, err)
 					require.Equal(t, `{"I":1}`, string(b))
 				})
 				t.Run("empty", func(t *testing.T) {
-					b, err := enc.Marshal(st{I: 1})
+					b, err := encCfg.Marshal(st{I: 1})
 					require.NoError(t, err)
 					require.Equal(t, `{}`, string(b))
 				})
@@ -57,19 +57,19 @@ func TestEncoder_CustomEncoder(t *testing.T) {
 					I *int `json:",omitempty"`
 				}
 				t.Run("nil", func(t *testing.T) {
-					b, err := enc.Marshal(st{})
+					b, err := encCfg.Marshal(st{})
 					require.NoError(t, err)
 					require.Equal(t, `{}`, string(b))
 				})
 				t.Run("zero", func(t *testing.T) {
 					i := 0
-					b, err := enc.Marshal(st{I: &i})
+					b, err := encCfg.Marshal(st{I: &i})
 					require.NoError(t, err)
 					require.Equal(t, `{"I":1}`, string(b))
 				})
 				t.Run("empty", func(t *testing.T) {
 					i := 1
-					b, err := enc.Marshal(st{I: &i})
+					b, err := encCfg.Marshal(st{I: &i})
 					require.NoError(t, err)
 					// pointer is not nil so it's not considered as empty
 					require.Equal(t, `{"I":2}`, string(b))

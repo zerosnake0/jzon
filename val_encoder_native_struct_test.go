@@ -51,10 +51,10 @@ func TestValEncoder_Native_Struct_Mapping(t *testing.T) {
 }
 
 func TestValEncoder_Native_Struct_CustomTag(t *testing.T) {
-	encoder := NewEncoder(&EncoderOption{
+	encCfg := NewEncoderConfig(&EncoderOption{
 		Tag: "jzon",
 	})
-	b, err := encoder.Marshal(&struct {
+	b, err := encCfg.Marshal(&struct {
 		A string `jzon:"b"`
 	}{
 		A: "test",

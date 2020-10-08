@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	// default decoder is compatible with standard lib
-	DefaultDecoder = NewDecoder(nil)
+	// Default decoder config is compatible with standard lib
+	DefaultDecoderConfig = NewDecoderConfig(nil)
 )
 
 type DecoderOption struct {
@@ -33,7 +33,7 @@ type DecoderOption struct {
 
 type decoderCache = map[rtype]ValDecoder
 
-type Decoder struct {
+type DecoderConfig struct {
 	cacheMu      sync.Mutex
 	decoderCache atomic.Value
 
@@ -44,8 +44,8 @@ type Decoder struct {
 	disallowUnknownFields bool
 }
 
-func NewDecoder(opt *DecoderOption) *Decoder {
-	dec := Decoder{
+func NewDecoderConfig(opt *DecoderOption) *DecoderConfig {
+	decCfg := DecoderConfig{
 		tag: "json",
 	}
 	// add decoders to cache
@@ -54,19 +54,19 @@ func NewDecoder(opt *DecoderOption) *Decoder {
 		for elemTyp, valDec := range opt.ValDecoders {
 			cache[rtypeOfType(reflect.PtrTo(elemTyp))] = valDec
 		}
-		dec.caseSensitive = opt.CaseSensitive
+		decCfg.caseSensitive = opt.CaseSensitive
 		if opt.Tag != "" {
-			dec.tag = opt.Tag
+			decCfg.tag = opt.Tag
 		}
-		dec.onlyTaggedField = opt.OnlyTaggedField
-		dec.useNumber = opt.UseNumber
-		dec.disallowUnknownFields = opt.DisallowUnknownFields
+		decCfg.onlyTaggedField = opt.OnlyTaggedField
+		decCfg.useNumber = opt.UseNumber
+		decCfg.disallowUnknownFields = opt.DisallowUnknownFields
 	}
-	dec.decoderCache.Store(cache)
-	return &dec
+	decCfg.decoderCache.Store(cache)
+	return &decCfg
 }
 
-func (dec *Decoder) Unmarshal(data []byte, obj interface{}) error {
+func (dec *DecoderConfig) Unmarshal(data []byte, obj interface{}) error {
 	it := dec.NewIterator()
 	err := it.Unmarshal(data, obj)
 	if err != nil {
@@ -76,11 +76,11 @@ func (dec *Decoder) Unmarshal(data []byte, obj interface{}) error {
 	return err
 }
 
-func (dec *Decoder) UnmarshalFromString(s string, obj interface{}) error {
+func (dec *DecoderConfig) UnmarshalFromString(s string, obj interface{}) error {
 	return dec.Unmarshal(localStringToBytes(s), obj)
 }
 
-func (dec *Decoder) UnmarshalFromReader(r io.Reader, obj interface{}) error {
+func (dec *DecoderConfig) UnmarshalFromReader(r io.Reader, obj interface{}) error {
 	it := dec.NewIterator()
 	err := it.UnmarshalFromReader(r, obj)
 	if err != nil {
@@ -90,12 +90,12 @@ func (dec *Decoder) UnmarshalFromReader(r io.Reader, obj interface{}) error {
 	return err
 }
 
-func (dec *Decoder) getDecoderFromCache(rType rtype) ValDecoder {
+func (dec *DecoderConfig) getDecoderFromCache(rType rtype) ValDecoder {
 	return dec.decoderCache.Load().(decoderCache)[rType]
 }
 
 // the typ must be a pointer type
-func (dec *Decoder) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder {
+func (dec *DecoderConfig) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder {
 	dec.cacheMu.Lock()
 	defer dec.cacheMu.Unlock()
 	cache := dec.decoderCache.Load().(decoderCache)
@@ -119,7 +119,7 @@ type decoderBuilder interface {
 	build(cache decoderCache)
 }
 
-func (dec *Decoder) createDecoderInternal(cache decoderCache, typesToCreate typeQueue) {
+func (dec *DecoderConfig) createDecoderInternal(cache decoderCache, typesToCreate typeQueue) {
 	rebuildMap := map[rtype]decoderBuilder{}
 	for ptrType := typesToCreate.pop(); ptrType != nil; ptrType = typesToCreate.pop() {
 		rType := rtypeOfType(ptrType)

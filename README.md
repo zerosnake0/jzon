@@ -116,7 +116,7 @@ func (*testIntDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) e
     ...
 }
 
-dec := NewDecoder(&DecoderOption{
+dec := NewDecoderConfig(&DecoderOption{
     ValDecoders: map[reflect.Type]ValDecoder{
         reflect.TypeOf(int(0)): (*testIntDecoder)(nil),
     },
@@ -146,7 +146,7 @@ func (*testIntEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
     ...
 }
 
-enc := NewEncoder(&EncoderOption{
+enc := NewEncoderConfig(&EncoderOption{
     ValEncoders: map[reflect.Type]ValEncoder{
         reflect.TypeOf(int(0)): (*testIntEncoder)(nil),
     },

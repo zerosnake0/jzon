@@ -341,11 +341,11 @@ func TestIterator_Read_ReadObject(t *testing.T) {
 }
 
 func TestIterator_Read_UseNumber(t *testing.T) {
-	dec := NewDecoder(&DecoderOption{
+	decCfg := NewDecoderConfig(&DecoderOption{
 		UseNumber: true,
 	})
-	it := dec.NewIterator()
-	defer dec.ReturnIterator(it)
+	it := decCfg.NewIterator()
+	defer decCfg.ReturnIterator(it)
 	it.ResetBytes([]byte(" 123 "))
 	o, err := it.Read()
 	require.NoError(t, err)

@@ -11,7 +11,7 @@ import (
 
 func TestValDecoder_Native_Slice(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	t.Run("nil pointer", func(t *testing.T) {
 		f(t, "null", NilPointerReceiverError, nil, nil)

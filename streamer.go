@@ -5,7 +5,7 @@ import (
 )
 
 type Streamer struct {
-	encoder *Encoder
+	cfg *EncoderConfig
 
 	writer io.Writer
 	buffer []byte
@@ -17,11 +17,11 @@ type Streamer struct {
 }
 
 func NewStreamer() *Streamer {
-	return DefaultEncoder.NewStreamer()
+	return DefaultEncoderConfig.NewStreamer()
 }
 
 func ReturnStreamer(s *Streamer) {
-	DefaultEncoder.ReturnStreamer(s)
+	DefaultEncoderConfig.ReturnStreamer(s)
 }
 
 func (s *Streamer) reset() {
@@ -135,7 +135,7 @@ func (s *Streamer) Field(field string) *Streamer {
 		return s
 	}
 	s.onVal()
-	s.buffer = encodeString(s.buffer, field, s.encoder.safeSet)
+	s.buffer = encodeString(s.buffer, field, s.cfg.safeSet)
 	s.buffer = append(s.buffer, ':')
 	s.poped = false
 	return s

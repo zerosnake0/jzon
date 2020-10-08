@@ -127,7 +127,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 		if err != nil {
 			return err
 		}
-		stField, fieldOut := dec.fields.find(field, it.tmpBuffer, it.decoder.caseSensitive)
+		stField, fieldOut := dec.fields.find(field, it.tmpBuffer, it.cfg.caseSensitive)
 		it.tmpBuffer = fieldOut
 		if stField != nil {
 			curPtr := add(ptr, stField.offsets[0].val, "struct field")
@@ -149,7 +149,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 				return err
 			}
 		} else {
-			if it.decoder.disallowUnknownFields {
+			if it.cfg.disallowUnknownFields {
 				return UnknownFieldError(field)
 			}
 			if err = it.Skip(); err != nil {

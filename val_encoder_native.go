@@ -45,8 +45,8 @@ func (*stringEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 		s.String(*(*string)(ptr))
 		return
 	}
-	subStream := s.encoder.NewStreamer()
-	defer s.encoder.ReturnStreamer(subStream)
+	subStream := s.cfg.NewStreamer()
+	defer s.cfg.ReturnStreamer(subStream)
 	subStream.String(*(*string)(ptr))
 	if subStream.Error != nil {
 		s.Error = subStream.Error
