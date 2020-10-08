@@ -425,6 +425,11 @@ func TestStreamer_ChainError(t *testing.T) {
 			s.Field("test")
 		})
 	})
+	t.Run("raw field", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.RawField([]byte(`"test"`))
+		})
+	})
 	t.Run("array start", func(t *testing.T) {
 		testStreamerChainError(t, func(s *Streamer) {
 			s.ArrayStart()
@@ -433,6 +438,11 @@ func TestStreamer_ChainError(t *testing.T) {
 	t.Run("array end", func(t *testing.T) {
 		testStreamerChainError(t, func(s *Streamer) {
 			s.ArrayEnd()
+		})
+	})
+	t.Run("value", func(t *testing.T) {
+		testStreamerChainError(t, func(s *Streamer) {
+			s.Value(nil)
 		})
 	})
 }

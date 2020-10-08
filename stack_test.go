@@ -51,3 +51,22 @@ func TestStack(t *testing.T) {
 		require.Equal(t, stackElementNone, s.pop())
 	})
 }
+
+func TestStack_Init(t *testing.T) {
+	t.Run("object", func(t *testing.T) {
+		var s stack
+		s.initObject()
+		require.Equal(t, stackElementObjectBegin, s.top())
+		require.Equal(t, stackElementObject, s.pop())
+		require.Equal(t, stackElementNone, s.top())
+		require.Equal(t, stackElementNone, s.pop())
+	})
+	t.Run("array", func(t *testing.T) {
+		var s stack
+		s.initArray()
+		require.Equal(t, stackElementArrayBegin, s.top())
+		require.Equal(t, stackElementArray, s.pop())
+		require.Equal(t, stackElementNone, s.top())
+		require.Equal(t, stackElementNone, s.pop())
+	})
+}

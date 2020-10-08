@@ -137,3 +137,16 @@ func TestValid(t *testing.T) {
 		f(t, "{}1")
 	})
 }
+
+func TestUnmarshal(t *testing.T) {
+	t.Run("data remained", func(t *testing.T) {
+		var i, i2 interface{}
+		checkDecodeWithStandard(t, DefaultDecoderConfig, "{}{", DataRemainedError, &i, &i2)
+	})
+}
+
+func TestMarshal(t *testing.T) {
+	b, err := Marshal("123")
+	require.NoError(t, err)
+	require.Equal(t, []byte(`"123"`), b)
+}
