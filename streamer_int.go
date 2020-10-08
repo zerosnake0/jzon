@@ -58,6 +58,7 @@ func (s *Streamer) quotedInt8(v int8) *Streamer {
 	return s
 }
 
+// Int8 writes an int8 value
 func (s *Streamer) Int8(v int8) *Streamer {
 	if s.Error != nil {
 		return s
@@ -78,6 +79,7 @@ func (s *Streamer) quotedUint8(v uint8) *Streamer {
 	return s
 }
 
+// Uint8 writes an uint8 value
 func (s *Streamer) Uint8(v uint8) *Streamer {
 	if s.Error != nil {
 		return s
@@ -116,6 +118,7 @@ func (s *Streamer) quotedInt16(v int16) *Streamer {
 	return s
 }
 
+// Int16 writes an int16 value
 func (s *Streamer) Int16(v int16) *Streamer {
 	if s.Error != nil {
 		return s
@@ -136,6 +139,7 @@ func (s *Streamer) quotedUint16(v uint16) *Streamer {
 	return s
 }
 
+// Uint16 writes an uint16 value
 func (s *Streamer) Uint16(v uint16) *Streamer {
 	if s.Error != nil {
 		return s
@@ -189,6 +193,7 @@ func (s *Streamer) quotedInt32(v int32) *Streamer {
 	return s
 }
 
+// Int32 writes an int32 value
 func (s *Streamer) Int32(v int32) *Streamer {
 	if s.Error != nil {
 		return s
@@ -209,6 +214,7 @@ func (s *Streamer) quotedUint32(v uint32) *Streamer {
 	return s
 }
 
+// Uint32 writes an uint32 value
 func (s *Streamer) Uint32(v uint32) *Streamer {
 	if s.Error != nil {
 		return s
@@ -283,6 +289,7 @@ func (s *Streamer) quotedInt64(v int64) *Streamer {
 	return s
 }
 
+// Int64 writes an int64 value
 func (s *Streamer) Int64(v int64) *Streamer {
 	if s.Error != nil {
 		return s
@@ -303,6 +310,7 @@ func (s *Streamer) quotedUint64(v uint64) *Streamer {
 	return s
 }
 
+// Uint64 writes an uint64 value
 func (s *Streamer) Uint64(v uint64) *Streamer {
 	if s.Error != nil {
 		return s
@@ -312,10 +320,12 @@ func (s *Streamer) Uint64(v uint64) *Streamer {
 	return s
 }
 
+// Int writes an int value
 func (s *Streamer) Int(v int) *Streamer {
 	return s.Int64(int64(v))
 }
 
+// Uint writes an uint value
 func (s *Streamer) Uint(v uint) *Streamer {
 	return s.Uint64(uint64(v))
 }

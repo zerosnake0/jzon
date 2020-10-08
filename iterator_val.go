@@ -5,6 +5,7 @@ import (
 	"unsafe"
 )
 
+// ReadVal reads a json object and decode it to a golang object
 func (it *Iterator) ReadVal(obj interface{}) error {
 	eface := (*eface)(unsafe.Pointer(&obj))
 	if eface.data == nil {

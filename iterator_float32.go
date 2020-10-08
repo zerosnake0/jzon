@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+// ReadFloat32 reads a float32 value
 func (it *Iterator) ReadFloat32() (float32, error) {
 	c, err := it.nextToken()
 	if err != nil {

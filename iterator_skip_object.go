@@ -55,6 +55,7 @@ func skipObjectWithStack(it *Iterator, _ byte) error {
 	}
 }
 
+// SkipObject skips an object
 func (it *Iterator) SkipObject() error {
 	c, err := it.nextToken()
 	if err != nil {

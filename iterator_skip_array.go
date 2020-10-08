@@ -44,6 +44,7 @@ func skipArrayWithStack(it *Iterator, _ byte) error {
 	}
 }
 
+// SkipArray skips an array
 func (it *Iterator) SkipArray() error {
 	c, err := it.nextToken()
 	if err != nil {

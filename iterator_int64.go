@@ -12,6 +12,7 @@ const (
 	maxUint64Mod10          = int8(math.MaxUint64 - maxUint64Div10*10)
 )
 
+// ReadUint64 reads an uint64 value
 func (it *Iterator) ReadUint64() (uint64, error) {
 	c, err := it.nextToken()
 	if err != nil {
@@ -93,6 +94,7 @@ func (it *Iterator) readInt64(c byte) (int64, error) {
 	return int64(v), nil
 }
 
+// ReadInt64 reads an int64 value
 func (it *Iterator) ReadInt64() (int64, error) {
 	c, err := it.nextToken()
 	if err != nil {

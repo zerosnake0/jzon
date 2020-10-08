@@ -21,6 +21,7 @@ func (it *Iterator) readFloat64(c byte) (float64, error) {
 	return f, err
 }
 
+// ReadFloat64 reads a float64 value
 func (it *Iterator) ReadFloat64() (float64, error) {
 	c, err := it.nextToken()
 	if err != nil {

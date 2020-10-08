@@ -4,14 +4,18 @@ import (
 	"io"
 )
 
+// Unmarshal parses the JSON-encoded data and stores the result
+// in the value pointed to
 func Unmarshal(data []byte, o interface{}) error {
 	return DefaultDecoderConfig.Unmarshal(data, o)
 }
 
+// Marshal returns the JSON encoding of object
 func Marshal(o interface{}) ([]byte, error) {
 	return DefaultEncoderConfig.Marshal(o)
 }
 
+// Valid reports whether data is a valid JSON encoding.
 func Valid(data []byte) bool {
 	it := NewIterator()
 	b := it.Valid(data)

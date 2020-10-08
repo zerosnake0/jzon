@@ -23,6 +23,7 @@ func (s *Streamer) value(obj interface{}, opts *EncOpts) *Streamer {
 	return s
 }
 
+// Value encodes a golang object to json
 func (s *Streamer) Value(obj interface{}) *Streamer {
 	return s.value(obj, nil)
 }

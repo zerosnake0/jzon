@@ -1,5 +1,6 @@
 package jzon
 
+// ReadBool reads a boolean value
 func (it *Iterator) ReadBool() (bool, error) {
 	c, err := it.nextToken()
 	if err != nil {

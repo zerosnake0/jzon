@@ -143,6 +143,7 @@ func skipNumber(it *Iterator, c byte) (err error) {
 	}
 }
 
+// SkipNumber skips a number
 func (it *Iterator) SkipNumber() error {
 	c, err := it.nextToken()
 	if err != nil {

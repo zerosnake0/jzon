@@ -11,6 +11,7 @@ const (
 	maxUint8Mod10 = int8(math.MaxUint8 - maxUint8Div10*10)
 )
 
+// ReadUint8 reads an Uint8 value
 func (it *Iterator) ReadUint8() (uint8, error) {
 	c, err := it.nextToken()
 	if err != nil {
@@ -97,6 +98,7 @@ func (it *Iterator) readInt8(c byte) (int8, error) {
 	return int8(v), nil
 }
 
+// ReadInt8 reads an int8 value
 func (it *Iterator) ReadInt8() (int8, error) {
 	c, err := it.nextToken()
 	if err != nil {

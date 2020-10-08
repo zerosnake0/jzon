@@ -44,6 +44,7 @@ func (it *Iterator) skipObjectField() error {
 	return nil
 }
 
+// ReadObjectBegin starts to read an object
 func (it *Iterator) ReadObjectBegin() (_ bool, _ string, err error) {
 	c, err := it.nextToken()
 	if err != nil {
@@ -77,6 +78,7 @@ func (it *Iterator) ReadObjectBegin() (_ bool, _ string, err error) {
 	}
 }
 
+// ReadObjectMore tells if there is more field to read in the object
 func (it *Iterator) ReadObjectMore() (_ bool, _ string, err error) {
 	c, err := it.nextToken()
 	if err != nil {
@@ -109,6 +111,8 @@ func (it *Iterator) ReadObjectMore() (_ bool, _ string, err error) {
 	}
 }
 
+// ReadObjectCB reads the object with a callback
+// The caller should make sure that the callback is correct
 func (it *Iterator) ReadObjectCB(cb func(it *Iterator, field string) error) error {
 	c, err := it.nextToken()
 	if err != nil {

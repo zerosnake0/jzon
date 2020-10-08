@@ -116,6 +116,7 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 	}
 }
 
+// Skip skips a json object
 func (it *Iterator) Skip() error {
 	c, err := it.nextToken()
 	if err != nil {

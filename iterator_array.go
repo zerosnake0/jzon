@@ -1,18 +1,18 @@
 package jzon
 
-/*
- * var (
- *     more bool
- *     err error
- * )
- * for more, err = it.ReadArray();
- *     more;
- *     more, err = it.ReadArrayMore() {
- * }
- * if err != nil {
- *     // error handling
- * }
- */
+// ReadArrayBegin starts to read an array
+//
+// var (
+//     more bool
+//     err error
+// )
+// for more, err = it.ReadArray();
+//     more;
+//     more, err = it.ReadArrayMore() {
+// }
+// if err != nil {
+//     // error handling
+// }
 func (it *Iterator) ReadArrayBegin() (ret bool, err error) {
 	c, err := it.nextToken()
 	if err != nil {
@@ -33,6 +33,7 @@ func (it *Iterator) ReadArrayBegin() (ret bool, err error) {
 	return true, nil
 }
 
+// ReadArrayMore tells if there is more item to read in the array
 func (it *Iterator) ReadArrayMore() (ret bool, err error) {
 	c, err := it.nextToken()
 	if err != nil {
@@ -50,6 +51,8 @@ func (it *Iterator) ReadArrayMore() (ret bool, err error) {
 	}
 }
 
+// ReadArrayCB reads the array with a callback
+// The caller should make sure that the callback is correct
 func (it *Iterator) ReadArrayCB(cb func(*Iterator) error) error {
 	c, err := it.nextToken()
 	if err != nil {

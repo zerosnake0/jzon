@@ -210,6 +210,7 @@ func (it *Iterator) expectQuote() error {
 	return nil
 }
 
+// ReadStringAsSlice reads a string as a byte slice
 // The returned slice can only be used temporarily, a copy must be made
 // if the result needs to be saved
 func (it *Iterator) ReadStringAsSlice() (_ []byte, err error) {
@@ -219,6 +220,7 @@ func (it *Iterator) ReadStringAsSlice() (_ []byte, err error) {
 	return it.readStringAsSlice()
 }
 
+// ReadStringAndAppend reads a string and appends to a byte slice
 func (it *Iterator) ReadStringAndAppend(buf []byte) (_ []byte, err error) {
 	if err = it.expectQuote(); err != nil {
 		return
@@ -239,6 +241,7 @@ func (it *Iterator) readString() (ret string, err error) {
 	return
 }
 
+// ReadString reads a string
 func (it *Iterator) ReadString() (_ string, err error) {
 	if err = it.expectQuote(); err != nil {
 		return

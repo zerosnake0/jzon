@@ -98,6 +98,7 @@ func init() {
 	}
 }
 
+// EncOpts is the context related encoding option of the object
 type EncOpts struct {
 	Quoted bool
 }
@@ -110,6 +111,7 @@ type keyEncoder interface {
 	Encode(ptr unsafe.Pointer, s *Streamer)
 }
 
+// ValEncoder is the interface to be implemented for custom encoder
 type ValEncoder interface {
 	IsEmpty(ptr unsafe.Pointer) bool
 

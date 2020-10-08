@@ -18,6 +18,7 @@ func (it *Iterator) readNumberAsString(c byte) (n string, err error) {
 	return
 }
 
+// ReadNumber reads a Number(json.Number)
 func (it *Iterator) ReadNumber() (n Number, err error) {
 	c, err := it.nextToken()
 	if err != nil {

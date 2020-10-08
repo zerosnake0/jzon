@@ -89,7 +89,7 @@ func (decCfg *DecoderConfig) UnmarshalFromString(s string, obj interface{}) erro
 	return decCfg.Unmarshal(localStringToBytes(s), obj)
 }
 
-// UnmarshalFromReader behave like json.Unmarshal but with a io.Reader
+// UnmarshalFromReader behave like json.Unmarshal but with an io.Reader
 func (decCfg *DecoderConfig) UnmarshalFromReader(r io.Reader, obj interface{}) error {
 	it := decCfg.NewIterator()
 	err := it.UnmarshalFromReader(r, obj)

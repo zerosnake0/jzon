@@ -42,6 +42,7 @@ func init() {
 	}
 }
 
+// Read reads a json object as a golang object
 func (it *Iterator) Read() (interface{}, error) {
 	c, err := it.nextToken()
 	if err != nil {

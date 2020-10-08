@@ -1,5 +1,6 @@
 package jzon
 
+// ReadNull reads a nil
 func (it *Iterator) ReadNull() error {
 	c, err := it.nextToken()
 	if err != nil {
