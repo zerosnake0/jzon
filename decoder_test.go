@@ -27,6 +27,7 @@ type decFace interface {
 }
 
 type inputOffset interface {
+	// Not available for go<1.13
 	InputOffset() int64
 }
 
