@@ -240,7 +240,7 @@ func (it *Iterator) readString() (ret string, err error) {
 	return
 }
 
-func (it *Iterator) ReadString() (ret string, err error) {
+func (it *Iterator) ReadString() (_ string, err error) {
 	if err = it.expectQuote(); err != nil {
 		return
 	}
