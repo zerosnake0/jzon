@@ -3,7 +3,7 @@ package jzon
 func (encCfg *EncoderConfig) NewStreamer() *Streamer {
 	s := defaultStreamerPool.BorrowStreamer()
 	s.cfg = encCfg
-	s.EscapeHTML(s.cfg.escapeHtml)
+	s.EscapeHTML(s.cfg.escapeHTML)
 	return s
 }
 

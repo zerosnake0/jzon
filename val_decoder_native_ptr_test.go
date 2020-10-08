@@ -19,7 +19,7 @@ func TestValDecoder_Native_Ptr(t *testing.T) {
 		t.Log("<<<<<<<<<<<<<<<<<<<<<<")
 	}
 	t.Run("nil pointer", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, (*int)(nil), (*int)(nil))
+		f(t, "null", ErrNilPointerReceiver, (*int)(nil), (*int)(nil))
 	})
 	t.Run("eof", func(t *testing.T) {
 		pi1 := (*int)(nil)

@@ -50,13 +50,13 @@ type EncoderConfig struct {
 	onlyTaggedField bool
 
 	// can override during runtime
-	escapeHtml bool
+	escapeHTML bool
 }
 
 func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 	encCfg := EncoderConfig{
 		tag:        "json",
-		escapeHtml: true,
+		escapeHTML: true,
 	}
 	cache := encoderCache{}
 	internalCache := encoderCache{}
@@ -66,7 +66,7 @@ func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 			cache[rtype] = valEnc
 			internalCache[rtype] = valEnc
 		}
-		encCfg.escapeHtml = opt.EscapeHTML
+		encCfg.escapeHTML = opt.EscapeHTML
 		if opt.Tag != "" {
 			encCfg.tag = opt.Tag
 		}
@@ -161,13 +161,13 @@ func (encCfg *EncoderConfig) createEncoderInternal(cache, internalCache encoderC
 					internalCache[rType] = w.encoder
 					rebuildMap[rType] = w
 				} else {
-					v := pointerJsonMarshalerEncoder(rType)
+					v := pointerJSONMarshalerEncoder(rType)
 					internalCache[rType] = v
 					cache[rType] = &directEncoder{v}
 				}
 				continue
 			}
-			v := &directJsonMarshalerEncoder{
+			v := &directJSONMarshalerEncoder{
 				isEmpty: isEmptyFunctions[kind],
 				rtype:   rType,
 			}
@@ -356,7 +356,7 @@ func (encCfg *EncoderConfig) createEncoderInternal(cache, internalCache encoderC
 			for i := range x.fields {
 				fi := &x.fields[i]
 				v := internalCache.preferPtrEncoder(fi.ptrType.Elem())
-				x.encoder.fields.add(fi, encCfg.escapeHtml, v)
+				x.encoder.fields.add(fi, encCfg.escapeHTML, v)
 			}
 			if ifaceIndir(rType) {
 				cache[rType] = x.encoder

@@ -246,7 +246,7 @@ func (it *Iterator) unmarshal(obj interface{}) error {
 	}
 	_, err = it.nextToken()
 	if err == nil {
-		return DataRemainedError
+		return ErrDataRemained
 	}
 	if err != io.EOF {
 		return err

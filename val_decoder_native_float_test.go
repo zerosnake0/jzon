@@ -21,7 +21,7 @@ func TestValDecoder_Native_Float32(t *testing.T) {
 		f(t, data, ex, 1.234)
 	}
 	t.Run("nil pointer", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, 0)
+		f(t, "null", ErrNilPointerReceiver, 0)
 	})
 	t.Run("eof", func(t *testing.T) {
 		f2(t, "", io.EOF)
@@ -56,7 +56,7 @@ func TestValDecoder_Native_Float64(t *testing.T) {
 		f(t, data, ex, 1.234)
 	}
 	t.Run("nil pointer", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, 0)
+		f(t, "null", ErrNilPointerReceiver, 0)
 	})
 	t.Run("eof", func(t *testing.T) {
 		f2(t, "", io.EOF)

@@ -45,7 +45,7 @@ func init() {
 	// standard json library types
 	createGlobalValEncoder((*json.Number)(nil), (*jsonNumberEncoder)(nil))
 	createGlobalValEncoder((*json.RawMessage)(nil), (*jsonRawMessageEncoder)(nil))
-	createGlobalValEncoder((*json.Marshaler)(nil), (*dynamicJsonMarshalerEncoder)(nil))
+	createGlobalValEncoder((*json.Marshaler)(nil), (*dynamicJSONMarshalerEncoder)(nil))
 	createGlobalValEncoder((*encoding.TextMarshaler)(nil), (*dynamicTextMarshalerEncoder)(nil))
 
 	// kind mapping

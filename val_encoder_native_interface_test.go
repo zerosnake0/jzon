@@ -78,7 +78,7 @@ func TestValEncoder_Interface_OmitEmpty(t *testing.T) {
 		})
 		t.Run("nil pointer", func(t *testing.T) {
 			checkEncodeValueWithStandard(t, st{
-				I: (*testJsonMarshaler2)(nil),
+				I: (*testJSONMarshaler2)(nil),
 			}, nil)
 		})
 	})

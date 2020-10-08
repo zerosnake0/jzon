@@ -243,7 +243,7 @@ func TestStreamer_Flush(t *testing.T) {
 		streamer := NewStreamer()
 		defer streamer.Release()
 		err := streamer.Flush()
-		require.Equal(t, NoWriterAttachedError, err)
+		require.Equal(t, ErrNoAttachedWriter, err)
 	})
 	t.Run("bad writer implementation", func(t *testing.T) {
 		streamer := NewStreamer()

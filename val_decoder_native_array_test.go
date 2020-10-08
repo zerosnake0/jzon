@@ -14,7 +14,7 @@ func TestValDecoder_Native_Array(t *testing.T) {
 		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	t.Run("nil pointer", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, nil, nil)
+		f(t, "null", ErrNilPointerReceiver, nil, nil)
 	})
 	t.Run("eof", func(t *testing.T) {
 		arr1 := [...]int{1, 2}

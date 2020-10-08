@@ -70,7 +70,7 @@ func (dec *oneFieldStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *De
 				subPtr := *(*unsafe.Pointer)(curPtr)
 				if subPtr == nil {
 					if offset.rtype == 0 { // the ptr field is not exported
-						return NilEmbeddedPointerError
+						return ErrNilEmbeddedPointer
 					}
 					subPtr = unsafe_New(offset.rtype)
 					*(*unsafe.Pointer)(curPtr) = subPtr

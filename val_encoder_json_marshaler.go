@@ -37,16 +37,16 @@ func (enc *jsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *E
 	s.Raw(b)
 }
 
-type directJsonMarshalerEncoder struct {
+type directJSONMarshalerEncoder struct {
 	isEmpty isEmptyFunc
 	rtype   rtype
 }
 
-func (enc *directJsonMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+func (enc *directJSONMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
 	return enc.isEmpty(ptr)
 }
 
-func (enc *directJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (enc *directJSONMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}
@@ -64,13 +64,13 @@ func (enc *directJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, o
 	s.Raw(b)
 }
 
-type pointerJsonMarshalerEncoder rtype
+type pointerJSONMarshalerEncoder rtype
 
-func (enc pointerJsonMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+func (enc pointerJSONMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
 	return *(*unsafe.Pointer)(ptr) == nil
 }
 
-func (enc pointerJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (enc pointerJSONMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}
@@ -93,13 +93,13 @@ func (enc pointerJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, o
 	s.Raw(b)
 }
 
-type dynamicJsonMarshalerEncoder struct{}
+type dynamicJSONMarshalerEncoder struct{}
 
-func (*dynamicJsonMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
+func (*dynamicJSONMarshalerEncoder) IsEmpty(ptr unsafe.Pointer) bool {
 	return *(*json.Marshaler)(ptr) == nil
 }
 
-func (*dynamicJsonMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
+func (*dynamicJSONMarshalerEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	if s.Error != nil {
 		return
 	}

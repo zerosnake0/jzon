@@ -14,23 +14,23 @@ func (e *DecodeError) Error() string {
 	return fmt.Sprintf("%s (near %s)", e.reason.Error(), e.location)
 }
 
-// DataRemainedError
-var DataRemainedError = errors.New("expecting EOF, but there is still data")
+// ErrDataRemained
+var ErrDataRemained = errors.New("expecting EOF, but there is still data")
 
-// PointerReceiverError
-var PointerReceiverError = errors.New("the receiver is not a pointer")
+// ErrPointerReceiver
+var ErrPointerReceiver = errors.New("the receiver is not a pointer")
 
-// NilPointerReceiverError
-var NilPointerReceiverError = errors.New("the receiver is nil")
+// ErrNilPointerReceiver
+var ErrNilPointerReceiver = errors.New("the receiver is nil")
 
-// IFaceError
-var IFaceError = errors.New("cannot unmarshal on empty iface")
+// ErrEmptyIFace
+var ErrEmptyIFace = errors.New("cannot unmarshal on empty iface")
 
 // NilEmbeddedError
-var NilEmbeddedPointerError = errors.New("cannot unmarshal on nil pointer (unexported embedded)")
+var ErrNilEmbeddedPointer = errors.New("cannot unmarshal on nil pointer (unexported embedded)")
 
-// EfaceLoopingError
-var EfaceLoopingError = errors.New("eface looping detected")
+// ErrEfaceLooping
+var ErrEfaceLooping = errors.New("eface looping detected")
 
 // InvalidStringCharError
 type InvalidStringCharError struct {

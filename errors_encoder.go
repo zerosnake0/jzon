@@ -4,8 +4,8 @@ import (
 	"errors"
 )
 
-var NoWriterAttachedError = errors.New("no writer attached")
+var ErrNoAttachedWriter = errors.New("no attached writer")
 
-var FloatIsInfinity = errors.New("float is infinity")
+var ErrFloatIsInfinity = errors.New("float is infinity")
 
-var FloatIsNan = errors.New("float is NaN")
+var ErrFloatIsNan = errors.New("float is NaN")

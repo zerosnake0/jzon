@@ -38,9 +38,9 @@ func (ef *encoderFields) init(size int) {
 	ef.list = make([]encoderFieldInfo, 0, size)
 }
 
-func (ef *encoderFields) add(f *field, escapeHtml bool, enc ValEncoder) {
+func (ef *encoderFields) add(f *field, escapeHTML bool, enc ValEncoder) {
 	var rawField []byte
-	if escapeHtml {
+	if escapeHTML {
 		rawField = encodeString(rawField, f.name, htmlSafeSet[:])
 	} else {
 		rawField = encodeString(rawField, f.name, safeSet[:])

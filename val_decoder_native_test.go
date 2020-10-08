@@ -24,7 +24,7 @@ func TestValDecoder_Native_Bool(t *testing.T) {
 		f(t, data, ex, true, false)
 	}
 	t.Run("nil pointer", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, false, false)
+		f(t, "null", ErrNilPointerReceiver, false, false)
 	})
 	t.Run("eof", func(t *testing.T) {
 		f2(t, "", io.EOF)
@@ -82,7 +82,7 @@ func TestValDecoder_Native_String(t *testing.T) {
 		f(t, data, ex, "dummy")
 	}
 	t.Run("nil pointer", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, "")
+		f(t, "null", ErrNilPointerReceiver, "")
 	})
 	t.Run("eof", func(t *testing.T) {
 		f2(t, "", io.EOF)

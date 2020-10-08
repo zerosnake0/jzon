@@ -13,7 +13,7 @@ func TestValDecoder_Native_Struct_Zero_Field(t *testing.T) {
 		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	t.Run("nil receiver", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, nil, nil)
+		f(t, "null", ErrNilPointerReceiver, nil, nil)
 	})
 	t.Run("eof", func(t *testing.T) {
 		f(t, "", io.EOF, &struct{}{}, &struct{}{})
@@ -90,7 +90,7 @@ func TestValDecoder_Native_Struct(t *testing.T) {
 		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	t.Run("nil receiver", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, nil, nil)
+		f(t, "null", ErrNilPointerReceiver, nil, nil)
 	})
 	t.Run("eof", func(t *testing.T) {
 		f(t, "", io.EOF, &struct {
@@ -285,7 +285,7 @@ func TestValDecoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 			type outer struct {
 				*inner
 			}
-			f(t, `{"a":1}`, NilEmbeddedPointerError, &outer{}, &outer{})
+			f(t, `{"a":1}`, ErrNilEmbeddedPointer, &outer{}, &outer{})
 		})
 		t.Run("exported field", func(t *testing.T) {
 			type Inner struct {

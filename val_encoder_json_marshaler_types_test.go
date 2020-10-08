@@ -6,9 +6,9 @@ import (
 )
 
 // bool
-type testBoolJsonMarshaler bool
+type testBoolJSONMarshaler bool
 
-func (b testBoolJsonMarshaler) MarshalJSON() ([]byte, error) {
+func (b testBoolJSONMarshaler) MarshalJSON() ([]byte, error) {
 	if b {
 		return []byte("true"), nil
 	}
@@ -33,9 +33,9 @@ func (arr testDirectArrayMarshaler) MarshalJSON() ([]byte, error) {
 }
 
 // map
-type testMapJsonMarshaler map[int]int
+type testMapJSONMarshaler map[int]int
 
-func (m testMapJsonMarshaler) MarshalJSON() ([]byte, error) {
+func (m testMapJSONMarshaler) MarshalJSON() ([]byte, error) {
 	s := fmt.Sprintf("%d", len(m))
 	return []byte(s), nil
 }
@@ -68,21 +68,21 @@ func (s testDirectStructMarshaler) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Itoa(*s.A)), nil
 }
 
-type testJsonMarshaler struct {
+type testJSONMarshaler struct {
 	data string
 	err  error
 }
 
-func (m testJsonMarshaler) MarshalJSON() ([]byte, error) {
+func (m testJSONMarshaler) MarshalJSON() ([]byte, error) {
 	return []byte(m.data), m.err
 }
 
-type testJsonMarshaler2 struct {
+type testJSONMarshaler2 struct {
 	data string
 	err  error
 }
 
-func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
+func (m *testJSONMarshaler2) MarshalJSON() ([]byte, error) {
 	if m == nil {
 		return []byte(`"is_null"`), nil
 		// return []byte(`null`), nil
@@ -91,12 +91,12 @@ func (m *testJsonMarshaler2) MarshalJSON() ([]byte, error) {
 }
 
 /* The following struct definition is not allowed
-type testJsonMarshaler3 struct {
+type testJSONMarshaler3 struct {
 }
 
-type pTestJsonMarshaler3 *testJsonMarshaler3
+type pTestJSONMarshaler3 *testJSONMarshaler3
 
-func (pTestJsonMarshaler3) MarshalJSON() ([]byte, error) {
+func (pTestJSONMarshaler3) MarshalJSON() ([]byte, error) {
 	return nil, nil
 }
 */

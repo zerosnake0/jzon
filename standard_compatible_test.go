@@ -141,7 +141,7 @@ func TestValid(t *testing.T) {
 func TestUnmarshal(t *testing.T) {
 	t.Run("data remained", func(t *testing.T) {
 		var i, i2 interface{}
-		checkDecodeWithStandard(t, DefaultDecoderConfig, "{}{", DataRemainedError, &i, &i2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, "{}{", ErrDataRemained, &i, &i2)
 	})
 }
 

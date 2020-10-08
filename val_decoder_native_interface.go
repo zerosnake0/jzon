@@ -39,7 +39,7 @@ func (dec *efaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 	//   o2 = &o1
 	// so we have this looping check here
 	if !dec.checkLoop(ptr, it) {
-		return EfaceLoopingError
+		return ErrEfaceLooping
 	}
 	ef := (*eface)(ptr)
 	if ef.data == nil {
@@ -129,7 +129,7 @@ func (dec *ifaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 	}
 	o := packIFace(ptr)
 	if o == nil {
-		return IFaceError
+		return ErrEmptyIFace
 	}
 	return it.ReadVal(o)
 }

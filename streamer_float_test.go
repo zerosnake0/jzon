@@ -18,14 +18,14 @@ func TestStreamer_Float32_Error(t *testing.T) {
 		s := NewStreamer()
 		defer s.Release()
 		s.Float32(f)
-		require.Equal(t, FloatIsInfinity, s.Error)
+		require.Equal(t, ErrFloatIsInfinity, s.Error)
 	})
 	t.Run("nan", func(t *testing.T) {
 		f := float32(math.NaN())
 		s := NewStreamer()
 		defer s.Release()
 		s.Float32(f)
-		require.Equal(t, FloatIsNan, s.Error)
+		require.Equal(t, ErrFloatIsNan, s.Error)
 	})
 }
 
@@ -63,14 +63,14 @@ func TestStreamer_Float64_Error(t *testing.T) {
 		s := NewStreamer()
 		defer s.Release()
 		s.Float64(f)
-		require.Equal(t, FloatIsInfinity, s.Error)
+		require.Equal(t, ErrFloatIsInfinity, s.Error)
 	})
 	t.Run("nan", func(t *testing.T) {
 		f := math.NaN()
 		s := NewStreamer()
 		defer s.Release()
 		s.Float64(f)
-		require.Equal(t, FloatIsNan, s.Error)
+		require.Equal(t, ErrFloatIsNan, s.Error)
 	})
 }
 

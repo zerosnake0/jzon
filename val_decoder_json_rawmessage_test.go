@@ -22,7 +22,7 @@ func TestValDecoder_JsonRawMessage(t *testing.T) {
 		f(t, data, ex, "1.23")
 	}
 	t.Run("nil pointer", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, "")
+		f(t, "null", ErrNilPointerReceiver, "")
 	})
 	t.Run("eof", func(t *testing.T) {
 		f2(t, "", io.EOF)

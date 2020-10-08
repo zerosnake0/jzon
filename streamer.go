@@ -62,7 +62,7 @@ func (s *Streamer) Flush() error {
 		return s.Error
 	}
 	if s.writer == nil {
-		return NoWriterAttachedError
+		return ErrNoAttachedWriter
 	}
 	l := len(s.buffer)
 	// see comment of io.Writer
