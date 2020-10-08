@@ -81,15 +81,14 @@ func (df *decoderFields) find(key, buf []byte, caseSensitive bool) (*decoderFiel
 			return &df.list[i], upper
 		}
 		return nil, upper
-	} else {
-		for i := range df.list {
-			ff := &df.list[i]
-			if ff.equalFold(ff.nameBytes, key) {
-				return ff, buf
-			}
-		}
-		return nil, buf
 	}
+	for i := range df.list {
+		ff := &df.list[i]
+		if ff.equalFold(ff.nameBytes, key) {
+			return ff, buf
+		}
+	}
+	return nil, buf
 }
 
 type structDecoder struct {

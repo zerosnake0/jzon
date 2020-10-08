@@ -123,9 +123,8 @@ Retry:
 			goto Retry
 		}
 		return appendRune(b, combined), nil
-	} else {
-		return appendRune(b, r), nil
 	}
+	return appendRune(b, r), nil
 }
 
 // internal, call only after a '"' is consumed

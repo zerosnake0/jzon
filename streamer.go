@@ -136,9 +136,8 @@ func (s *Streamer) False() *Streamer {
 func (s *Streamer) Bool(b bool) *Streamer {
 	if b {
 		return s.True()
-	} else {
-		return s.False()
 	}
+	return s.False()
 }
 
 func (s *Streamer) ObjectStart() *Streamer {

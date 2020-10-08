@@ -78,19 +78,18 @@ func (it *Iterator) readInt32(c byte) (int32, error) {
 			}
 		}
 		return -int32(v), nil
-	} else {
-		v, err := it.readUint32(c)
-		if err != nil {
-			return 0, err
-		}
-		if v > math.MaxInt32 {
-			return 0, IntOverflowError{
-				typ:   "int32",
-				value: strconv.FormatUint(uint64(v), 10),
-			}
-		}
-		return int32(v), nil
 	}
+	v, err := it.readUint32(c)
+	if err != nil {
+		return 0, err
+	}
+	if v > math.MaxInt32 {
+		return 0, IntOverflowError{
+			typ:   "int32",
+			value: strconv.FormatUint(uint64(v), 10),
+		}
+	}
+	return int32(v), nil
 }
 
 func (it *Iterator) ReadInt32() (int32, error) {

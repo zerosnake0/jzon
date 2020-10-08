@@ -11,9 +11,8 @@ type testBoolJsonMarshaler bool
 func (b testBoolJsonMarshaler) MarshalJSON() ([]byte, error) {
 	if b {
 		return []byte("true"), nil
-	} else {
-		return []byte("false"), nil
 	}
+	return []byte("false"), nil
 }
 
 // array

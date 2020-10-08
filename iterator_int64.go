@@ -79,19 +79,18 @@ func (it *Iterator) readInt64(c byte) (int64, error) {
 			}
 		}
 		return -int64(v), nil
-	} else {
-		v, err := it.readUint64(c)
-		if err != nil {
-			return 0, err
-		}
-		if v > math.MaxInt64 {
-			return 0, IntOverflowError{
-				typ:   "int64",
-				value: strconv.FormatUint(uint64(v), 10),
-			}
-		}
-		return int64(v), nil
 	}
+	v, err := it.readUint64(c)
+	if err != nil {
+		return 0, err
+	}
+	if v > math.MaxInt64 {
+		return 0, IntOverflowError{
+			typ:   "int64",
+			value: strconv.FormatUint(uint64(v), 10),
+		}
+	}
+	return int64(v), nil
 }
 
 func (it *Iterator) ReadInt64() (int64, error) {

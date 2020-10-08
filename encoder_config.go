@@ -34,10 +34,9 @@ func (cache encoderCache) preferPtrEncoder(typ reflect.Type) ValEncoder {
 	ptrEncoder := cache[rtypeOfType(ptrType)]
 	if pe, ok := ptrEncoder.(*pointerEncoder); ok {
 		return pe.encoder
-	} else {
-		// the element has a special pointer encoder
-		return &directEncoder{ptrEncoder}
 	}
+	// the element has a special pointer encoder
+	return &directEncoder{ptrEncoder}
 }
 
 type EncoderConfig struct {

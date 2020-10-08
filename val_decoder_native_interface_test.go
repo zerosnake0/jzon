@@ -50,15 +50,14 @@ func copyValue(t *testing.T, in interface{}) (out interface{}) {
 		if ptrValue.IsNil() {
 			newV := reflect.NewAt(typ.Elem(), nil)
 			return newV.Interface()
-		} else {
-			elem := ptrValue.Elem()
-			copied := copyValue(t, elem.Interface())
-			newV := reflect.New(elem.Type())
-			if copied != nil {
-				newV.Elem().Set(reflect.ValueOf(copied))
-			}
-			return newV.Interface()
 		}
+		elem := ptrValue.Elem()
+		copied := copyValue(t, elem.Interface())
+		newV := reflect.New(elem.Type())
+		if copied != nil {
+			newV.Elem().Set(reflect.ValueOf(copied))
+		}
+		return newV.Interface()
 	case reflect.Struct:
 		oldV := reflect.ValueOf(in)
 		newV := reflect.New(typ).Elem()

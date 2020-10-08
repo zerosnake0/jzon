@@ -28,9 +28,8 @@ func init() {
 			if it.useNumber {
 				s, err := it.readNumberAsString(c)
 				return json.Number(s), err
-			} else {
-				return it.readFloat64(c)
 			}
+			return it.readFloat64(c)
 		}
 	}
 	errFunc := func(it *Iterator, c byte) (interface{}, error) {
