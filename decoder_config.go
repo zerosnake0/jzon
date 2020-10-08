@@ -105,11 +105,6 @@ func (decCfg *DecoderConfig) NewDecoder(r io.Reader) *Decoder {
 	}
 }
 
-func (decCfg *DecoderConfig) ReturnDecoder(dec *Decoder) {
-	dec.it.Release()
-	dec.it = nil
-}
-
 // the typ must be a pointer type
 func (decCfg *DecoderConfig) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder {
 	decCfg.cacheMu.Lock()

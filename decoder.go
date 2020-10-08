@@ -10,6 +10,11 @@ type Decoder struct {
 	err error
 }
 
+func (dec *Decoder) Release() {
+	dec.it.Release()
+	dec.it = nil
+}
+
 func (dec *Decoder) UseNumber() {
 	dec.it.useNumber = true
 }

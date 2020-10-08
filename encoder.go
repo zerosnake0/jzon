@@ -5,6 +5,11 @@ type Encoder struct {
 	err error
 }
 
+func (e *Encoder) Release() {
+	e.s.Release()
+	e.s = nil
+}
+
 func encodeInternal(s *Streamer, v interface{}) error {
 	if err := s.Value(v).Flush(); err != nil {
 		return err

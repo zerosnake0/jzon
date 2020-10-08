@@ -102,11 +102,6 @@ func (encCfg *EncoderConfig) NewEncoder(w io.Writer) *Encoder {
 	}
 }
 
-func (encCfg *EncoderConfig) ReturnEncoder(enc *Encoder) {
-	enc.s.Release()
-	enc.s = nil
-}
-
 func (encCfg *EncoderConfig) getEncoderFromCache(rtype rtype) ValEncoder {
 	return encCfg.encoderCache.Load().(encoderCache)[rtype]
 }

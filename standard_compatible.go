@@ -27,14 +27,6 @@ func NewDecoder(r io.Reader) *Decoder {
 	return DefaultDecoderConfig.NewDecoder(r)
 }
 
-func ReturnDecoder(dec *Decoder) {
-	DefaultDecoderConfig.ReturnDecoder(dec)
-}
-
 func NewEncoder(w io.Writer) *Encoder {
 	return DefaultEncoderConfig.NewEncoder(w)
-}
-
-func ReturnEncoder(enc *Encoder) {
-	DefaultEncoderConfig.ReturnEncoder(enc)
 }

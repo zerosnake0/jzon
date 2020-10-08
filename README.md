@@ -82,6 +82,14 @@ err := jzon.Unmarshal(b, &data)
 
 // Marshal
 b, err := jzon.Marshal(&data)
+
+// Decoder
+dec := jzon.NewDecoder(reader)
+defer dec.Release()
+
+// Encoder
+enc := jzon.NewEncoder(writer)
+defer enc.Release()
 ```
 
 ### Iterator
