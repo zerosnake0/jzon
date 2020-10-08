@@ -1,12 +1,14 @@
 package jzon
 
-func (dec *DecoderConfig) NewIterator() *Iterator {
+func (decCfg *DecoderConfig) NewIterator() *Iterator {
 	it := defaultIteratorPool.BorrowIterator()
-	it.cfg = dec
+	it.cfg = decCfg
+	it.useNumber = decCfg.useNumber
+	it.disallowUnknownFields = decCfg.disallowUnknownFields
 	return it
 }
 
-func (dec *DecoderConfig) ReturnIterator(it *Iterator) {
+func (decCfg *DecoderConfig) ReturnIterator(it *Iterator) {
 	it.cfg = nil
 	defaultIteratorPool.ReturnIterator(it)
 }

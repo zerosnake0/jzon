@@ -104,7 +104,7 @@ func (dec *smallStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOp
 				return err
 			}
 		} else {
-			if it.cfg.disallowUnknownFields {
+			if it.disallowUnknownFields {
 				return UnknownFieldError(field)
 			}
 			if err = it.Skip(); err != nil {

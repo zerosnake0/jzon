@@ -81,9 +81,9 @@ func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 	return &encCfg
 }
 
-func (enc *EncoderConfig) Marshal(obj interface{}) ([]byte, error) {
-	s := enc.NewStreamer()
-	defer enc.ReturnStreamer(s)
+func (encCfg *EncoderConfig) Marshal(obj interface{}) ([]byte, error) {
+	s := encCfg.NewStreamer()
+	defer encCfg.ReturnStreamer(s)
 	s.Value(obj)
 	if s.Error != nil {
 		return nil, s.Error
@@ -97,14 +97,14 @@ func (enc *EncoderConfig) Marshal(obj interface{}) ([]byte, error) {
 	return b, nil
 }
 
-func (enc *EncoderConfig) getEncoderFromCache(rtype rtype) ValEncoder {
-	return enc.encoderCache.Load().(encoderCache)[rtype]
+func (encCfg *EncoderConfig) getEncoderFromCache(rtype rtype) ValEncoder {
+	return encCfg.encoderCache.Load().(encoderCache)[rtype]
 }
 
-func (enc *EncoderConfig) createEncoder(rtype rtype, typ reflect.Type) ValEncoder {
-	enc.cacheMu.Lock()
-	defer enc.cacheMu.Unlock()
-	cache := enc.encoderCache.Load().(encoderCache)
+func (encCfg *EncoderConfig) createEncoder(rtype rtype, typ reflect.Type) ValEncoder {
+	encCfg.cacheMu.Lock()
+	defer encCfg.cacheMu.Unlock()
+	cache := encCfg.encoderCache.Load().(encoderCache)
 	// double check
 	if ve := cache[rtype]; ve != nil {
 		return ve
@@ -115,12 +115,12 @@ func (enc *EncoderConfig) createEncoder(rtype rtype, typ reflect.Type) ValEncode
 	}
 	var q typeQueue
 	q.push(typ)
-	enc.createEncoderInternal(newCache, enc.internalCache, q)
-	enc.encoderCache.Store(newCache)
+	encCfg.createEncoderInternal(newCache, encCfg.internalCache, q)
+	encCfg.encoderCache.Store(newCache)
 	return newCache[rtype]
 }
 
-func (enc *EncoderConfig) createEncoderInternal(cache, internalCache encoderCache, typesToCreate typeQueue) {
+func (encCfg *EncoderConfig) createEncoderInternal(cache, internalCache encoderCache, typesToCreate typeQueue) {
 	rebuildMap := map[rtype]interface{}{}
 	for typ := typesToCreate.pop(); typ != nil; typ = typesToCreate.pop() {
 		rType := rtypeOfType(typ)
@@ -270,7 +270,7 @@ func (enc *EncoderConfig) createEncoderInternal(cache, internalCache encoderCach
 			internalCache[rType] = w.encoder
 			rebuildMap[rType] = w
 		case reflect.Struct:
-			w := enc.newStructEncoder(typ)
+			w := encCfg.newStructEncoder(typ)
 			if w == nil {
 				// no fields to marshal
 				v := (*emptyStructEncoder)(nil)
@@ -352,7 +352,7 @@ func (enc *EncoderConfig) createEncoderInternal(cache, internalCache encoderCach
 			for i := range x.fields {
 				fi := &x.fields[i]
 				v := internalCache.preferPtrEncoder(fi.ptrType.Elem())
-				x.encoder.fields.add(fi, enc.escapeHtml, v)
+				x.encoder.fields.add(fi, encCfg.escapeHtml, v)
 			}
 			if ifaceIndir(rType) {
 				cache[rType] = x.encoder

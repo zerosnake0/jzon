@@ -37,9 +37,12 @@ type DecoderConfig struct {
 	cacheMu      sync.Mutex
 	decoderCache atomic.Value
 
-	caseSensitive         bool
-	tag                   string
-	onlyTaggedField       bool
+	// fixed config, cannot override during runtime
+	caseSensitive   bool
+	tag             string
+	onlyTaggedField bool
+
+	// can override during runtime
 	useNumber             bool
 	disallowUnknownFields bool
 }
@@ -66,39 +69,52 @@ func NewDecoderConfig(opt *DecoderOption) *DecoderConfig {
 	return &decCfg
 }
 
-func (dec *DecoderConfig) Unmarshal(data []byte, obj interface{}) error {
-	it := dec.NewIterator()
+func (decCfg *DecoderConfig) Unmarshal(data []byte, obj interface{}) error {
+	it := decCfg.NewIterator()
 	err := it.Unmarshal(data, obj)
 	if err != nil {
 		err = it.WrapError(err)
 	}
-	dec.ReturnIterator(it)
+	decCfg.ReturnIterator(it)
 	return err
 }
 
-func (dec *DecoderConfig) UnmarshalFromString(s string, obj interface{}) error {
-	return dec.Unmarshal(localStringToBytes(s), obj)
+func (decCfg *DecoderConfig) UnmarshalFromString(s string, obj interface{}) error {
+	return decCfg.Unmarshal(localStringToBytes(s), obj)
 }
 
-func (dec *DecoderConfig) UnmarshalFromReader(r io.Reader, obj interface{}) error {
-	it := dec.NewIterator()
+func (decCfg *DecoderConfig) UnmarshalFromReader(r io.Reader, obj interface{}) error {
+	it := decCfg.NewIterator()
 	err := it.UnmarshalFromReader(r, obj)
 	if err != nil {
 		err = it.WrapError(err)
 	}
-	dec.ReturnIterator(it)
+	decCfg.ReturnIterator(it)
 	return err
 }
 
-func (dec *DecoderConfig) getDecoderFromCache(rType rtype) ValDecoder {
-	return dec.decoderCache.Load().(decoderCache)[rType]
+func (decCfg *DecoderConfig) getDecoderFromCache(rType rtype) ValDecoder {
+	return decCfg.decoderCache.Load().(decoderCache)[rType]
+}
+
+func (decCfg *DecoderConfig) NewDecoder(r io.Reader) *Decoder {
+	it := decCfg.NewIterator()
+	it.Reset(r)
+	return &Decoder{
+		it: it,
+	}
+}
+
+func (decCfg *DecoderConfig) ReturnDecoder(dec *Decoder) {
+	decCfg.ReturnIterator(dec.it)
+	dec.it = nil
 }
 
 // the typ must be a pointer type
-func (dec *DecoderConfig) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder {
-	dec.cacheMu.Lock()
-	defer dec.cacheMu.Unlock()
-	cache := dec.decoderCache.Load().(decoderCache)
+func (decCfg *DecoderConfig) createDecoder(rType rtype, ptrType reflect.Type) ValDecoder {
+	decCfg.cacheMu.Lock()
+	defer decCfg.cacheMu.Unlock()
+	cache := decCfg.decoderCache.Load().(decoderCache)
 	// double check
 	if vd := cache[rType]; vd != nil {
 		return vd
@@ -110,8 +126,8 @@ func (dec *DecoderConfig) createDecoder(rType rtype, ptrType reflect.Type) ValDe
 	}
 	var q typeQueue
 	q.push(ptrType)
-	dec.createDecoderInternal(newCache, q)
-	dec.decoderCache.Store(newCache)
+	decCfg.createDecoderInternal(newCache, q)
+	decCfg.decoderCache.Store(newCache)
 	return newCache[rType]
 }
 
@@ -119,7 +135,7 @@ type decoderBuilder interface {
 	build(cache decoderCache)
 }
 
-func (dec *DecoderConfig) createDecoderInternal(cache decoderCache, typesToCreate typeQueue) {
+func (decCfg *DecoderConfig) createDecoderInternal(cache decoderCache, typesToCreate typeQueue) {
 	rebuildMap := map[rtype]decoderBuilder{}
 	for ptrType := typesToCreate.pop(); ptrType != nil; ptrType = typesToCreate.pop() {
 		rType := rtypeOfType(ptrType)
@@ -164,14 +180,10 @@ func (dec *DecoderConfig) createDecoderInternal(cache decoderCache, typesToCreat
 				cache[rType] = (*ifaceDecoder)(nil)
 			}
 		case reflect.Struct:
-			fields := describeStruct(elem, dec.tag, dec.onlyTaggedField)
+			fields := describeStruct(elem, decCfg.tag, decCfg.onlyTaggedField)
 			numFields := len(fields)
 			if numFields == 0 {
-				if dec.disallowUnknownFields {
-					cache[rType] = (*emptyObjectDecoder)(nil)
-				} else {
-					cache[rType] = (*skipDecoder)(nil)
-				}
+				cache[rType] = (*emptyObjectDecoder)(nil)
 				continue
 			}
 			for i := range fields {
@@ -179,7 +191,7 @@ func (dec *DecoderConfig) createDecoderInternal(cache decoderCache, typesToCreat
 				typesToCreate.push(fi.ptrType)
 			}
 			if numFields == 1 {
-				w := newOneFieldStructDecoder(&fields[0], dec.caseSensitive)
+				w := newOneFieldStructDecoder(&fields[0], decCfg.caseSensitive)
 				cache[rType] = w.decoder
 				rebuildMap[rType] = w
 			} else if numFields <= 10 {

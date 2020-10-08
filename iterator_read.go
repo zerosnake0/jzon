@@ -25,7 +25,7 @@ func init() {
 	readFunctions['{'] = readObjectWithStack
 	for _, c := range []byte("-0123456789") {
 		readFunctions[c] = func(it *Iterator, c byte) (interface{}, error) {
-			if it.cfg.useNumber {
+			if it.useNumber {
 				s, err := it.readNumberAsString(c)
 				return json.Number(s), err
 			} else {

@@ -27,6 +27,7 @@ type iteratorEmbedded struct {
 	Context interface{} // custom iteration context
 }
 
+// Iterator is designed for one-shot use, each reuse must call reset first
 type Iterator struct {
 	cfg *DecoderConfig
 
@@ -42,6 +43,9 @@ type Iterator struct {
 	tail int
 
 	iteratorEmbedded
+
+	useNumber             bool
+	disallowUnknownFields bool
 }
 
 func NewIterator() *Iterator {
@@ -94,7 +98,7 @@ func (it *Iterator) ResetBytes(data []byte) {
 }
 
 func (it *Iterator) Buffer() []byte {
-	return it.buffer[:it.tail]
+	return it.buffer[it.head:it.tail]
 }
 
 func (it *Iterator) errorLocation() []byte {
@@ -124,6 +128,7 @@ func (it *Iterator) WrapError(err error) *DecodeError {
 }
 
 // make sure that it.head == it.tail before call
+// will set error
 func (it *Iterator) readMore() error {
 	if it.reader == nil {
 		return io.EOF
@@ -141,8 +146,10 @@ func (it *Iterator) readMore() error {
 			// save internal buffer for reuse
 			it.fixbuf = it.buffer
 		} else {
-			if it.head != it.tail { // debug, to be removed
-				panic(fmt.Errorf("head %d, tail %d", it.head, it.tail))
+			if jzonDebug {
+				if it.head != it.tail {
+					panic(fmt.Errorf("head %d, tail %d", it.head, it.tail))
+				}
 			}
 			n, err = it.reader.Read(it.buffer)
 			it.offset += it.tail

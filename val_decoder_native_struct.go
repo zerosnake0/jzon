@@ -149,7 +149,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 				return err
 			}
 		} else {
-			if it.cfg.disallowUnknownFields {
+			if it.disallowUnknownFields {
 				return UnknownFieldError(field)
 			}
 			if err = it.Skip(); err != nil {

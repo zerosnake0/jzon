@@ -22,3 +22,11 @@ func Valid(data []byte) bool {
 func UnmarshalFromReader(r io.Reader, o interface{}) error {
 	return DefaultDecoderConfig.UnmarshalFromReader(r, o)
 }
+
+func NewDecoder(r io.Reader) *Decoder {
+	return DefaultDecoderConfig.NewDecoder(r)
+}
+
+func ReturnDecoder(dec *Decoder) {
+	DefaultDecoderConfig.ReturnDecoder(dec)
+}
