@@ -5,7 +5,7 @@ func skipArrayWithStack(it *Iterator, _ byte) error {
 	if err != nil {
 		return err
 	}
-	it.head += 1
+	it.head++
 	if c == ']' {
 		return nil
 	}
@@ -29,7 +29,7 @@ func skipArrayWithStack(it *Iterator, _ byte) error {
 		if err != nil {
 			return err
 		}
-		it.head += 1
+		it.head++
 		if c == ']' {
 			return nil
 		}
@@ -40,7 +40,7 @@ func skipArrayWithStack(it *Iterator, _ byte) error {
 		if err != nil {
 			return err
 		}
-		it.head += 1
+		it.head++
 	}
 }
 
@@ -52,6 +52,6 @@ func (it *Iterator) SkipArray() error {
 	if c != '[' {
 		return UnexpectedByteError{got: c, exp: '['}
 	}
-	it.head += 1
+	it.head++
 	return skipArrayWithStack(it, c)
 }

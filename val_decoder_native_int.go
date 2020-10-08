@@ -14,7 +14,7 @@ func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) erro
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	}
 	quoted := (opts != nil) && (opts.Quoted || opts.MapKey)

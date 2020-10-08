@@ -89,7 +89,7 @@ func TestIterator_Array_ReadArray_Example(t *testing.T) {
 			ri, err := it.ReadInt()
 			must.NoError(err)
 			must.Equal(i, ri)
-			i += 1
+			i++
 		}
 		must.NoError(err)
 		_, err = it.NextValueType()
@@ -174,7 +174,7 @@ func TestIterator_Array_ReadArrayCB_Example(t *testing.T) {
 			j, err := it.ReadInt()
 			must.NoError(err)
 			must.Equal(i, j)
-			i += 1
+			i++
 			return nil
 		})
 		must.NoError(err)

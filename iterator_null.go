@@ -8,6 +8,6 @@ func (it *Iterator) ReadNull() error {
 	if c != 'n' {
 		return UnexpectedByteError{got: c, exp: 'n'}
 	}
-	it.head += 1
+	it.head++
 	return it.expectBytes("ull")
 }

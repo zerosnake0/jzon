@@ -7,10 +7,10 @@ func (it *Iterator) ReadBool() (bool, error) {
 	}
 	switch c {
 	case 't':
-		it.head += 1
+		it.head++
 		return true, it.expectBytes("rue")
 	case 'f':
-		it.head += 1
+		it.head++
 		return false, it.expectBytes("alse")
 	default:
 		return false, UnexpectedByteError{got: c, exp: 't', exp2: 'f'}

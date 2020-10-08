@@ -77,13 +77,13 @@ func (it *Iterator) readEscapedChar(b []byte) ([]byte, error) {
 	}
 	escaped := escapeMap[c]
 	if escaped != noEscape {
-		it.head += 1
+		it.head++
 		return append(b, escaped), nil
 	}
 	if c != 'u' {
 		return b, InvalidEscapeCharError{c: c}
 	}
-	it.head += 1
+	it.head++
 	r, err := it.readU4()
 	if err != nil {
 		return b, err
@@ -97,7 +97,7 @@ Retry:
 		if c != '\\' {
 			return appendRune(b, r), nil
 		}
-		it.head += 1
+		it.head++
 		c, err = it.nextByte()
 		if err != nil {
 			return b, err
@@ -108,10 +108,10 @@ Retry:
 			if escaped == noEscape {
 				return b, InvalidEscapeCharError{c: c}
 			}
-			it.head += 1
+			it.head++
 			return append(b, escaped), nil
 		}
-		it.head += 1
+		it.head++
 		r2, err := it.readU4()
 		if err != nil {
 			return b, err
@@ -207,7 +207,7 @@ func (it *Iterator) expectQuote() error {
 	if c != '"' {
 		return UnexpectedByteError{exp: '"', got: c}
 	}
-	it.head += 1 // consume the leading '"'
+	it.head++ // consume the leading '"'
 	return nil
 }
 

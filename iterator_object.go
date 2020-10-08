@@ -15,7 +15,7 @@ func (it *Iterator) readObjectFieldAsSlice() (field []byte, err error) {
 		err = UnexpectedByteError{got: c, exp: ':'}
 		return
 	}
-	it.head += 1
+	it.head++
 	return
 }
 
@@ -40,7 +40,7 @@ func (it *Iterator) skipObjectField() error {
 	if c != ':' {
 		return UnexpectedByteError{got: c, exp: ':'}
 	}
-	it.head += 1
+	it.head++
 	return nil
 }
 
@@ -53,7 +53,7 @@ func (it *Iterator) ReadObjectBegin() (_ bool, _ string, err error) {
 		err = UnexpectedByteError{got: c, exp: '{'}
 		return
 	}
-	it.head += 1
+	it.head++
 	c, err = it.nextToken()
 	if err != nil {
 		return
@@ -61,10 +61,10 @@ func (it *Iterator) ReadObjectBegin() (_ bool, _ string, err error) {
 	switch c {
 	case '}':
 		// no more items
-		it.head += 1
+		it.head++
 		return
 	case '"':
-		it.head += 1
+		it.head++
 		var fieldBytes []byte
 		fieldBytes, err = it.readObjectFieldAsSlice()
 		if err != nil {
@@ -84,10 +84,10 @@ func (it *Iterator) ReadObjectMore() (_ bool, _ string, err error) {
 	}
 	switch c {
 	case '}':
-		it.head += 1
+		it.head++
 		return
 	case ',':
-		it.head += 1
+		it.head++
 		c, err = it.nextToken()
 		if err != nil {
 			return
@@ -96,7 +96,7 @@ func (it *Iterator) ReadObjectMore() (_ bool, _ string, err error) {
 			err = UnexpectedByteError{got: c, exp: '"'}
 			return
 		}
-		it.head += 1
+		it.head++
 		var fieldBytes []byte
 		fieldBytes, err = it.readObjectFieldAsSlice()
 		if err != nil {
@@ -117,19 +117,19 @@ func (it *Iterator) ReadObjectCB(cb func(it *Iterator, field string) error) erro
 	if c != '{' {
 		return UnexpectedByteError{got: c, exp: '{'}
 	}
-	it.head += 1
+	it.head++
 	c, err = it.nextToken()
 	if err != nil {
 		return err
 	}
 	if c == '}' {
-		it.head += 1
+		it.head++
 		return nil
 	}
 	if c != '"' {
 		return UnexpectedByteError{got: c, exp: '"', exp2: '}'}
 	}
-	it.head += 1
+	it.head++
 	for {
 		field, err := it.readObjectField()
 		if err != nil {
@@ -144,10 +144,10 @@ func (it *Iterator) ReadObjectCB(cb func(it *Iterator, field string) error) erro
 		}
 		switch c {
 		case '}':
-			it.head += 1
+			it.head++
 			return nil
 		case ',':
-			it.head += 1
+			it.head++
 			c, err = it.nextToken()
 			if err != nil {
 				return err
@@ -155,7 +155,7 @@ func (it *Iterator) ReadObjectCB(cb func(it *Iterator, field string) error) erro
 			if c != '"' {
 				return UnexpectedByteError{got: c, exp: '"'}
 			}
-			it.head += 1
+			it.head++
 		default:
 			return UnexpectedByteError{got: c, exp: '}', exp2: ','}
 		}

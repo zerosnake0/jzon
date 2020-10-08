@@ -19,7 +19,7 @@ type badWriter struct {
 func (w *badWriter) Write(data []byte) (int, error) {
 	n := len(data)
 	if n > 0 {
-		n -= 1
+		n--
 	}
 	w.data = string(data)
 	return n, nil

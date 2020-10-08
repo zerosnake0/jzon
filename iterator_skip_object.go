@@ -6,14 +6,14 @@ func skipObjectWithStack(it *Iterator, _ byte) error {
 		return err
 	}
 	if c == '}' {
-		it.head += 1
+		it.head++
 		return nil
 	}
 	for {
 		if c != '"' {
 			return UnexpectedByteError{got: c, exp: '"'}
 		}
-		it.head += 1
+		it.head++
 		if err = it.skipObjectField(); err != nil {
 			return err
 		}
@@ -21,7 +21,7 @@ func skipObjectWithStack(it *Iterator, _ byte) error {
 		if err != nil {
 			return err
 		}
-		it.head += 1
+		it.head++
 		switch c {
 		case '{':
 			s := stackPool.Get().(*stack).initObject()
@@ -41,7 +41,7 @@ func skipObjectWithStack(it *Iterator, _ byte) error {
 		if err != nil {
 			return err
 		}
-		it.head += 1
+		it.head++
 		if c == '}' {
 			return nil
 		}
@@ -63,6 +63,6 @@ func (it *Iterator) SkipObject() error {
 	if c != '{' {
 		return UnexpectedByteError{got: c, exp: '{'}
 	}
-	it.head += 1
+	it.head++
 	return skipObjectWithStack(it, c)
 }

@@ -27,7 +27,7 @@ func (it *Iterator) ReadNumber() (n Number, err error) {
 		err = UnexpectedByteError{got: c}
 		return
 	}
-	it.head += 1
+	it.head++
 	s, err := it.readNumberAsString(c)
 	return Number(s), err
 }

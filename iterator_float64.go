@@ -11,7 +11,7 @@ func (it *Iterator) readFloat64(c byte) (float64, error) {
 		if err != nil {
 			return 0, err
 		}
-		it.head += 1
+		it.head++
 		f, buf, err := it.readPositiveFloat64(c, it.tmpBuffer[:0])
 		it.tmpBuffer = buf
 		return -f, err
@@ -26,7 +26,7 @@ func (it *Iterator) ReadFloat64() (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readFloat64(c)
 }
 
@@ -39,14 +39,14 @@ func (it *Iterator) readFloat64ExponentPart(buf []byte) (ret float64, _ []byte, 
 	if err != nil {
 		return 0, buf, err
 	}
-	it.head += 1
+	it.head++
 	if c == '+' || c == '-' {
 		buf = append(buf, c)
 		c, err = it.nextByte()
 		if err != nil {
 			return 0, buf, err
 		}
-		it.head += 1
+		it.head++
 	}
 	if intDigits[c] == invalidDigit {
 		return 0, buf, InvalidFloatError{c: c}
@@ -85,7 +85,7 @@ func (it *Iterator) readFloat64FractionPart(buf []byte) (ret float64, _ []byte, 
 	if intDigits[c] == invalidDigit {
 		return 0, buf, InvalidFloatError{c: c}
 	}
-	it.head += 1
+	it.head++
 	buf = append(buf, c)
 	for {
 		i := it.head
@@ -137,11 +137,11 @@ func (it *Iterator) readPositiveFloat64(c byte, buf []byte) (ret float64, _ []by
 		}
 		switch floatDigits[it.buffer[it.head]] {
 		case dotInNumber:
-			it.head += 1
+			it.head++
 			buf = append(buf, '.')
 			return it.readFloat64FractionPart(buf)
 		case expInNumber:
-			it.head += 1
+			it.head++
 			buf = append(buf, 'e')
 			return it.readFloat64ExponentPart(buf)
 		default:

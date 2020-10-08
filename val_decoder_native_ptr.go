@@ -35,7 +35,7 @@ func (dec *pointerDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpt
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		if err = it.expectBytes("ull"); err != nil {
 			return err
 		}

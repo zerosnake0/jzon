@@ -17,7 +17,7 @@ func (it *Iterator) ReadUint32() (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readUint32(c)
 }
 
@@ -66,7 +66,7 @@ func (it *Iterator) readInt32(c byte) (int32, error) {
 		if err != nil {
 			return 0, err
 		}
-		it.head += 1
+		it.head++
 		v, err := it.readUint32(c)
 		if err != nil {
 			return 0, err
@@ -98,6 +98,6 @@ func (it *Iterator) ReadInt32() (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readInt32(c)
 }
