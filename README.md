@@ -88,7 +88,7 @@ b, err := jzon.Marshal(&data)
 
 ```go
 iter := jzon.NewIterator()
-defer jzon.ReturnIterator(iter)
+defer iter.Release()
 iter.Reset(b)
 jzon.ReadVal(&data)
 ```
@@ -99,7 +99,7 @@ jzon.ReadVal(&data)
 var w io.Writer
 
 streamer := jzon.NewStreamer()
-defer jzon.ReturnStreamer(streamer)
+defer streamer.Release()
 streamer.Reset(w)
 streamer.Value(&data)
 streamer.Flush()
@@ -128,7 +128,7 @@ err := dec.Unmarshal(b, &data)
 
 // iterator
 iter := dec.NewIterator()
-defer dec.ReturnIterator(iter)
+defer iter.Release()
 ```
 
 ### Custom Encoder
@@ -157,5 +157,5 @@ b, err := enc.Marshal(&data)
 
 // streamer
 streamer := enc.NewStreamer()
-defer enc.ReturnStreamer(streamer)
+defer streamer.Release()
 ```
