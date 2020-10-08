@@ -8,13 +8,13 @@ func (tq *typeQueue) push(t reflect.Type) {
 	*tq = append(*tq, t)
 }
 
-func (tq *typeQueue) pushAlsoPtr(t reflect.Type) {
-	if t.Kind() == reflect.Ptr {
-		*tq = append(*tq, t)
-	} else {
-		*tq = append(*tq, reflect.PtrTo(t), t)
-	}
-}
+// func (tq *typeQueue) pushAlsoPtr(t reflect.Type) {
+// 	if t.Kind() == reflect.Ptr {
+// 		*tq = append(*tq, t)
+// 	} else {
+// 		*tq = append(*tq, reflect.PtrTo(t), t)
+// 	}
+// }
 
 func (tq *typeQueue) pop() (t reflect.Type) {
 	q := *tq

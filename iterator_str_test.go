@@ -275,6 +275,22 @@ func TestIterator_Str_readStringAsSlice(t *testing.T) {
 func TestIterator_Str_ReadStringAsSlice(t *testing.T) {
 	t.Run("not string", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
+			_, err := it.ReadStringAsSlice()
+			require.Equal(t, io.EOF, err)
+		})
+	})
+	t.Run("normal", func(t *testing.T) {
+		withIterator(`"abc"`, func(it *Iterator) {
+			ret, err := it.ReadStringAsSlice()
+			require.NoError(t, err)
+			require.Equal(t, []byte("abc"), ret)
+		})
+	})
+}
+
+func TestIterator_Str_ReadStringAndAppend(t *testing.T) {
+	t.Run("not string", func(t *testing.T) {
+		withIterator("", func(it *Iterator) {
 			_, err := it.ReadStringAndAppend(nil)
 			require.Equal(t, io.EOF, err)
 		})
@@ -289,6 +305,13 @@ func TestIterator_Str_ReadStringAsSlice(t *testing.T) {
 			require.Equal(t, p1.Data, p2.Data)
 			require.Equal(t, p1.Cap, p2.Cap)
 			require.Equal(t, []byte("abc"), ret)
+		})
+	})
+	t.Run("error", func(t *testing.T) {
+		withIterator(`"`, func(it *Iterator) {
+			buf := make([]byte, 0, 32)
+			_, err := it.ReadStringAndAppend(buf)
+			require.Equal(t, io.EOF, err)
 		})
 	})
 }

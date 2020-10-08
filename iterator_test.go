@@ -2,7 +2,9 @@ package jzon
 
 import (
 	"bytes"
+	"errors"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -104,4 +106,15 @@ func TestIterator_NextValueType(t *testing.T) {
 			must.Equal(typ, next)
 		}
 	}
+}
+
+func TestIterator_WrapError(t *testing.T) {
+	must := require.New(t)
+	it := NewIterator()
+	s := strings.Repeat(" ", errWidth+1)
+	it.ResetBytes([]byte(s))
+	ex := errors.New("test")
+	err := it.WrapError(ex)
+	err2 := it.WrapError(err)
+	must.Equal(err, err2)
 }

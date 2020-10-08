@@ -103,18 +103,20 @@ func (it *Iterator) Buffer() []byte {
 	return it.buffer[it.head:it.tail]
 }
 
+const errWidth = 20
+
 func (it *Iterator) errorLocation() []byte {
 	var (
 		head int
 		tail int
 	)
-	if it.head > 20 {
-		head = it.head - 20
+	if it.head > errWidth {
+		head = it.head - errWidth
 	}
-	if it.tail-it.head < 20 {
+	if it.tail-it.head < errWidth {
 		tail = it.tail
 	} else {
-		tail = it.head + 20
+		tail = it.head + errWidth
 	}
 	return it.buffer[head:tail]
 }

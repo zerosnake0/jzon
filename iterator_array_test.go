@@ -140,7 +140,7 @@ func TestIterator_Array_ReadArrayCB(t *testing.T) {
 	t.Run("error on more", func(t *testing.T) {
 		withIterator(" [ 1 ", func(it *Iterator) {
 			err := it.ReadArrayCB(func(it *Iterator) (err error) {
-				_, err = it.ReadInt()
+				_, err = it.ReadUint()
 				return
 			})
 			require.Equal(t, io.EOF, err)
@@ -149,7 +149,7 @@ func TestIterator_Array_ReadArrayCB(t *testing.T) {
 	t.Run("error on more 2", func(t *testing.T) {
 		withIterator(" [ 1a", func(it *Iterator) {
 			err := it.ReadArrayCB(func(it *Iterator) (err error) {
-				_, err = it.ReadInt()
+				_, err = it.ReadUint()
 				return
 			})
 			require.IsType(t, UnexpectedByteError{}, err)
@@ -158,7 +158,7 @@ func TestIterator_Array_ReadArrayCB(t *testing.T) {
 	t.Run("2 items", func(t *testing.T) {
 		withIterator(" [ 1 , 2 ] ", func(it *Iterator) {
 			err := it.ReadArrayCB(func(it *Iterator) (err error) {
-				_, err = it.ReadInt()
+				_, err = it.ReadUint()
 				return
 			})
 			require.NoError(t, err)

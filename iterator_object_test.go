@@ -116,6 +116,12 @@ func TestIterator_Object_ReadObjectMore(t *testing.T) {
 			require.IsType(t, UnexpectedByteError{}, err)
 		})
 	})
+	t.Run("eof after quote", func(t *testing.T) {
+		f(t, `, "`, func(it *Iterator) {
+			_, _, err := it.ReadObjectMore()
+			require.Equal(t, io.EOF, err)
+		})
+	})
 }
 
 func TestIterator_Object_ReadObject_Example(t *testing.T) {
@@ -297,5 +303,13 @@ func TestIterator_Object_skipObjectField(t *testing.T) {
 	withIterator(` key" : `, func(it *Iterator) {
 		err := it.skipObjectField()
 		must.NoError(err)
+	})
+	withIterator(` key `, func(it *Iterator) {
+		err := it.skipObjectField()
+		must.Equal(io.EOF, err)
+	})
+	withIterator(` key" { `, func(it *Iterator) {
+		err := it.skipObjectField()
+		must.IsType(UnexpectedByteError{}, err)
 	})
 }
