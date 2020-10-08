@@ -20,7 +20,7 @@ func (it *Iterator) readObjectFieldAsSlice() (field []byte, err error) {
 }
 
 // called only when a '"' is consumed
-func (it *Iterator) readObjectField() (string, error) {
+func (it *Iterator) readObjectField() (_ string, err error) {
 	field, err := it.readObjectFieldAsSlice()
 	if err != nil {
 		return "", err

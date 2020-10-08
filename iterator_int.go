@@ -9,31 +9,10 @@ const (
 )
 
 var (
-	readInt   func(it *Iterator) (int, error)
-	readUint  func(it *Iterator) (uint, error)
 	intDigits [charNum]int8
 )
 
 func init() {
-	if strconv.IntSize == 32 {
-		readInt = func(it *Iterator) (int, error) {
-			i, err := it.ReadInt32()
-			return int(i), err
-		}
-		readUint = func(it *Iterator) (uint, error) {
-			u, err := it.ReadUint32()
-			return uint(u), err
-		}
-	} else {
-		readInt = func(it *Iterator) (int, error) {
-			i, err := it.ReadInt64()
-			return int(i), err
-		}
-		readUint = func(it *Iterator) (uint, error) {
-			u, err := it.ReadUint64()
-			return uint(u), err
-		}
-	}
 	for i := 0; i < charNum; i++ {
 		intDigits[i] = invalidDigit
 	}
@@ -43,9 +22,19 @@ func init() {
 }
 
 func (it *Iterator) ReadInt() (int, error) {
-	return readInt(it)
+	if strconv.IntSize == 32 {
+		i, err := it.ReadInt32()
+		return int(i), err
+	}
+	i, err := it.ReadInt64()
+	return int(i), err
 }
 
 func (it *Iterator) ReadUint() (uint, error) {
-	return readUint(it)
+	if strconv.IntSize == 32 {
+		u, err := it.ReadUint32()
+		return uint(u), err
+	}
+	u, err := it.ReadUint64()
+	return uint(u), err
 }
