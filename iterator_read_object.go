@@ -7,14 +7,14 @@ func readObjectWithStack(it *Iterator, _ byte) (interface{}, error) {
 	}
 	topObj := map[string]interface{}{}
 	if c == '}' {
-		it.head += 1
+		it.head++
 		return topObj, nil
 	}
 	for {
 		if c != '"' {
 			return nil, UnexpectedByteError{got: c, exp: '"'}
 		}
-		it.head += 1
+		it.head++
 		field, err := it.readObjectField()
 		if err != nil {
 			return nil, err
@@ -23,7 +23,7 @@ func readObjectWithStack(it *Iterator, _ byte) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		it.head += 1
+		it.head++
 		// We disabled the following switch to test benchmark
 		// comparing to using builtin stack
 		// the result is using ours own stack will improve the
@@ -57,7 +57,7 @@ func readObjectWithStack(it *Iterator, _ byte) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		it.head += 1
+		it.head++
 		if c == '}' {
 			return topObj, nil
 		}

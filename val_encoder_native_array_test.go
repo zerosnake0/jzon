@@ -9,7 +9,7 @@ import (
 func TestValEncoder_Array_Error(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		e := errors.New("test")
-		arr := [...]json.Marshaler{testJsonMarshaler{
+		arr := [...]json.Marshaler{testJSONMarshaler{
 			data: `"test"`,
 			err:  e,
 		}}

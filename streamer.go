@@ -4,6 +4,7 @@ import (
 	"io"
 )
 
+// Streamer is a chained class for encoding object to json
 type Streamer struct {
 	cfg *EncoderConfig
 
@@ -18,15 +19,18 @@ type Streamer struct {
 	Context interface{} // custom stream context
 
 	// runtime
-	safeSet []string
+	escapeHTML bool
+	safeSet    []string
 	// prefix  string
 	// indent  string
 }
 
+// NewStreamer returns a new streamer
 func NewStreamer() *Streamer {
 	return DefaultEncoderConfig.NewStreamer()
 }
 
+// Release the streamer, the streamer should not be used after call
 func (s *Streamer) Release() {
 	s.cfg.returnStreamer(s)
 }
@@ -39,12 +43,15 @@ func (s *Streamer) reset() {
 	s.Context = nil
 }
 
+// Reset resets the streamer with a new writer
 func (s *Streamer) Reset(w io.Writer) {
 	s.reset()
 	s.writer = w
 }
 
+// EscapeHTML set if the string should be html-escaped
 func (s *Streamer) EscapeHTML(on bool) {
+	s.escapeHTML = on
 	if on {
 		s.safeSet = htmlSafeSet[:]
 	} else {
@@ -57,12 +64,13 @@ func (s *Streamer) EscapeHTML(on bool) {
 // 	s.indent = indent
 // }
 
+// Flush flushes from buffer to the writer
 func (s *Streamer) Flush() error {
 	if s.Error != nil {
 		return s.Error
 	}
 	if s.writer == nil {
-		return NoWriterAttachedError
+		return ErrNoAttachedWriter
 	}
 	l := len(s.buffer)
 	// see comment of io.Writer
@@ -84,6 +92,7 @@ func (s *Streamer) onVal() {
 	}
 }
 
+// RawString writes a raw object (in string)
 func (s *Streamer) RawString(raw string) *Streamer {
 	if s.Error != nil {
 		return s
@@ -93,6 +102,7 @@ func (s *Streamer) RawString(raw string) *Streamer {
 	return s
 }
 
+// Raw writes a raw object (in byte slice)
 func (s *Streamer) Raw(raw []byte) *Streamer {
 	if s.Error != nil {
 		return s
@@ -107,6 +117,7 @@ func (s *Streamer) null() {
 	s.buffer = append(s.buffer, 'n', 'u', 'l', 'l')
 }
 
+// Null writes a `null`
 func (s *Streamer) Null() *Streamer {
 	if s.Error != nil {
 		return s
@@ -115,6 +126,7 @@ func (s *Streamer) Null() *Streamer {
 	return s
 }
 
+// True writes a `true`
 func (s *Streamer) True() *Streamer {
 	if s.Error != nil {
 		return s
@@ -124,6 +136,7 @@ func (s *Streamer) True() *Streamer {
 	return s
 }
 
+// False writes a `false`
 func (s *Streamer) False() *Streamer {
 	if s.Error != nil {
 		return s
@@ -133,14 +146,15 @@ func (s *Streamer) False() *Streamer {
 	return s
 }
 
+// Bool writes a boolean value
 func (s *Streamer) Bool(b bool) *Streamer {
 	if b {
 		return s.True()
-	} else {
-		return s.False()
 	}
+	return s.False()
 }
 
+// ObjectStart starts to write an object
 func (s *Streamer) ObjectStart() *Streamer {
 	if s.Error != nil {
 		return s
@@ -151,6 +165,7 @@ func (s *Streamer) ObjectStart() *Streamer {
 	return s
 }
 
+// Field writes an object field
 func (s *Streamer) Field(field string) *Streamer {
 	if s.Error != nil {
 		return s
@@ -162,6 +177,7 @@ func (s *Streamer) Field(field string) *Streamer {
 	return s
 }
 
+// RawField writes an object field (in raw byte slice)
 func (s *Streamer) RawField(b []byte) *Streamer {
 	if s.Error != nil {
 		return s
@@ -173,6 +189,7 @@ func (s *Streamer) RawField(b []byte) *Streamer {
 	return s
 }
 
+// ObjectEnd ends the object writing
 func (s *Streamer) ObjectEnd() *Streamer {
 	if s.Error != nil {
 		return s
@@ -182,6 +199,7 @@ func (s *Streamer) ObjectEnd() *Streamer {
 	return s
 }
 
+// ArrayStart starts to write an array
 func (s *Streamer) ArrayStart() *Streamer {
 	if s.Error != nil {
 		return s
@@ -192,6 +210,7 @@ func (s *Streamer) ArrayStart() *Streamer {
 	return s
 }
 
+// ArrayEnd ends the array writing
 func (s *Streamer) ArrayEnd() *Streamer {
 	if s.Error != nil {
 		return s

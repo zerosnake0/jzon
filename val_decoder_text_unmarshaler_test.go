@@ -38,7 +38,7 @@ func TestValDecoder_TextUnmarshaler(t *testing.T) {
 		f(t, data, ex, "dummy", initErr)
 	}
 	t.Run("nil pointer", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, "", nil)
+		f(t, "null", ErrNilPointerReceiver, "", nil)
 	})
 	t.Run("eof", func(t *testing.T) {
 		f2(t, " ", io.EOF, nil)

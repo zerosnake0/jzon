@@ -50,15 +50,14 @@ func copyValue(t *testing.T, in interface{}) (out interface{}) {
 		if ptrValue.IsNil() {
 			newV := reflect.NewAt(typ.Elem(), nil)
 			return newV.Interface()
-		} else {
-			elem := ptrValue.Elem()
-			copied := copyValue(t, elem.Interface())
-			newV := reflect.New(elem.Type())
-			if copied != nil {
-				newV.Elem().Set(reflect.ValueOf(copied))
-			}
-			return newV.Interface()
 		}
+		elem := ptrValue.Elem()
+		copied := copyValue(t, elem.Interface())
+		newV := reflect.New(elem.Type())
+		if copied != nil {
+			newV.Elem().Set(reflect.ValueOf(copied))
+		}
+		return newV.Interface()
 	case reflect.Struct:
 		oldV := reflect.ValueOf(in)
 		newV := reflect.New(typ).Elem()
@@ -130,7 +129,7 @@ func TestValDecoder_Native_Interface(t *testing.T) {
 
 	// eface
 	t.Run("nil pointer", func(t *testing.T) {
-		f2(t, "null", NilPointerReceiverError)
+		f2(t, "null", ErrNilPointerReceiver)
 	})
 	t.Run("eof", func(t *testing.T) {
 		f3(t, "", io.EOF)
@@ -154,19 +153,19 @@ func TestValDecoder_Native_Interface(t *testing.T) {
 		f2(t, `{"a":"b"}`, nil, 1)
 	})
 	t.Run("non compatible value 2", func(t *testing.T) {
-		f2(t, `{"a":"b"}`, nil, testJsonUnmarshaler{
+		f2(t, `{"a":"b"}`, nil, testJSONUnmarshaler{
 			data: "123",
 			err:  errors.New("test"),
-		}, testJsonUnmarshaler{
+		}, testJSONUnmarshaler{
 			data: "123",
 			err:  errors.New("test"),
 		})
 	})
 	t.Run("eof 2", func(t *testing.T) {
-		f2(t, ``, io.EOF, &testJsonUnmarshaler{
+		f2(t, ``, io.EOF, &testJSONUnmarshaler{
 			data: "123",
 			err:  errors.New("test error"),
-		}, &testJsonUnmarshaler{
+		}, &testJSONUnmarshaler{
 			data: "123",
 			err:  errors.New("test error"),
 		})
@@ -174,10 +173,10 @@ func TestValDecoder_Native_Interface(t *testing.T) {
 	t.Run("non compatible value 3", func(t *testing.T) {
 		ex := errors.New("test error")
 		f2(t, `{"a":"b"}`, ex,
-			&testJsonUnmarshaler{
+			&testJSONUnmarshaler{
 				data: "123",
 				err:  ex,
-			}, &testJsonUnmarshaler{
+			}, &testJSONUnmarshaler{
 				data: "123",
 				err:  ex,
 			})
@@ -283,7 +282,7 @@ func TestValDecoder_Native_Interface(t *testing.T) {
 	t.Run("iface not null 1", func(t *testing.T) {
 		var um1 testIface
 		var um2 testIface
-		f(t, `{}`, IFaceError, &um1, &um2)
+		f(t, `{}`, ErrEmptyIFace, &um1, &um2)
 	})
 	t.Run("iface not null 2", func(t *testing.T) {
 		var um1 testIface = testIfaceImpl{
@@ -292,7 +291,7 @@ func TestValDecoder_Native_Interface(t *testing.T) {
 		var um2 testIface = testIfaceImpl{
 			field: "test",
 		}
-		f(t, `{}`, PointerReceiverError, &um1, &um2)
+		f(t, `{}`, ErrPointerReceiver, &um1, &um2)
 	})
 	t.Run("iface not null 3", func(t *testing.T) {
 		var um1 testIface = &testIfaceImpl{
@@ -347,7 +346,7 @@ func TestValDecoder_Native_Interface_Loop(t *testing.T) {
 		var o1 iface
 		o1 = &o1
 		err := DefaultDecoderConfig.Unmarshal([]byte(`1`), o1)
-		checkError(t, EfaceLoopingError, err)
+		checkError(t, ErrEfaceLooping, err)
 	})
 	t.Run("loop 2", func(t *testing.T) {
 		// the standard lib does not deal with cross nested
@@ -357,7 +356,7 @@ func TestValDecoder_Native_Interface_Loop(t *testing.T) {
 		o1 = &o1o
 		o1o = &o1
 		err := DefaultDecoderConfig.Unmarshal([]byte(`1`), o1)
-		checkError(t, EfaceLoopingError, err)
+		checkError(t, ErrEfaceLooping, err)
 	})
 }
 

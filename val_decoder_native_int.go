@@ -14,7 +14,7 @@ func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) erro
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	}
 	quoted := (opts != nil) && (opts.Quoted || opts.MapKey)
@@ -22,13 +22,13 @@ func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) erro
 		if c != '"' {
 			return UnexpectedByteError{got: c, exp: '"'}
 		}
-		it.head += 1
+		it.head++
 		c, err = it.nextByte()
 		if err != nil {
 			return err
 		}
 	}
-	it.head += 1
+	it.head++
 	i, err := it.readInt8(c)
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (*int8Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) erro
 		if c != '"' {
 			return UnexpectedByteError{got: c, exp: '"'}
 		}
-		it.head += 1
+		it.head++
 	}
 	*(*int8)(ptr) = i
 	return nil
@@ -57,7 +57,7 @@ func (*int16Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) err
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	}
 	quoted := (opts != nil) && (opts.Quoted || opts.MapKey)
@@ -65,13 +65,13 @@ func (*int16Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) err
 		if c != '"' {
 			return UnexpectedByteError{got: c, exp: '"'}
 		}
-		it.head += 1
+		it.head++
 		c, err = it.nextByte()
 		if err != nil {
 			return err
 		}
 	}
-	it.head += 1
+	it.head++
 	i, err := it.readInt16(c)
 	if err != nil {
 		return err
@@ -84,7 +84,7 @@ func (*int16Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) err
 		if c != '"' {
 			return UnexpectedByteError{got: c, exp: '"'}
 		}
-		it.head += 1
+		it.head++
 	}
 	*(*int16)(ptr) = i
 	return nil
@@ -100,7 +100,7 @@ func (*int32Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) err
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	}
 	quoted := (opts != nil) && (opts.Quoted || opts.MapKey)
@@ -108,13 +108,13 @@ func (*int32Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) err
 		if c != '"' {
 			return UnexpectedByteError{got: c, exp: '"'}
 		}
-		it.head += 1
+		it.head++
 		c, err = it.nextByte()
 		if err != nil {
 			return err
 		}
 	}
-	it.head += 1
+	it.head++
 	i, err := it.readInt32(c)
 	if err != nil {
 		return err
@@ -127,7 +127,7 @@ func (*int32Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) err
 		if c != '"' {
 			return UnexpectedByteError{got: c, exp: '"'}
 		}
-		it.head += 1
+		it.head++
 	}
 	*(*int32)(ptr) = i
 	return nil
@@ -143,7 +143,7 @@ func (*int64Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) err
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	}
 	quoted := (opts != nil) && (opts.Quoted || opts.MapKey)
@@ -151,13 +151,13 @@ func (*int64Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) err
 		if c != '"' {
 			return UnexpectedByteError{got: c, exp: '"'}
 		}
-		it.head += 1
+		it.head++
 		c, err = it.nextByte()
 		if err != nil {
 			return err
 		}
 	}
-	it.head += 1
+	it.head++
 	i, err := it.readInt64(c)
 	if err != nil {
 		return err
@@ -170,7 +170,7 @@ func (*int64Decoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) err
 		if c != '"' {
 			return UnexpectedByteError{got: c, exp: '"'}
 		}
-		it.head += 1
+		it.head++
 	}
 	*(*int64)(ptr) = i
 	return nil

@@ -12,12 +12,13 @@ const (
 	maxUint16Mod10          = int8(math.MaxUint16 - maxUint16Div10*10)
 )
 
+// ReadUint16 reads an uint16 value
 func (it *Iterator) ReadUint16() (uint16, error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readUint16(c)
 }
 
@@ -66,7 +67,7 @@ func (it *Iterator) readInt16(c byte) (int16, error) {
 		if err != nil {
 			return 0, err
 		}
-		it.head += 1
+		it.head++
 		v, err := it.readUint16(c)
 		if err != nil {
 			return 0, err
@@ -78,26 +79,26 @@ func (it *Iterator) readInt16(c byte) (int16, error) {
 			}
 		}
 		return -int16(v), nil
-	} else {
-		v, err := it.readUint16(c)
-		if err != nil {
-			return 0, err
-		}
-		if v > math.MaxInt16 {
-			return 0, IntOverflowError{
-				typ:   "int16",
-				value: strconv.FormatUint(uint64(v), 10),
-			}
-		}
-		return int16(v), nil
 	}
+	v, err := it.readUint16(c)
+	if err != nil {
+		return 0, err
+	}
+	if v > math.MaxInt16 {
+		return 0, IntOverflowError{
+			typ:   "int16",
+			value: strconv.FormatUint(uint64(v), 10),
+		}
+	}
+	return int16(v), nil
 }
 
+// ReadInt16 reads an int16 value
 func (it *Iterator) ReadInt16() (int16, error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readInt16(c)
 }

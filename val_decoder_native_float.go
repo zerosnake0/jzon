@@ -14,7 +14,7 @@ func (*float32Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	}
 	f, err := it.ReadFloat32()
@@ -35,7 +35,7 @@ func (*float64Decoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	}
 	f, err := it.ReadFloat64()

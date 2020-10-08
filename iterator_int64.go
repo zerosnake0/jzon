@@ -12,12 +12,13 @@ const (
 	maxUint64Mod10          = int8(math.MaxUint64 - maxUint64Div10*10)
 )
 
+// ReadUint64 reads an uint64 value
 func (it *Iterator) ReadUint64() (uint64, error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readUint64(c)
 }
 
@@ -67,7 +68,7 @@ func (it *Iterator) readInt64(c byte) (int64, error) {
 		if err != nil {
 			return 0, err
 		}
-		it.head += 1
+		it.head++
 		v, err := it.readUint64(c)
 		if err != nil {
 			return 0, err
@@ -79,26 +80,26 @@ func (it *Iterator) readInt64(c byte) (int64, error) {
 			}
 		}
 		return -int64(v), nil
-	} else {
-		v, err := it.readUint64(c)
-		if err != nil {
-			return 0, err
-		}
-		if v > math.MaxInt64 {
-			return 0, IntOverflowError{
-				typ:   "int64",
-				value: strconv.FormatUint(uint64(v), 10),
-			}
-		}
-		return int64(v), nil
 	}
+	v, err := it.readUint64(c)
+	if err != nil {
+		return 0, err
+	}
+	if v > math.MaxInt64 {
+		return 0, IntOverflowError{
+			typ:   "int64",
+			value: strconv.FormatUint(uint64(v), 10),
+		}
+	}
+	return int64(v), nil
 }
 
+// ReadInt64 reads an int64 value
 func (it *Iterator) ReadInt64() (int64, error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readInt64(c)
 }

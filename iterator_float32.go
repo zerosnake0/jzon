@@ -5,18 +5,19 @@ import (
 	"strconv"
 )
 
+// ReadFloat32 reads a float32 value
 func (it *Iterator) ReadFloat32() (float32, error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	if c == '-' {
 		c, err = it.nextByte()
 		if err != nil {
 			return 0, err
 		}
-		it.head += 1
+		it.head++
 		f, buf, err := it.readPositiveFloat32(c, it.tmpBuffer[:0])
 		it.tmpBuffer = buf
 		return -f, err
@@ -36,14 +37,14 @@ func (it *Iterator) readFloat32ExponentPart(buf []byte) (ret float32, _ []byte, 
 	if err != nil {
 		return 0, buf, err
 	}
-	it.head += 1
+	it.head++
 	if c == '+' || c == '-' {
 		buf = append(buf, c)
 		c, err = it.nextByte()
 		if err != nil {
 			return 0, buf, err
 		}
-		it.head += 1
+		it.head++
 	}
 	if intDigits[c] == invalidDigit {
 		return 0, buf, InvalidFloatError{c: c}
@@ -82,7 +83,7 @@ func (it *Iterator) readFloat32FractionPart(buf []byte) (ret float32, _ []byte, 
 	if intDigits[c] == invalidDigit {
 		return 0, buf, InvalidFloatError{c: c}
 	}
-	it.head += 1
+	it.head++
 	buf = append(buf, c)
 	for {
 		i := it.head
@@ -134,11 +135,11 @@ func (it *Iterator) readPositiveFloat32(c byte, buf []byte) (ret float32, _ []by
 		}
 		switch floatDigits[it.buffer[it.head]] {
 		case dotInNumber:
-			it.head += 1
+			it.head++
 			buf = append(buf, '.')
 			return it.readFloat32FractionPart(buf)
 		case expInNumber:
-			it.head += 1
+			it.head++
 			buf = append(buf, 'e')
 			return it.readFloat32ExponentPart(buf)
 		default:

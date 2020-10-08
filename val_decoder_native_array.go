@@ -44,13 +44,13 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	}
 	if c != '[' {
 		return UnexpectedByteError{got: c, exp: '[', exp2: 'n'}
 	}
-	it.head += 1
+	it.head++
 	c, err = it.nextToken()
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 	count := 0
 	var offset uintptr = 0
 	if c == ']' {
-		it.head += 1
+		it.head++
 	} else {
 		for {
 			if count < dec.length {
@@ -68,7 +68,7 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 				if err := dec.elemDec.Decode(elemPtr, it, nil); err != nil {
 					return err
 				}
-				count += 1
+				count++
 				offset += dec.elemSize
 			} else {
 				if err := it.Skip(); err != nil {
@@ -79,7 +79,7 @@ func (dec *arrayDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 			if err != nil {
 				return err
 			}
-			it.head += 1
+			it.head++
 			if c == ']' {
 				break
 			}

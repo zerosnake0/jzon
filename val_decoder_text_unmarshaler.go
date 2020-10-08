@@ -21,14 +21,14 @@ func (dec textUnmarshalerDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *De
 	}
 	switch c {
 	case '"':
-		it.head += 1
+		it.head++
 		b, err := it.readStringAsSlice()
 		if err != nil {
 			return err
 		}
 		return unmarshaler.UnmarshalText(b)
 	case 'n':
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	default:
 		return UnexpectedByteError{got: c, exp: '"', exp2: 'n'}

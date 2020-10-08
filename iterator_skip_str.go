@@ -30,13 +30,13 @@ func (it *Iterator) skipEscapedChar() error {
 	}
 	escaped := escapeMap[c]
 	if escaped != noEscape {
-		it.head += 1
+		it.head++
 		return nil
 	}
 	if c != 'u' {
 		return InvalidEscapeCharError{c: c}
 	}
-	it.head += 1
+	it.head++
 	return it.skipU4()
 }
 
@@ -70,6 +70,7 @@ func skipString(it *Iterator, _ byte) error {
 	}
 }
 
+// SkipString skips a string
 func (it *Iterator) SkipString() error {
 	c, err := it.nextToken()
 	if err != nil {
@@ -78,6 +79,6 @@ func (it *Iterator) SkipString() error {
 	if c != '"' {
 		return UnexpectedByteError{got: c, exp: '"'}
 	}
-	it.head += 1
+	it.head++
 	return skipString(it, c)
 }

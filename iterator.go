@@ -50,10 +50,12 @@ type Iterator struct {
 	disallowUnknownFields bool
 }
 
+// NewIterator returns a new iterator.
 func NewIterator() *Iterator {
 	return DefaultDecoderConfig.NewIterator()
 }
 
+// Release the iterator, the iterator should not be reused after call.
 func (it *Iterator) Release() {
 	it.cfg.returnIterator(it)
 }
@@ -67,12 +69,13 @@ func (it *Iterator) reset() {
 	it.iteratorEmbedded = iteratorEmbedded{}
 }
 
-/*
- * In reset methods, explicit assignment is faster than then following
- *   *it = Iterator{ ... }
- * When the above code is used, runtime.duffcopy and runtime.duffzero will be used
- * which will slow down our code (correct me if I am wrong)
- */
+// Reset the iterator with an io.Reader
+// if the reader is nil, reset the iterator to its initial state
+//
+// In reset methods, explicit assignment is faster than then following
+//   *it = Iterator{ ... }
+// When the above code is used, runtime.duffcopy and runtime.duffzero will be used
+// which will slow down our code (correct me if I am wrong)
 func (it *Iterator) Reset(r io.Reader) {
 	switch v := r.(type) {
 	case nil:
@@ -90,6 +93,7 @@ func (it *Iterator) Reset(r io.Reader) {
 	it.iteratorEmbedded = iteratorEmbedded{}
 }
 
+// ResetBytes resets iterator with a byte slice
 func (it *Iterator) ResetBytes(data []byte) {
 	it.reader = nil
 	it.buffer = data
@@ -99,6 +103,7 @@ func (it *Iterator) ResetBytes(data []byte) {
 	it.iteratorEmbedded = iteratorEmbedded{}
 }
 
+// Buffer returns the current slice buffer of the iterator.
 func (it *Iterator) Buffer() []byte {
 	return it.buffer[it.head:it.tail]
 }
@@ -121,6 +126,7 @@ func (it *Iterator) errorLocation() []byte {
 	return it.buffer[head:tail]
 }
 
+// WrapError wraps the error with the current iterator location
 func (it *Iterator) WrapError(err error) *DecodeError {
 	if e, ok := err.(*DecodeError); ok {
 		return e
@@ -233,7 +239,7 @@ func (it *Iterator) nextToken() (ret byte, err error) {
 	}
 }
 
-// Read until the first valid token is found, only the whitespaces are consumed
+// NextValueType read until the first valid token is found, only the whitespaces are consumed
 func (it *Iterator) NextValueType() (ValueType, error) {
 	v, err := it.nextToken()
 	return valueTypeMap[v], err
@@ -246,7 +252,7 @@ func (it *Iterator) unmarshal(obj interface{}) error {
 	}
 	_, err = it.nextToken()
 	if err == nil {
-		return DataRemainedError
+		return ErrDataRemained
 	}
 	if err != io.EOF {
 		return err
@@ -254,11 +260,13 @@ func (it *Iterator) unmarshal(obj interface{}) error {
 	return nil
 }
 
+// Unmarshal behave like standard json.Unmarshal
 func (it *Iterator) Unmarshal(data []byte, obj interface{}) error {
 	it.ResetBytes(data)
 	return it.unmarshal(obj)
 }
 
+// Valid behave like standard json.Valid
 func (it *Iterator) Valid(data []byte) bool {
 	it.ResetBytes(data)
 	err := it.Skip()
@@ -269,6 +277,7 @@ func (it *Iterator) Valid(data []byte) bool {
 	return err == io.EOF
 }
 
+// UnmarshalFromReader behave like standard json.Unmarshal but with an io.Reader
 func (it *Iterator) UnmarshalFromReader(r io.Reader, obj interface{}) error {
 	it.Reset(r)
 	return it.unmarshal(obj)

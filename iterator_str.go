@@ -77,13 +77,13 @@ func (it *Iterator) readEscapedChar(b []byte) ([]byte, error) {
 	}
 	escaped := escapeMap[c]
 	if escaped != noEscape {
-		it.head += 1
+		it.head++
 		return append(b, escaped), nil
 	}
 	if c != 'u' {
 		return b, InvalidEscapeCharError{c: c}
 	}
-	it.head += 1
+	it.head++
 	r, err := it.readU4()
 	if err != nil {
 		return b, err
@@ -97,7 +97,7 @@ Retry:
 		if c != '\\' {
 			return appendRune(b, r), nil
 		}
-		it.head += 1
+		it.head++
 		c, err = it.nextByte()
 		if err != nil {
 			return b, err
@@ -108,10 +108,10 @@ Retry:
 			if escaped == noEscape {
 				return b, InvalidEscapeCharError{c: c}
 			}
-			it.head += 1
+			it.head++
 			return append(b, escaped), nil
 		}
-		it.head += 1
+		it.head++
 		r2, err := it.readU4()
 		if err != nil {
 			return b, err
@@ -123,9 +123,8 @@ Retry:
 			goto Retry
 		}
 		return appendRune(b, combined), nil
-	} else {
-		return appendRune(b, r), nil
 	}
+	return appendRune(b, r), nil
 }
 
 // internal, call only after a '"' is consumed
@@ -207,10 +206,11 @@ func (it *Iterator) expectQuote() error {
 	if c != '"' {
 		return UnexpectedByteError{exp: '"', got: c}
 	}
-	it.head += 1 // consume the leading '"'
+	it.head++ // consume the leading '"'
 	return nil
 }
 
+// ReadStringAsSlice reads a string as a byte slice
 // The returned slice can only be used temporarily, a copy must be made
 // if the result needs to be saved
 func (it *Iterator) ReadStringAsSlice() (_ []byte, err error) {
@@ -220,6 +220,7 @@ func (it *Iterator) ReadStringAsSlice() (_ []byte, err error) {
 	return it.readStringAsSlice()
 }
 
+// ReadStringAndAppend reads a string and appends to a byte slice
 func (it *Iterator) ReadStringAndAppend(buf []byte) (_ []byte, err error) {
 	if err = it.expectQuote(); err != nil {
 		return
@@ -240,6 +241,7 @@ func (it *Iterator) readString() (ret string, err error) {
 	return
 }
 
+// ReadString reads a string
 func (it *Iterator) ReadString() (_ string, err error) {
 	if err = it.expectQuote(); err != nil {
 		return

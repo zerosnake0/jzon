@@ -22,7 +22,7 @@ func TestValDecoder_Native_Base64(t *testing.T) {
 		f(t, data, ex, "dummy")
 	}
 	t.Run("nil pointer", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, "")
+		f(t, "null", ErrNilPointerReceiver, "")
 	})
 	t.Run("eof", func(t *testing.T) {
 		f2(t, "", io.EOF)

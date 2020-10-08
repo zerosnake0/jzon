@@ -19,7 +19,7 @@ func TestValEncoder_Map_Error(t *testing.T) {
 	t.Run("element error", func(t *testing.T) {
 		e := errors.New("test")
 		checkEncodeValueWithStandard(t, map[string]json.Marshaler{
-			"key": testJsonMarshaler{
+			"key": testJSONMarshaler{
 				err: e,
 			},
 		}, e)

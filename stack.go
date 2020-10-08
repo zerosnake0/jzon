@@ -71,7 +71,7 @@ func (s *stack) pop() stackElement {
 	depth := s.depth - 1
 	div := depth >> 6
 	mod := depth & 63
-	s.depth -= 1
+	s.depth--
 	// stackElementObjectBegin -> stackElementObject
 	// stackElementArrayBegin -> stackElementArray
 	return stackElement((s.stack[div]>>mod)&1) | 2
@@ -84,7 +84,7 @@ func (s *stack) pushObject() *stack {
 	} else {
 		s.stack[div] &= (1 << (s.depth & 63)) - 1
 	}
-	s.depth += 1
+	s.depth++
 	return s
 }
 
@@ -95,6 +95,6 @@ func (s *stack) pushArray() *stack {
 	} else {
 		s.stack[div] |= 1 << (s.depth & 63)
 	}
-	s.depth += 1
+	s.depth++
 	return s
 }

@@ -1,16 +1,26 @@
 package jzon
 
+// ValueType is the type of the next json token
 type ValueType int
 
 const (
+	// WhiteSpaceValue the next token is whitespace
 	WhiteSpaceValue ValueType = iota
+	// InvalidValue an error occurred
 	InvalidValue
+	// StringValue the next token is string
 	StringValue
+	// NumberValue the next token is number
 	NumberValue
+	// ObjectValue the next token is object
 	ObjectValue
+	// ArrayValue the next token is array
 	ArrayValue
+	// BoolValue the next token is a boolean value
 	BoolValue
+	// NullValue the next token is null
 	NullValue
+	// LastValue is a counter, should not be used
 	LastValue
 )
 

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func runeToAscii(s string) string {
+func runeToASCII(s string) string {
 	var ret string
 	for _, r := range []rune(s) {
 		if r < 128 {
@@ -41,7 +41,7 @@ func testIteratorStr(t *testing.T, input string, ex error) {
 
 func TestIterator_Str_readU4(t *testing.T) {
 	origin := `中`
-	src := runeToAscii(`"` + origin + `"`)
+	src := runeToASCII(`"` + origin + `"`)
 	t.Run("eof", func(t *testing.T) {
 		testIteratorStr(t, src[:3], io.EOF)
 	})

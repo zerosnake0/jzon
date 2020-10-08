@@ -5,7 +5,7 @@ func readArrayWithStack(it *Iterator, _ byte) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	it.head += 1
+	it.head++
 	topObj := make([]interface{}, 0)
 	if c == ']' {
 		return topObj, nil
@@ -44,7 +44,7 @@ func readArrayWithStack(it *Iterator, _ byte) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		it.head += 1
+		it.head++
 		if c == ']' {
 			return topObj, nil
 		}
@@ -55,6 +55,6 @@ func readArrayWithStack(it *Iterator, _ byte) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		it.head += 1
+		it.head++
 	}
 }

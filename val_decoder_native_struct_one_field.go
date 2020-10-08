@@ -39,26 +39,26 @@ func (dec *oneFieldStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *De
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		err = it.expectBytes("ull")
 		return
 	}
 	if c != '{' {
 		return UnexpectedByteError{got: c, exp2: 'n', exp: '{'}
 	}
-	it.head += 1
+	it.head++
 	c, err = it.nextToken()
 	if err != nil {
 		return
 	}
 	if c == '}' {
-		it.head += 1
+		it.head++
 		return
 	}
 	if c != '"' {
 		return UnexpectedByteError{got: c, exp: '}', exp2: '"'}
 	}
-	it.head += 1
+	it.head++
 	for {
 		field, err := it.readObjectFieldAsSlice()
 		if err != nil {
@@ -70,7 +70,7 @@ func (dec *oneFieldStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *De
 				subPtr := *(*unsafe.Pointer)(curPtr)
 				if subPtr == nil {
 					if offset.rtype == 0 { // the ptr field is not exported
-						return NilEmbeddedPointerError
+						return ErrNilEmbeddedPointer
 					}
 					subPtr = unsafe_New(offset.rtype)
 					*(*unsafe.Pointer)(curPtr) = subPtr
@@ -97,10 +97,10 @@ func (dec *oneFieldStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *De
 		}
 		switch c {
 		case '}':
-			it.head += 1
+			it.head++
 			return nil
 		case ',':
-			it.head += 1
+			it.head++
 			c, err = it.nextToken()
 			if err != nil {
 				return err
@@ -108,7 +108,7 @@ func (dec *oneFieldStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *De
 			if c != '"' {
 				return UnexpectedByteError{got: c, exp: '"'}
 			}
-			it.head += 1
+			it.head++
 		default:
 			return UnexpectedByteError{got: c, exp: '}', exp2: ','}
 		}

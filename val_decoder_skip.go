@@ -11,7 +11,7 @@ func (*emptyObjectDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) 
 	if err != nil {
 		return err
 	}
-	it.head += 1
+	it.head++
 	switch c {
 	case 'n':
 		return it.expectBytes("ull")
@@ -21,14 +21,13 @@ func (*emptyObjectDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) 
 			if err != nil {
 				return err
 			}
-			it.head += 1
+			it.head++
 			if c != '}' {
 				return UnexpectedByteError{got: c, exp: '}'}
 			}
 			return nil
-		} else {
-			return skipFunctions[c](it, c)
 		}
+		return skipFunctions[c](it, c)
 	default:
 		return UnexpectedByteError{got: c, exp: '{', exp2: 'n'}
 	}

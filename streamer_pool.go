@@ -5,15 +5,15 @@ import (
 )
 
 var (
-	defaultStreamerPool = NewStreamerPool()
+	defaultStreamerPool = newStreamerPool()
 )
 
-type StreamerPool struct {
+type streamerPool struct {
 	pool sync.Pool
 }
 
-func NewStreamerPool() *StreamerPool {
-	return &StreamerPool{
+func newStreamerPool() *streamerPool {
+	return &streamerPool{
 		pool: sync.Pool{
 			New: func() interface{} {
 				return &Streamer{
@@ -24,12 +24,12 @@ func NewStreamerPool() *StreamerPool {
 	}
 }
 
-func (p *StreamerPool) BorrowStreamer() *Streamer {
+func (p *streamerPool) borrowStreamer() *Streamer {
 	s := p.pool.Get().(*Streamer)
 	return s
 }
 
-func (p *StreamerPool) ReturnStreamer(s *Streamer) {
+func (p *streamerPool) returnStreamer(s *Streamer) {
 	s.reset()
 	p.pool.Put(s)
 }

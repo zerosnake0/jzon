@@ -1,6 +1,8 @@
 package jzon
 
-// No copy version
+// SkipRaw skips and returns the bytes skipped
+// slice will not be copied, so make a copy if the return
+// value is to be stored somewhere
 func (it *Iterator) SkipRaw() ([]byte, error) {
 	c, err := it.nextToken()
 	if err != nil {
@@ -9,7 +11,7 @@ func (it *Iterator) SkipRaw() ([]byte, error) {
 	oldCapture := it.capture
 	it.capture = true
 	begin := it.head
-	it.head += 1
+	it.head++
 	err = skipFunctions[c](it, c)
 	it.capture = oldCapture
 	if err != nil {
@@ -18,7 +20,7 @@ func (it *Iterator) SkipRaw() ([]byte, error) {
 	return it.buffer[begin:it.head], nil
 }
 
-// copy version
+// AppendRaw is like SkipRaw but it is a copy version
 func (it *Iterator) AppendRaw(in []byte) ([]byte, error) {
 	b, err := it.SkipRaw()
 	if err != nil {
@@ -28,7 +30,7 @@ func (it *Iterator) AppendRaw(in []byte) ([]byte, error) {
 	return append(in, b...), nil
 }
 
-// copy version
+// ReadRaw reads a raw json object (slice will be copied)
 func (it *Iterator) ReadRaw() ([]byte, error) {
 	return it.AppendRaw(nil)
 }

@@ -21,6 +21,7 @@ func init() {
 	}
 }
 
+// ReadInt reads an int value
 func (it *Iterator) ReadInt() (int, error) {
 	if strconv.IntSize == 32 {
 		i, err := it.ReadInt32()
@@ -30,6 +31,7 @@ func (it *Iterator) ReadInt() (int, error) {
 	return int(i), err
 }
 
+// ReadUint reads an uint value
 func (it *Iterator) ReadUint() (uint, error) {
 	if strconv.IntSize == 32 {
 		u, err := it.ReadUint32()

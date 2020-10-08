@@ -6,27 +6,27 @@ import (
 	"testing"
 )
 
-type testJsonUnmarshaler struct {
+type testJSONUnmarshaler struct {
 	data string
 	err  error
 }
 
-func (t *testJsonUnmarshaler) UnmarshalJSON(data []byte) error {
+func (t *testJSONUnmarshaler) UnmarshalJSON(data []byte) error {
 	t.data = string(data)
 	return t.err
 }
 
 func TestValDecoder_JsonUnmarshaler(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, initValue string, initErr error) {
-		var p1 *testJsonUnmarshaler
-		var p2 *testJsonUnmarshaler
+		var p1 *testJSONUnmarshaler
+		var p2 *testJSONUnmarshaler
 		if initValue != "" {
-			b1 := testJsonUnmarshaler{
+			b1 := testJSONUnmarshaler{
 				data: initValue,
 				err:  initErr,
 			}
 			p1 = &b1
-			b2 := testJsonUnmarshaler{
+			b2 := testJSONUnmarshaler{
 				data: initValue,
 				err:  initErr,
 			}
@@ -38,7 +38,7 @@ func TestValDecoder_JsonUnmarshaler(t *testing.T) {
 		f(t, data, ex, "dummy", initErr)
 	}
 	t.Run("nil pointer", func(t *testing.T) {
-		f(t, "null", NilPointerReceiverError, "", nil)
+		f(t, "null", ErrNilPointerReceiver, "", nil)
 	})
 	t.Run("eof", func(t *testing.T) {
 		f2(t, " ", io.EOF, nil)

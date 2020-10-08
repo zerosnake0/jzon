@@ -12,12 +12,13 @@ const (
 	maxUint32Mod10          = int8(math.MaxUint32 - maxUint32Div10*10)
 )
 
+// ReadUint32 reads an uint32 value
 func (it *Iterator) ReadUint32() (uint32, error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readUint32(c)
 }
 
@@ -66,7 +67,7 @@ func (it *Iterator) readInt32(c byte) (int32, error) {
 		if err != nil {
 			return 0, err
 		}
-		it.head += 1
+		it.head++
 		v, err := it.readUint32(c)
 		if err != nil {
 			return 0, err
@@ -78,26 +79,26 @@ func (it *Iterator) readInt32(c byte) (int32, error) {
 			}
 		}
 		return -int32(v), nil
-	} else {
-		v, err := it.readUint32(c)
-		if err != nil {
-			return 0, err
-		}
-		if v > math.MaxInt32 {
-			return 0, IntOverflowError{
-				typ:   "int32",
-				value: strconv.FormatUint(uint64(v), 10),
-			}
-		}
-		return int32(v), nil
 	}
+	v, err := it.readUint32(c)
+	if err != nil {
+		return 0, err
+	}
+	if v > math.MaxInt32 {
+		return 0, IntOverflowError{
+			typ:   "int32",
+			value: strconv.FormatUint(uint64(v), 10),
+		}
+	}
+	return int32(v), nil
 }
 
+// ReadInt32 reads an int32 value
 func (it *Iterator) ReadInt32() (int32, error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readInt32(c)
 }

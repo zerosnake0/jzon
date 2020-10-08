@@ -87,6 +87,7 @@ func init() {
 	}
 }
 
+// DecOpts is the context related decoding option of the object
 type DecOpts struct {
 	MapKey bool
 	Quoted bool
@@ -96,6 +97,7 @@ func (opts *DecOpts) noescape() *DecOpts {
 	return (*DecOpts)(noescape(unsafe.Pointer(opts)))
 }
 
+// ValDecoder is the interface to be implemented for custom decoder
 type ValDecoder interface {
 	Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error
 }

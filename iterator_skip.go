@@ -37,7 +37,7 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 		if err != nil {
 			return err
 		}
-		it.head += 1
+		it.head++
 		if top&1 == 0 {
 			// stackElementObjectBegin
 			// stackElementObject
@@ -55,7 +55,7 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 				if err != nil {
 					return err
 				}
-				it.head += 1
+				it.head++
 			}
 			if c != '"' {
 				return UnexpectedByteError{got: c, exp: '"'}
@@ -66,7 +66,7 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 			if c, err = it.nextToken(); err != nil {
 				return err
 			}
-			it.head += 1
+			it.head++
 			switch c {
 			case '[':
 				s.pushObject()
@@ -97,7 +97,7 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 				if err != nil {
 					return err
 				}
-				it.head += 1
+				it.head++
 			}
 			switch c {
 			case '[':
@@ -116,11 +116,12 @@ func skipWithStack(it *Iterator, top stackElement, s *stack) (err error) {
 	}
 }
 
+// Skip skips a json object
 func (it *Iterator) Skip() error {
 	c, err := it.nextToken()
 	if err != nil {
 		return err
 	}
-	it.head += 1
+	it.head++
 	return skipFunctions[c](it, c)
 }

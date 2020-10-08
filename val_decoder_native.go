@@ -15,17 +15,17 @@ func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) erro
 	}
 	switch c {
 	case 'n':
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	case 't':
-		it.head += 1
+		it.head++
 		if err := it.expectBytes("rue"); err != nil {
 			return err
 		}
 		*(*bool)(ptr) = true
 		return nil
 	case 'f':
-		it.head += 1
+		it.head++
 		if err := it.expectBytes("alse"); err != nil {
 			return err
 		}
@@ -36,12 +36,12 @@ func (*boolDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) erro
 		if !quoted {
 			return UnexpectedByteError{got: c}
 		}
-		it.head += 1
+		it.head++
 		c, err := it.nextToken()
 		if err != nil {
 			return err
 		}
-		it.head += 1
+		it.head++
 		switch c {
 		case 't':
 			if err := it.expectBytes(`rue"`); err != nil {
@@ -75,7 +75,7 @@ func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) er
 	}
 	switch c {
 	case '"':
-		it.head += 1
+		it.head++
 		s, err := it.readString()
 		if err != nil {
 			return err
@@ -118,7 +118,7 @@ func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) er
 			return BadQuotedStringError(s)
 		}
 	case 'n':
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	default:
 		return UnexpectedByteError{got: c, exp: '"', exp2: 'n'}

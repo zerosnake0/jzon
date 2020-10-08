@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	// Default decoder config is compatible with standard lib
+	// DefaultDecoderConfig is compatible with standard lib
 	DefaultDecoderConfig = NewDecoderConfig(nil)
 )
 
+// DecoderOption can be used to customize the decoder config
 type DecoderOption struct {
 	// custom value decoders
 	ValDecoders map[reflect.Type]ValDecoder
@@ -33,6 +34,7 @@ type DecoderOption struct {
 
 type decoderCache = map[rtype]ValDecoder
 
+// DecoderConfig is a frozen config for decoding
 type DecoderConfig struct {
 	cacheMu      sync.Mutex
 	decoderCache atomic.Value
@@ -47,6 +49,8 @@ type DecoderConfig struct {
 	disallowUnknownFields bool
 }
 
+// NewDecoderConfig returns a new decoder config
+// If the input option is nil, the default option will be applied
 func NewDecoderConfig(opt *DecoderOption) *DecoderConfig {
 	decCfg := DecoderConfig{
 		tag: "json",
@@ -69,6 +73,7 @@ func NewDecoderConfig(opt *DecoderOption) *DecoderConfig {
 	return &decCfg
 }
 
+// Unmarshal behave like json.Unmarshal
 func (decCfg *DecoderConfig) Unmarshal(data []byte, obj interface{}) error {
 	it := decCfg.NewIterator()
 	err := it.Unmarshal(data, obj)
@@ -79,10 +84,12 @@ func (decCfg *DecoderConfig) Unmarshal(data []byte, obj interface{}) error {
 	return err
 }
 
+// UnmarshalFromString behave like json.Unmarshal but with a string
 func (decCfg *DecoderConfig) UnmarshalFromString(s string, obj interface{}) error {
 	return decCfg.Unmarshal(localStringToBytes(s), obj)
 }
 
+// UnmarshalFromReader behave like json.Unmarshal but with an io.Reader
 func (decCfg *DecoderConfig) UnmarshalFromReader(r io.Reader, obj interface{}) error {
 	it := decCfg.NewIterator()
 	err := it.UnmarshalFromReader(r, obj)
@@ -97,6 +104,7 @@ func (decCfg *DecoderConfig) getDecoderFromCache(rType rtype) ValDecoder {
 	return decCfg.decoderCache.Load().(decoderCache)[rType]
 }
 
+// NewDecoder returns a new decoder that reads from r.
 func (decCfg *DecoderConfig) NewDecoder(r io.Reader) *Decoder {
 	it := decCfg.NewIterator()
 	it.Reset(r)

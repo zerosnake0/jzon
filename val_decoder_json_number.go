@@ -14,7 +14,7 @@ func (*jsonNumberDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) e
 	var s string
 	switch valueTypeMap[c] {
 	case StringValue:
-		it.head += 1
+		it.head++
 		c, err = it.nextByte()
 		if err != nil {
 			return err
@@ -22,7 +22,7 @@ func (*jsonNumberDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) e
 		if valueTypeMap[c] != NumberValue {
 			return InvalidDigitError{c}
 		}
-		it.head += 1
+		it.head++
 		s, err = it.readNumberAsString(c)
 		if err != nil {
 			return err
@@ -34,15 +34,15 @@ func (*jsonNumberDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) e
 		if c != '"' {
 			return UnexpectedByteError{exp: '"', got: c}
 		}
-		it.head += 1
+		it.head++
 		*((*string)(ptr)) = s
 		return nil
 	case NullValue:
 		// to be compatible with standard lib
-		it.head += 1
+		it.head++
 		return it.expectBytes("ull")
 	case NumberValue:
-		it.head += 1
+		it.head++
 		s, err = it.readNumberAsString(c)
 		if err != nil {
 			return err

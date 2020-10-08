@@ -19,7 +19,7 @@ type badWriter struct {
 func (w *badWriter) Write(data []byte) (int, error) {
 	n := len(data)
 	if n > 0 {
-		n -= 1
+		n--
 	}
 	w.data = string(data)
 	return n, nil
@@ -243,7 +243,7 @@ func TestStreamer_Flush(t *testing.T) {
 		streamer := NewStreamer()
 		defer streamer.Release()
 		err := streamer.Flush()
-		require.Equal(t, NoWriterAttachedError, err)
+		require.Equal(t, ErrNoAttachedWriter, err)
 	})
 	t.Run("bad writer implementation", func(t *testing.T) {
 		streamer := NewStreamer()

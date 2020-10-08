@@ -5,17 +5,18 @@ import (
 	"strconv"
 )
 
+// Float32 writes a float32 value
 func (s *Streamer) Float32(f float32) *Streamer {
 	if s.Error != nil {
 		return s
 	}
 	f64 := float64(f)
 	if math.IsInf(f64, 0) {
-		s.Error = FloatIsInfinity
+		s.Error = ErrFloatIsInfinity
 		return s
 	}
 	if math.IsNaN(f64) {
-		s.Error = FloatIsNan
+		s.Error = ErrFloatIsNan
 		return s
 	}
 	s.onVal()
@@ -45,16 +46,17 @@ func (s *Streamer) Float32(f float32) *Streamer {
 	return s
 }
 
+// Float64 writes a float64 value
 func (s *Streamer) Float64(f float64) *Streamer {
 	if s.Error != nil {
 		return s
 	}
 	if math.IsInf(f, 0) {
-		s.Error = FloatIsInfinity
+		s.Error = ErrFloatIsInfinity
 		return s
 	}
 	if math.IsNaN(f) {
-		s.Error = FloatIsNan
+		s.Error = ErrFloatIsNan
 		return s
 	}
 	s.onVal()

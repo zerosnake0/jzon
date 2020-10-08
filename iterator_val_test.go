@@ -10,14 +10,14 @@ func TestIterator_Val_ReadVal(t *testing.T) {
 	t.Run("nil pointer receiver error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			err := it.ReadVal(nil)
-			require.Equal(t, NilPointerReceiverError, err)
+			require.Equal(t, ErrNilPointerReceiver, err)
 		})
 	})
 	t.Run("pointer receiver error", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
 			var o string
 			err := it.ReadVal(o)
-			require.Equal(t, PointerReceiverError, err)
+			require.Equal(t, ErrPointerReceiver, err)
 		})
 	})
 	t.Run("struct", func(t *testing.T) {

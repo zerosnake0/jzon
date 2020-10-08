@@ -1,8 +1,9 @@
+package jzon
+
 /* see encoding/json
  * - some additional comments may be added
  * - some code may be slightly modified
  */
-package jzon
 
 import (
 	"bytes"

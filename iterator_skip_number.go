@@ -9,13 +9,13 @@ func (it *Iterator) skipExponentPart() (err error) {
 	if err != nil {
 		return err
 	}
-	it.head += 1
+	it.head++
 	if c == '+' || c == '-' {
 		c, err = it.nextByte()
 		if err != nil {
 			return err
 		}
-		it.head += 1
+		it.head++
 	}
 	if intDigits[c] == invalidDigit {
 		return InvalidDigitError{c: c}
@@ -49,7 +49,7 @@ func (it *Iterator) skipFractionPart() (err error) {
 	if intDigits[c] == invalidDigit {
 		return InvalidDigitError{c: c}
 	}
-	it.head += 1
+	it.head++
 	for {
 		i := it.head
 		for ; i < it.tail; i++ {
@@ -88,7 +88,7 @@ func skipNumber(it *Iterator, c byte) (err error) {
 		if intDigits[c] == invalidDigit {
 			return InvalidDigitError{c: c}
 		}
-		it.head += 1
+		it.head++
 	}
 	// positive
 	// here the c can only be '0'~'9'
@@ -103,10 +103,10 @@ func skipNumber(it *Iterator, c byte) (err error) {
 		}
 		switch floatDigits[it.buffer[it.head]] {
 		case dotInNumber:
-			it.head += 1
+			it.head++
 			return it.skipFractionPart()
 		case expInNumber:
-			it.head += 1
+			it.head++
 			return it.skipExponentPart()
 		default:
 			return nil
@@ -143,6 +143,7 @@ func skipNumber(it *Iterator, c byte) (err error) {
 	}
 }
 
+// SkipNumber skips a number
 func (it *Iterator) SkipNumber() error {
 	c, err := it.nextToken()
 	if err != nil {
@@ -151,6 +152,6 @@ func (it *Iterator) SkipNumber() error {
 	if valueTypeMap[c] != NumberValue {
 		return UnexpectedByteError{got: c}
 	}
-	it.head += 1
+	it.head++
 	return skipNumber(it, c)
 }

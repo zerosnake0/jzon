@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	// Default encoder config is compatible with standard lib
+	// DefaultEncoderConfig is compatible with standard lib
 	DefaultEncoderConfig = NewEncoderConfig(nil)
 )
 
+// EncoderOption can be used to customize the encoder config
 type EncoderOption struct {
 	ValEncoders map[reflect.Type]ValEncoder
 
@@ -34,12 +35,12 @@ func (cache encoderCache) preferPtrEncoder(typ reflect.Type) ValEncoder {
 	ptrEncoder := cache[rtypeOfType(ptrType)]
 	if pe, ok := ptrEncoder.(*pointerEncoder); ok {
 		return pe.encoder
-	} else {
-		// the element has a special pointer encoder
-		return &directEncoder{ptrEncoder}
 	}
+	// the element has a special pointer encoder
+	return &directEncoder{ptrEncoder}
 }
 
+// EncoderConfig is a frozen config for encoding
 type EncoderConfig struct {
 	cacheMu sync.Mutex
 	// the encoder cache, or root encoder cache
@@ -51,13 +52,15 @@ type EncoderConfig struct {
 	onlyTaggedField bool
 
 	// can override during runtime
-	escapeHtml bool
+	escapeHTML bool
 }
 
+// NewEncoderConfig returns a new encoder config
+// If the input option is nil, the default option will be applied
 func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 	encCfg := EncoderConfig{
 		tag:        "json",
-		escapeHtml: true,
+		escapeHTML: true,
 	}
 	cache := encoderCache{}
 	internalCache := encoderCache{}
@@ -67,7 +70,7 @@ func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 			cache[rtype] = valEnc
 			internalCache[rtype] = valEnc
 		}
-		encCfg.escapeHtml = opt.EscapeHTML
+		encCfg.escapeHTML = opt.EscapeHTML
 		if opt.Tag != "" {
 			encCfg.tag = opt.Tag
 		}
@@ -78,6 +81,7 @@ func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 	return &encCfg
 }
 
+// Marshal behave like json.Marshal
 func (encCfg *EncoderConfig) Marshal(obj interface{}) ([]byte, error) {
 	s := encCfg.NewStreamer()
 	defer s.Release()
@@ -94,6 +98,7 @@ func (encCfg *EncoderConfig) Marshal(obj interface{}) ([]byte, error) {
 	return b, nil
 }
 
+// NewEncoder returns a new encoder that writes to w.
 func (encCfg *EncoderConfig) NewEncoder(w io.Writer) *Encoder {
 	s := encCfg.NewStreamer()
 	s.Reset(w)
@@ -162,13 +167,13 @@ func (encCfg *EncoderConfig) createEncoderInternal(cache, internalCache encoderC
 					internalCache[rType] = w.encoder
 					rebuildMap[rType] = w
 				} else {
-					v := pointerJsonMarshalerEncoder(rType)
+					v := pointerJSONMarshalerEncoder(rType)
 					internalCache[rType] = v
 					cache[rType] = &directEncoder{v}
 				}
 				continue
 			}
-			v := &directJsonMarshalerEncoder{
+			v := &directJSONMarshalerEncoder{
 				isEmpty: isEmptyFunctions[kind],
 				rtype:   rType,
 			}
@@ -357,7 +362,7 @@ func (encCfg *EncoderConfig) createEncoderInternal(cache, internalCache encoderC
 			for i := range x.fields {
 				fi := &x.fields[i]
 				v := internalCache.preferPtrEncoder(fi.ptrType.Elem())
-				x.encoder.fields.add(fi, encCfg.escapeHtml, v)
+				x.encoder.fields.add(fi, v)
 			}
 			if ifaceIndir(rType) {
 				cache[rType] = x.encoder

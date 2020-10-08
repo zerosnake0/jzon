@@ -28,9 +28,8 @@ func init() {
 			if it.useNumber {
 				s, err := it.readNumberAsString(c)
 				return json.Number(s), err
-			} else {
-				return it.readFloat64(c)
 			}
+			return it.readFloat64(c)
 		}
 	}
 	errFunc := func(it *Iterator, c byte) (interface{}, error) {
@@ -43,12 +42,13 @@ func init() {
 	}
 }
 
+// Read reads a json object as a golang object
 func (it *Iterator) Read() (interface{}, error) {
 	c, err := it.nextToken()
 	if err != nil {
 		return nil, err
 	}
-	it.head += 1
+	it.head++
 	return readFunctions[c](it, c)
 }
 
@@ -60,7 +60,7 @@ func readWithStack(it *Iterator, top stackElement, s *stack, ns *nodeStack) (
 		if err != nil {
 			return nil, err
 		}
-		it.head += 1
+		it.head++
 		if top&1 == 0 {
 			// stackElementObjectBegin
 			// stackElementObject
@@ -79,7 +79,7 @@ func readWithStack(it *Iterator, top stackElement, s *stack, ns *nodeStack) (
 				if err != nil {
 					return nil, err
 				}
-				it.head += 1
+				it.head++
 			}
 			if c != '"' {
 				return nil, UnexpectedByteError{got: c, exp: '"'}
@@ -92,7 +92,7 @@ func readWithStack(it *Iterator, top stackElement, s *stack, ns *nodeStack) (
 			if err != nil {
 				return nil, err
 			}
-			it.head += 1
+			it.head++
 			switch c {
 			case '[':
 				s.pushObject()
@@ -128,7 +128,7 @@ func readWithStack(it *Iterator, top stackElement, s *stack, ns *nodeStack) (
 				if err != nil {
 					return nil, err
 				}
-				it.head += 1
+				it.head++
 			}
 			switch c {
 			case '[':

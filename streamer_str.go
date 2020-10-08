@@ -72,7 +72,7 @@ func encodeString(buffer []byte, str string, safeSet []string) []byte {
 				buffer = append(buffer, str[offset:i]...)
 				buffer = append(buffer, '\\', 'u',
 					'f', 'f', 'f', 'd')
-				i += 1
+				i++
 				offset = i
 				continue
 			}

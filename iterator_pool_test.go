@@ -10,17 +10,17 @@ import (
 func TestIteratorPool(t *testing.T) {
 	must := require.New(t)
 
-	pool := NewIteratorPool()
+	pool := newIteratorPool()
 
 	f := func(cb func(it *Iterator)) {
-		it := pool.BorrowIterator()
+		it := pool.borrowIterator()
 		must.Nil(it.reader)
 		must.Nil(it.buffer)
 		must.Equal(0, it.offset)
 		must.Equal(0, it.head)
 		must.Equal(0, it.tail)
 		cb(it)
-		pool.ReturnIterator(it)
+		pool.returnIterator(it)
 		must.Nil(it.reader)
 		must.Nil(it.buffer)
 	}
