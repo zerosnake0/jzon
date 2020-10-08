@@ -27,7 +27,7 @@ func (w *badWriter) Write(data []byte) (int, error) {
 
 func testStreamerWithEncoderConfig(t *testing.T, encCfg *EncoderConfig, exp string, cb func(s *Streamer)) {
 	streamer := encCfg.NewStreamer()
-	defer encCfg.ReturnStreamer(streamer)
+	defer streamer.Release()
 	var b bytes.Buffer
 	streamer.Reset(&b)
 
@@ -163,7 +163,7 @@ func checkEncodeWithStandardInternal(t *testing.T, jsonOpt func(*json.Encoder), 
 		expErr, err)
 
 	streamer := encCfg.NewStreamer()
-	defer encCfg.ReturnStreamer(streamer)
+	defer streamer.Release()
 	func() {
 		defer func() {
 			if e := recover(); e != nil {
@@ -223,7 +223,7 @@ func checkEncodeValueWithStandard(t *testing.T, obj interface{}, expErr interfac
 
 func testStreamerChainError(t *testing.T, cb func(s *Streamer)) {
 	s := DefaultEncoderConfig.NewStreamer()
-	defer DefaultEncoderConfig.ReturnStreamer(s)
+	defer s.Release()
 
 	var b bytes.Buffer
 	s.Reset(&b)
@@ -241,13 +241,13 @@ func testStreamerChainError(t *testing.T, cb func(s *Streamer)) {
 func TestStreamer_Flush(t *testing.T) {
 	t.Run("no writer attached", func(t *testing.T) {
 		streamer := NewStreamer()
-		defer ReturnStreamer(streamer)
+		defer streamer.Release()
 		err := streamer.Flush()
 		require.Equal(t, NoWriterAttachedError, err)
 	})
 	t.Run("bad writer implementation", func(t *testing.T) {
 		streamer := NewStreamer()
-		defer ReturnStreamer(streamer)
+		defer streamer.Release()
 		var (
 			w   badWriter
 			err error

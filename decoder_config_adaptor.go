@@ -8,7 +8,7 @@ func (decCfg *DecoderConfig) NewIterator() *Iterator {
 	return it
 }
 
-func (decCfg *DecoderConfig) ReturnIterator(it *Iterator) {
+func (decCfg *DecoderConfig) returnIterator(it *Iterator) {
 	it.cfg = nil
 	defaultIteratorPool.ReturnIterator(it)
 }

@@ -30,7 +30,7 @@ func (dec *Decoder) Buffered() io.Reader {
 }
 
 // func (dec *Decoder) Token() (json.Token, error) {
-// 	panic("implement me")
+// 	panic("not implemented")
 // }
 
 func (dec *Decoder) More() bool {

@@ -345,7 +345,7 @@ func TestIterator_Read_UseNumber(t *testing.T) {
 		UseNumber: true,
 	})
 	it := decCfg.NewIterator()
-	defer decCfg.ReturnIterator(it)
+	defer it.Release()
 	it.ResetBytes([]byte(" 123 "))
 	o, err := it.Read()
 	require.NoError(t, err)

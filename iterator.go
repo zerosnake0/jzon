@@ -24,6 +24,8 @@ type iteratorEmbedded struct {
 	lastEfaceOffset int
 	lastEfacePtr    uintptr
 
+	// TODO: 1. type of context?
+	// TODO: 2. should context be reset as well?
 	Context interface{} // custom iteration context
 }
 
@@ -52,8 +54,8 @@ func NewIterator() *Iterator {
 	return DefaultDecoderConfig.NewIterator()
 }
 
-func ReturnIterator(it *Iterator) {
-	DefaultDecoderConfig.ReturnIterator(it)
+func (it *Iterator) Release() {
+	it.cfg.returnIterator(it)
 }
 
 func (it *Iterator) reset() {

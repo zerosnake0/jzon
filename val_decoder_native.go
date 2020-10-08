@@ -101,7 +101,7 @@ func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) er
 			}
 			// borrow another iterator
 			subIt := it.cfg.NewIterator()
-			defer it.cfg.ReturnIterator(subIt)
+			defer subIt.Release()
 			subIt.ResetBytes(localStringToBytes(s))
 			subStr, err := subIt.ReadString()
 			if err != nil {

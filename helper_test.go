@@ -17,7 +17,7 @@ func skipTest(t *testing.T, fmt string, args ...interface{}) {
 
 func withIterator(data string, cb func(it *Iterator)) {
 	it := NewIterator()
-	defer ReturnIterator(it)
+	defer it.Release()
 	if data != "" {
 		it.ResetBytes(localStringToBytes(data))
 	}

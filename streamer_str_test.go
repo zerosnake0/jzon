@@ -34,7 +34,7 @@ func testStreamerStringEscape(t *testing.T, s string, escape bool) {
 	exp := strings.TrimSpace(b.String())
 
 	streamer := encCfg.NewStreamer()
-	defer encCfg.ReturnStreamer(streamer)
+	defer streamer.Release()
 	streamer.String(s)
 	require.NoError(t, streamer.Error)
 	require.Equal(t, exp, string(streamer.buffer))

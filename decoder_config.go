@@ -75,7 +75,7 @@ func (decCfg *DecoderConfig) Unmarshal(data []byte, obj interface{}) error {
 	if err != nil {
 		err = it.WrapError(err)
 	}
-	decCfg.ReturnIterator(it)
+	it.Release()
 	return err
 }
 
@@ -89,7 +89,7 @@ func (decCfg *DecoderConfig) UnmarshalFromReader(r io.Reader, obj interface{}) e
 	if err != nil {
 		err = it.WrapError(err)
 	}
-	decCfg.ReturnIterator(it)
+	it.Release()
 	return err
 }
 
@@ -106,7 +106,7 @@ func (decCfg *DecoderConfig) NewDecoder(r io.Reader) *Decoder {
 }
 
 func (decCfg *DecoderConfig) ReturnDecoder(dec *Decoder) {
-	decCfg.ReturnIterator(dec.it)
+	dec.it.Release()
 	dec.it = nil
 }
 

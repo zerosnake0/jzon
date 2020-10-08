@@ -13,15 +13,22 @@ type Streamer struct {
 	Error error
 	poped bool
 
+	// TODO: 1. type of context?
+	// TODO: 2. should context be reset as well?
 	Context interface{} // custom stream context
+
+	// runtime
+	safeSet []string
+	// prefix  string
+	// indent  string
 }
 
 func NewStreamer() *Streamer {
 	return DefaultEncoderConfig.NewStreamer()
 }
 
-func ReturnStreamer(s *Streamer) {
-	DefaultEncoderConfig.ReturnStreamer(s)
+func (s *Streamer) Release() {
+	s.cfg.returnStreamer(s)
 }
 
 func (s *Streamer) reset() {
@@ -33,8 +40,22 @@ func (s *Streamer) reset() {
 }
 
 func (s *Streamer) Reset(w io.Writer) {
+	s.reset()
 	s.writer = w
 }
+
+func (s *Streamer) EscapeHTML(on bool) {
+	if on {
+		s.safeSet = htmlSafeSet[:]
+	} else {
+		s.safeSet = safeSet[:]
+	}
+}
+
+// func (s *Streamer) SetIndent(prefix, indent string) {
+// 	s.prefix = prefix
+// 	s.indent = indent
+// }
 
 func (s *Streamer) Flush() error {
 	if s.Error != nil {
@@ -135,7 +156,7 @@ func (s *Streamer) Field(field string) *Streamer {
 		return s
 	}
 	s.onVal()
-	s.buffer = encodeString(s.buffer, field, s.cfg.safeSet)
+	s.buffer = encodeString(s.buffer, field, s.safeSet)
 	s.buffer = append(s.buffer, ':')
 	s.poped = false
 	return s

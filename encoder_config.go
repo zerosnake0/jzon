@@ -1,6 +1,7 @@
 package jzon
 
 import (
+	"io"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -46,10 +47,11 @@ type EncoderConfig struct {
 	// the internal cache
 	internalCache encoderCache
 
-	escapeHtml      bool
-	safeSet         []string
 	tag             string
 	onlyTaggedField bool
+
+	// can override during runtime
+	escapeHtml bool
 }
 
 func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
@@ -73,17 +75,12 @@ func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 	}
 	encCfg.encoderCache.Store(cache)
 	encCfg.internalCache = internalCache
-	if encCfg.escapeHtml {
-		encCfg.safeSet = htmlSafeSet[:]
-	} else {
-		encCfg.safeSet = safeSet[:]
-	}
 	return &encCfg
 }
 
 func (encCfg *EncoderConfig) Marshal(obj interface{}) ([]byte, error) {
 	s := encCfg.NewStreamer()
-	defer encCfg.ReturnStreamer(s)
+	defer s.Release()
 	s.Value(obj)
 	if s.Error != nil {
 		return nil, s.Error
@@ -95,6 +92,19 @@ func (encCfg *EncoderConfig) Marshal(obj interface{}) ([]byte, error) {
 	b := make([]byte, len(s.buffer))
 	copy(b, s.buffer)
 	return b, nil
+}
+
+func (encCfg *EncoderConfig) NewEncoder(w io.Writer) *Encoder {
+	s := encCfg.NewStreamer()
+	s.Reset(w)
+	return &Encoder{
+		s: s,
+	}
+}
+
+func (encCfg *EncoderConfig) ReturnEncoder(enc *Encoder) {
+	enc.s.Release()
+	enc.s = nil
 }
 
 func (encCfg *EncoderConfig) getEncoderFromCache(rtype rtype) ValEncoder {
