@@ -39,7 +39,9 @@ func TestEncoder_SetEscapeHTML(t *testing.T) {
 		must.Equal(`"`+s+`"`+"\n", buf.String(), "%T", enc)
 	}
 	f(json.NewEncoder(buf))
-	f(NewEncoder(buf))
+	enc := NewEncoder(buf)
+	defer enc.Release()
+	f(enc)
 }
 
 // func TestEncoder_SetIndent(t *testing.T) {

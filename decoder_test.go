@@ -93,7 +93,9 @@ func TestDecoder(t *testing.T) {
 				check(dec, 1, false, 6, 7)
 			}
 			f(json.NewDecoder(newReader()))
-			f(NewDecoder(newReader()))
+			dec := NewDecoder(newReader())
+			defer dec.Release()
+			f(dec)
 		})
 		t.Run("failure at start", func(t *testing.T) {
 			must := require.New(t)
@@ -114,7 +116,9 @@ func TestDecoder(t *testing.T) {
 				must.Equal(err2, err)
 			}
 			f(json.NewDecoder(newReader()))
-			f(NewDecoder(newReader()))
+			dec := NewDecoder(newReader())
+			defer dec.Release()
+			f(dec)
 		})
 		t.Run("failure at middle", func(t *testing.T) {
 			must := require.New(t)
@@ -134,7 +138,9 @@ func TestDecoder(t *testing.T) {
 				must.Error(err2)
 			}
 			f(json.NewDecoder(newReader()))
-			f(NewDecoder(newReader()))
+			dec := NewDecoder(newReader())
+			defer dec.Release()
+			f(dec)
 		})
 	})
 }
@@ -153,7 +159,9 @@ func TestDecoder_UseNumber(t *testing.T) {
 		must.Equal(json.Number(s), i)
 	}
 	f(json.NewDecoder(newReader()))
-	f(NewDecoder(newReader()))
+	dec := NewDecoder(newReader())
+	defer dec.Release()
+	f(dec)
 }
 
 func TestDecoder_DisallowUnknownFields(t *testing.T) {
@@ -170,5 +178,7 @@ func TestDecoder_DisallowUnknownFields(t *testing.T) {
 		must.Error(err)
 	}
 	f(json.NewDecoder(newReader()))
-	f(NewDecoder(newReader()))
+	dec := NewDecoder(newReader())
+	defer dec.Release()
+	f(dec)
 }
