@@ -1,6 +1,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/zerosnake0/jzon)](https://goreportcard.com/report/github.com/zerosnake0/jzon)
 [![Build Status](https://travis-ci.org/zerosnake0/jzon.svg?branch=master)](https://travis-ci.org/zerosnake0/jzon)
 [![codecov](https://codecov.io/gh/zerosnake0/jzon/branch/master/graph/badge.svg)](https://codecov.io/gh/zerosnake0/jzon)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 # jzon
 
