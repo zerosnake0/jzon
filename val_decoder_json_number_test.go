@@ -16,7 +16,7 @@ func TestValDecoder_JsonNumber(t *testing.T) {
 			b2 := initValue
 			p2 = &b2
 		}
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	f2 := func(t *testing.T, data string, ex error) {
 		f(t, data, ex, "1.23")

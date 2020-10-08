@@ -62,25 +62,25 @@ func (*testBoolEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
 	s.Bool(!*(*bool)(ptr))
 }
 
-func TestValEncoder_Bool_Kind_CustomEncoder(t *testing.T) {
-	enc := NewEncoder(&EncoderOption{
+func TestValEncoder_Bool_Kind_CustomConfig(t *testing.T) {
+	encCfg := NewEncoderConfig(&EncoderOption{
 		ValEncoders: map[reflect.Type]ValEncoder{
 			reflect.TypeOf(true): (*testBoolEncoder)(nil),
 		},
 	})
 
-	testStreamerWithEncoder(t, enc, "false", func(s *Streamer) {
+	testStreamerWithEncoderConfig(t, encCfg, "false", func(s *Streamer) {
 		s.Value(true)
 	})
-	testStreamerWithEncoder(t, enc, "true", func(s *Streamer) {
+	testStreamerWithEncoderConfig(t, encCfg, "true", func(s *Streamer) {
 		s.Value(false)
 	})
-	testStreamerWithEncoder(t, enc, `{"B":true}`, func(s *Streamer) {
+	testStreamerWithEncoderConfig(t, encCfg, `{"B":true}`, func(s *Streamer) {
 		s.Value(struct {
 			B bool `json:",omitempty"`
 		}{B: false})
 	})
-	testStreamerWithEncoder(t, enc, `{}`, func(s *Streamer) {
+	testStreamerWithEncoderConfig(t, encCfg, `{}`, func(s *Streamer) {
 		s.Value(struct {
 			B bool `json:",omitempty"`
 		}{B: true})
@@ -88,18 +88,18 @@ func TestValEncoder_Bool_Kind_CustomEncoder(t *testing.T) {
 
 	type Bool bool
 
-	testStreamerWithEncoder(t, enc, "false", func(s *Streamer) {
+	testStreamerWithEncoderConfig(t, encCfg, "false", func(s *Streamer) {
 		s.Value(Bool(true))
 	})
-	testStreamerWithEncoder(t, enc, "true", func(s *Streamer) {
+	testStreamerWithEncoderConfig(t, encCfg, "true", func(s *Streamer) {
 		s.Value(Bool(false))
 	})
-	testStreamerWithEncoder(t, enc, `{"B":true}`, func(s *Streamer) {
+	testStreamerWithEncoderConfig(t, encCfg, `{"B":true}`, func(s *Streamer) {
 		s.Value(struct {
 			B Bool `json:",omitempty"`
 		}{B: false})
 	})
-	testStreamerWithEncoder(t, enc, `{}`, func(s *Streamer) {
+	testStreamerWithEncoderConfig(t, encCfg, `{}`, func(s *Streamer) {
 		s.Value(struct {
 			B Bool `json:",omitempty"`
 		}{B: true})

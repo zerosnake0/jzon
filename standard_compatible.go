@@ -5,20 +5,36 @@ import (
 )
 
 func Unmarshal(data []byte, o interface{}) error {
-	return DefaultDecoder.Unmarshal(data, o)
+	return DefaultDecoderConfig.Unmarshal(data, o)
 }
 
 func Marshal(o interface{}) ([]byte, error) {
-	return DefaultEncoder.Marshal(o)
+	return DefaultEncoderConfig.Marshal(o)
 }
 
 func Valid(data []byte) bool {
 	it := NewIterator()
 	b := it.Valid(data)
-	ReturnIterator(it)
+	it.Release()
 	return b
 }
 
 func UnmarshalFromReader(r io.Reader, o interface{}) error {
-	return DefaultDecoder.UnmarshalFromReader(r, o)
+	return DefaultDecoderConfig.UnmarshalFromReader(r, o)
+}
+
+func NewDecoder(r io.Reader) *Decoder {
+	return DefaultDecoderConfig.NewDecoder(r)
+}
+
+func ReturnDecoder(dec *Decoder) {
+	DefaultDecoderConfig.ReturnDecoder(dec)
+}
+
+func NewEncoder(w io.Writer) *Encoder {
+	return DefaultEncoderConfig.NewEncoder(w)
+}
+
+func ReturnEncoder(enc *Encoder) {
+	DefaultEncoderConfig.ReturnEncoder(enc)
 }

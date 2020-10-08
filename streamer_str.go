@@ -34,7 +34,7 @@ func (s *Streamer) String(str string) *Streamer {
 		return s
 	}
 	s.onVal()
-	s.buffer = encodeString(s.buffer, str, s.encoder.safeSet)
+	s.buffer = encodeString(s.buffer, str, s.safeSet)
 	return s
 }
 

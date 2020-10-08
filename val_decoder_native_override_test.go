@@ -23,14 +23,14 @@ func (*testStringKindDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpt
 }
 
 func TestValDecoder_Native_Kind_String(t *testing.T) {
-	decoder := NewDecoder(&DecoderOption{
+	decCfg := NewDecoderConfig(&DecoderOption{
 		ValDecoders: map[reflect.Type]ValDecoder{
 			reflect.TypeOf(string("")): (*testStringKindDecoder)(nil),
 		},
 	})
 	data := []byte(`"abc"`)
 	var s testStringKind = "dummy"
-	err := decoder.Unmarshal(data, &s)
+	err := decCfg.Unmarshal(data, &s)
 	require.NoError(t, err)
 	require.Equal(t, testStringKind("`abc`"), s)
 }

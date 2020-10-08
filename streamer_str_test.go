@@ -17,24 +17,24 @@ func TestStreamer_String_ChainError(t *testing.T) {
 
 func testStreamerStringEscape(t *testing.T, s string, escape bool) {
 	var (
-		enc *Encoder
-		b   bytes.Buffer
+		encCfg *EncoderConfig
+		b      bytes.Buffer
 	)
 	jsEnc := json.NewEncoder(&b)
 	jsEnc.SetEscapeHTML(escape)
 	jsEnc.Encode(s)
 	if escape {
-		enc = DefaultEncoder
+		encCfg = DefaultEncoderConfig
 	} else {
-		enc = NewEncoder(&EncoderOption{
+		encCfg = NewEncoderConfig(&EncoderOption{
 			EscapeHTML: false,
 		})
 	}
 	// json.Encoder will add a newline at the end
 	exp := strings.TrimSpace(b.String())
 
-	streamer := enc.NewStreamer()
-	defer enc.ReturnStreamer(streamer)
+	streamer := encCfg.NewStreamer()
+	defer streamer.Release()
 	streamer.String(s)
 	require.NoError(t, streamer.Error)
 	require.Equal(t, exp, string(streamer.buffer))

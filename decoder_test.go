@@ -1,228 +1,174 @@
 package jzon
 
 import (
-	"reflect"
-	"runtime/debug"
+	"encoding/json"
+	"io"
+	"io/ioutil"
+	"strings"
 	"testing"
-	"unsafe"
+	"testing/iotest"
 
 	"github.com/stretchr/testify/require"
 )
 
-type testIntDecoder struct{}
+type decFace interface {
+	UseNumber()
 
-func (*testIntDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
-	vt, err := it.NextValueType()
-	if err != nil {
-		return err
-	}
-	switch vt {
-	case NullValue:
-		if err := it.ReadNull(); err != nil {
-			return err
-		}
-		*(*int)(ptr) = 1
-		return nil
-	default:
-		i, err := it.ReadInt()
-		if err != nil {
-			return err
-		}
-		*(*int)(ptr) = i * 2
-		return nil
-	}
+	DisallowUnknownFields()
+
+	Decode(interface{}) error
+
+	Buffered() io.Reader
+
+	// This is incompatible
+	// Token() (json.Token, error)
+
+	More() bool
 }
 
-type testPtrDecoder struct{}
-
-func (*testPtrDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) error {
-	vt, err := it.NextValueType()
-	if err != nil {
-		return err
-	}
-	switch vt {
-	case NullValue:
-		if err := it.ReadNull(); err != nil {
-			return err
-		}
-		v := -1
-		*(**int)(ptr) = &v
-		return nil
-	default:
-		i, err := it.ReadInt()
-		if err != nil {
-			return err
-		}
-		i = i * 2
-		*(**int)(ptr) = &i
-		return nil
-	}
+type inputOffset interface {
+	// Not available for go<1.13
+	InputOffset() int64
 }
 
-func TestDecoder_CustomDecoder(t *testing.T) {
-	t.Run("int", func(t *testing.T) {
-		dec := NewDecoder(&DecoderOption{
-			ValDecoders: map[reflect.Type]ValDecoder{
-				reflect.TypeOf(int(0)): (*testIntDecoder)(nil),
-			},
-			CaseSensitive: true,
+var _ decFace = &json.Decoder{}
+var _ decFace = &Decoder{}
+
+func TestDecoder(t *testing.T) {
+	t.Run("consecutive", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			must := require.New(t)
+
+			newReader := func() io.Reader {
+				s := ` {} {} `
+				return iotest.OneByteReader(strings.NewReader(s))
+			}
+
+			check := func(dec decFace, length int, expMore bool, leftOffset, rightOffset int64) {
+				buffered := dec.Buffered()
+				if buffered == nil {
+					return
+				}
+				b, err := ioutil.ReadAll(buffered)
+				must.NoError(err)
+				if length > 0 {
+					t.Logf("%T: %q", dec, b)
+				}
+				must.True(length >= len(b))
+
+				ofI, ofIok := dec.(inputOffset)
+				if ofIok {
+					offset := ofI.InputOffset()
+					// t.Logf("%T %d", dec, offset)
+					must.True(leftOffset <= offset, "%T %d > %d", dec, leftOffset, offset)
+					must.True(rightOffset >= offset, "%T %d < %d", dec, rightOffset, offset)
+				}
+
+				more := dec.More()
+				must.Equal(expMore, more, "%T", dec)
+
+				if ofIok {
+					offset := ofI.InputOffset()
+					// t.Logf("%T %d", dec, offset)
+					must.True(leftOffset <= offset, "%T %d > %d", dec, leftOffset, offset)
+					must.True(rightOffset >= offset, "%T %d < %d", dec, rightOffset, offset)
+				}
+			}
+
+			f := func(dec decFace) {
+				var i, i2, i3 interface{}
+
+				check(dec, 0, true, 0, 1)
+
+				err := dec.Decode(&i)
+				must.NoError(err, "%T", dec)
+				check(dec, 0, true, 3, 4)
+
+				err2 := dec.Decode(&i2)
+				must.NoError(err2, "%T", dec)
+				check(dec, 0, false, 6, 7)
+
+				err3 := dec.Decode(&i3)
+				must.Equal(io.EOF, err3, "%T", dec)
+				check(dec, 1, false, 6, 7)
+			}
+			f(json.NewDecoder(newReader()))
+			f(NewDecoder(newReader()))
 		})
-		t.Run("value", func(t *testing.T) {
-			t.Run("null", func(t *testing.T) {
-				var i int
-				err := dec.UnmarshalFromString("null", &i)
-				require.NoError(t, err)
-				require.Equal(t, 1, i)
-			})
-			t.Run("not null", func(t *testing.T) {
-				var i int
-				err := dec.UnmarshalFromString("1", &i)
-				require.NoError(t, err)
-				require.Equal(t, 2, i)
-			})
+		t.Run("failure at start", func(t *testing.T) {
+			must := require.New(t)
+
+			newReader := func() io.Reader {
+				s := ` } {} `
+				return iotest.OneByteReader(strings.NewReader(s))
+			}
+			f := func(dec decFace) {
+				var i, i2 interface{}
+
+				err := dec.Decode(&i)
+				t.Logf("%T %v", dec, err)
+				must.Error(err)
+
+				err2 := dec.Decode(&i2)
+				t.Logf("%T %v", dec, err2)
+				must.Equal(err2, err)
+			}
+			f(json.NewDecoder(newReader()))
+			f(NewDecoder(newReader()))
 		})
-		t.Run("pointer", func(t *testing.T) {
-			t.Run("null on not null", func(t *testing.T) {
-				v := 1
-				i := &v
-				err := dec.UnmarshalFromString("null", &i)
-				require.NoError(t, err)
-				require.Nil(t, i)
-			})
-			t.Run("not null", func(t *testing.T) {
-				v := -1
-				i := &v
-				err := dec.UnmarshalFromString("2", &i)
-				require.NoError(t, err)
-				require.NotNil(t, i)
-				require.Equal(t, 4, v)
-			})
-		})
-		t.Run("field", func(t *testing.T) {
-			t.Run("value", func(t *testing.T) {
-				st := struct {
-					A int `json:"a"`
-				}{}
-				t.Run("not present", func(t *testing.T) {
-					v := 1
-					st.A = v
-					err := dec.UnmarshalFromString(`{}`, &st)
-					require.NoError(t, err)
-					require.Equal(t, v, st.A)
-				})
-				t.Run("null", func(t *testing.T) {
-					st.A = -1
-					err := dec.UnmarshalFromString(`{"a":null}`, &st)
-					require.NoError(t, err)
-					require.Equal(t, 1, st.A)
-				})
-				t.Run("not null", func(t *testing.T) {
-					st.A = -1
-					err := dec.UnmarshalFromString(`{"a":1}`, &st)
-					require.NoError(t, err)
-					require.Equal(t, 2, st.A)
-				})
-			})
-			t.Run("pointer", func(t *testing.T) {
-				st := struct {
-					A *int `json:"a"`
-				}{}
-				t.Run("not present", func(t *testing.T) {
-					v := 123
-					st.A = &v
-					err := dec.UnmarshalFromString(`{}`, &st)
-					require.NoError(t, err)
-					require.Equal(t, &v, st.A)
-				})
-				t.Run("null on not null", func(t *testing.T) {
-					v := 123
-					st.A = &v
-					err := dec.UnmarshalFromString(`{"a":null}`, &st)
-					require.NoError(t, err)
-					require.Nil(t, st.A)
-				})
-				t.Run("not null", func(t *testing.T) {
-					v := 123
-					st.A = &v
-					err := dec.UnmarshalFromString(`{"a":1}`, &st)
-					require.NoError(t, err)
-					require.NotNil(t, st.A)
-					require.Equal(t, 2, *st.A)
-				})
-			})
-		})
-	})
-	t.Run("ptr", func(t *testing.T) {
-		dec := NewDecoder(&DecoderOption{
-			ValDecoders: map[reflect.Type]ValDecoder{
-				reflect.TypeOf((*int)(nil)): (*testPtrDecoder)(nil),
-			},
-			CaseSensitive: true,
-		})
-		t.Run("value", func(t *testing.T) {
-			t.Run("null", func(t *testing.T) {
-				var i *int
-				err := dec.UnmarshalFromString("null", &i)
-				require.NoError(t, err)
-				require.NotNil(t, i)
-				require.Equal(t, -1, *i)
-			})
-			t.Run("not null", func(t *testing.T) {
-				var i *int
-				err := dec.UnmarshalFromString("1", &i)
-				require.NoError(t, err)
-				require.NotNil(t, i)
-				require.Equal(t, 2, *i)
-			})
-		})
-		t.Run("struct", func(t *testing.T) {
-			t.Run("value", func(t *testing.T) {
-				st := struct {
-					A *int `json:"a"`
-				}{}
-				t.Run("null", func(t *testing.T) {
-					i := 123
-					st.A = &i
-					err := dec.UnmarshalFromString("null", &st)
-					require.NoError(t, err)
-					require.Equal(t, &i, st.A)
-				})
-				t.Run("not present", func(t *testing.T) {
-					i := 123
-					st.A = &i
-					err := dec.UnmarshalFromString(`{}`, &st)
-					require.NoError(t, err)
-					require.Equal(t, &i, st.A)
-				})
-				t.Run("present as null", func(t *testing.T) {
-					i := 123
-					st.A = &i
-					err := dec.UnmarshalFromString(`{"a":null}`, &st)
-					require.NoError(t, err)
-					require.NotNil(t, st.A)
-					require.Equal(t, -1, *st.A)
-				})
-				t.Run("present as not null", func(t *testing.T) {
-					i := 123
-					st.A = &i
-					err := dec.UnmarshalFromString(`{"a":1}`, &st)
-					require.NoError(t, err)
-					require.NotNil(t, st.A)
-					require.Equal(t, 2, *st.A)
-				})
-			})
-			t.Run("pointer", func(t *testing.T) {
-				st := struct {
-					A **int `json:"a"`
-				}{}
-				var v *int
-				st.A = &v
-				require.NotNil(t, st.A)
-				err := dec.UnmarshalFromString(`{"a":null}`, &st)
-				require.NoError(t, err)
-				require.Nil(t, st.A)
-			})
+		t.Run("failure at middle", func(t *testing.T) {
+			must := require.New(t)
+
+			newReader := func() io.Reader {
+				s := ` {} } `
+				return iotest.OneByteReader(strings.NewReader(s))
+			}
+			f := func(dec decFace) {
+				var i, i2 interface{}
+
+				err := dec.Decode(&i)
+				must.NoError(err)
+
+				err2 := dec.Decode(&i2)
+				t.Logf("%T %v", dec, err2)
+				must.Error(err2)
+			}
+			f(json.NewDecoder(newReader()))
+			f(NewDecoder(newReader()))
 		})
 	})
-	debug.FreeOSMemory()
+}
+
+func TestDecoder_UseNumber(t *testing.T) {
+	must := require.New(t)
+	s := "123.456"
+	newReader := func() io.Reader {
+		return strings.NewReader(s)
+	}
+	f := func(dec decFace) {
+		dec.UseNumber()
+		var i interface{}
+		err := dec.Decode(&i)
+		must.NoError(err)
+		must.Equal(json.Number(s), i)
+	}
+	f(json.NewDecoder(newReader()))
+	f(NewDecoder(newReader()))
+}
+
+func TestDecoder_DisallowUnknownFields(t *testing.T) {
+	must := require.New(t)
+	s := `{"k":"v"}`
+	newReader := func() io.Reader {
+		return strings.NewReader(s)
+	}
+	f := func(dec decFace) {
+		dec.DisallowUnknownFields()
+		var i struct{}
+		err := dec.Decode(&i)
+		t.Log(err)
+		must.Error(err)
+	}
+	f(json.NewDecoder(newReader()))
+	f(NewDecoder(newReader()))
 }

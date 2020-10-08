@@ -10,13 +10,13 @@ func (it *Iterator) ReadVal(obj interface{}) error {
 	if eface.data == nil {
 		return NilPointerReceiverError
 	}
-	dec := it.decoder.getDecoderFromCache(eface.rtype)
+	dec := it.cfg.getDecoderFromCache(eface.rtype)
 	if dec == nil {
 		typ := reflect.TypeOf(obj)
 		if typ.Kind() != reflect.Ptr {
 			return PointerReceiverError
 		}
-		dec = it.decoder.createDecoder(eface.rtype, typ)
+		dec = it.cfg.createDecoder(eface.rtype, typ)
 	}
 	return dec.Decode(eface.data, it, nil)
 }

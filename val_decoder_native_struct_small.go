@@ -83,7 +83,7 @@ func (dec *smallStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOp
 		if err != nil {
 			return err
 		}
-		stField := dec.find(field, it.decoder.caseSensitive)
+		stField := dec.find(field, it.cfg.caseSensitive)
 		if stField != nil {
 			curPtr := add(ptr, stField.offsets[0].val, "struct field")
 			for _, offset := range stField.offsets[1:] {
@@ -104,7 +104,7 @@ func (dec *smallStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOp
 				return err
 			}
 		} else {
-			if it.decoder.disallowUnknownFields {
+			if it.disallowUnknownFields {
 				return UnknownFieldError(field)
 			}
 			if err = it.Skip(); err != nil {

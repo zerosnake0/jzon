@@ -100,8 +100,8 @@ func (*stringDecoder) Decode(ptr unsafe.Pointer, it *Iterator, opts *DecOpts) er
 				return BadQuotedStringError(s)
 			}
 			// borrow another iterator
-			subIt := it.decoder.NewIterator()
-			defer it.decoder.ReturnIterator(subIt)
+			subIt := it.cfg.NewIterator()
+			defer subIt.Release()
 			subIt.ResetBytes(localStringToBytes(s))
 			subStr, err := subIt.ReadString()
 			if err != nil {

@@ -1,80 +1,68 @@
 package jzon
 
 import (
-	"reflect"
+	"bytes"
+	"encoding/json"
 	"testing"
-	"unsafe"
 
 	"github.com/stretchr/testify/require"
 )
 
-type testIntEncoder struct{}
+type encFace interface {
+	Encode(v interface{}) error
 
-func (*testIntEncoder) IsEmpty(ptr unsafe.Pointer) bool {
-	return *(*int)(ptr) == 1
+	SetEscapeHTML(on bool)
+
+	// This is incompatible with standard library
+	// SetIndent(prefix, indent string)
 }
 
-func (*testIntEncoder) Encode(ptr unsafe.Pointer, s *Streamer, opts *EncOpts) {
-	s.Int(*(*int)(ptr) + 1)
+var _ encFace = &json.Encoder{}
+var _ encFace = &Encoder{}
+
+func TestEncoder_SetEscapeHTML(t *testing.T) {
+	must := require.New(t)
+	s := "<>&"
+	buf := bytes.NewBuffer(nil)
+	f := func(enc encFace) {
+		// enabled
+		buf.Reset()
+		err := enc.Encode(s)
+		must.NoError(err)
+		must.Equal(`"\u003c\u003e\u0026"`+"\n", buf.String(), "%T", enc)
+
+		// disabled
+		buf.Reset()
+		enc.SetEscapeHTML(false)
+		err = enc.Encode(s)
+		must.NoError(err)
+		must.Equal(`"`+s+`"`+"\n", buf.String(), "%T", enc)
+	}
+	f(json.NewEncoder(buf))
+	f(NewEncoder(buf))
 }
 
-func TestEncoder_CustomEncoder(t *testing.T) {
-	t.Run("int", func(t *testing.T) {
-		enc := NewEncoder(&EncoderOption{
-			ValEncoders: map[reflect.Type]ValEncoder{
-				reflect.TypeOf(int(0)): (*testIntEncoder)(nil),
-			},
-		})
-		t.Run("value", func(t *testing.T) {
-			b, err := enc.Marshal(1)
-			require.NoError(t, err)
-			require.Equal(t, "2", string(b))
-		})
-		t.Run("pointer", func(t *testing.T) {
-			i := 1
-			b, err := enc.Marshal(&i)
-			require.NoError(t, err)
-			require.Equal(t, "2", string(b))
-		})
-		t.Run("struct", func(t *testing.T) {
-			t.Run("value", func(t *testing.T) {
-				type st struct {
-					I int `json:",omitempty"`
-				}
-				t.Run("zero", func(t *testing.T) {
-					b, err := enc.Marshal(st{})
-					require.NoError(t, err)
-					require.Equal(t, `{"I":1}`, string(b))
-				})
-				t.Run("empty", func(t *testing.T) {
-					b, err := enc.Marshal(st{I: 1})
-					require.NoError(t, err)
-					require.Equal(t, `{}`, string(b))
-				})
-			})
-			t.Run("pointer", func(t *testing.T) {
-				type st struct {
-					I *int `json:",omitempty"`
-				}
-				t.Run("nil", func(t *testing.T) {
-					b, err := enc.Marshal(st{})
-					require.NoError(t, err)
-					require.Equal(t, `{}`, string(b))
-				})
-				t.Run("zero", func(t *testing.T) {
-					i := 0
-					b, err := enc.Marshal(st{I: &i})
-					require.NoError(t, err)
-					require.Equal(t, `{"I":1}`, string(b))
-				})
-				t.Run("empty", func(t *testing.T) {
-					i := 1
-					b, err := enc.Marshal(st{I: &i})
-					require.NoError(t, err)
-					// pointer is not nil so it's not considered as empty
-					require.Equal(t, `{"I":2}`, string(b))
-				})
-			})
-		})
-	})
-}
+// func TestEncoder_SetIndent(t *testing.T) {
+// 	must := require.New(t)
+// 	s := map[string]interface{}{
+// 		"k": "v",
+// 	}
+// 	buf := bytes.NewBuffer(nil)
+// 	f := func(enc encFace) {
+// 		// disabled
+// 		buf.Reset()
+// 		err := enc.Encode(s)
+// 		must.NoError(err)
+// 		must.Equal(`{"k":"v"}`+"\n", buf.String(), "%T", enc)
+//
+// 		// disabled
+// 		buf.Reset()
+// 		enc.SetIndent("p", "i")
+// 		err = enc.Encode(s)
+// 		must.NoError(err)
+// 		t.Logf("\n%s", buf.Bytes())
+// 		must.Equal("{\npi\"k\": \"v\"\np}\n", buf.String(), "%T", enc)
+// 	}
+// 	f(json.NewEncoder(buf))
+// 	f(NewEncoder(buf))
+// }

@@ -32,7 +32,7 @@ func TestValDecoder_JsonUnmarshaler(t *testing.T) {
 			}
 			p2 = &b2
 		}
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	f2 := func(t *testing.T, data string, ex error, initErr error) {
 		f(t, data, ex, "dummy", initErr)

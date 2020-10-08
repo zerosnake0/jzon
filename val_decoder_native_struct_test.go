@@ -10,7 +10,7 @@ import (
 
 func TestValDecoder_Native_Struct_Zero_Field(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	t.Run("nil receiver", func(t *testing.T) {
 		f(t, "null", NilPointerReceiverError, nil, nil)
@@ -29,7 +29,7 @@ func TestValDecoder_Native_Struct_Zero_Field(t *testing.T) {
 
 func TestValDecoder_Native_Struct_Mapping(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	t.Run("unexported field", func(t *testing.T) {
 		f(t, ` { "a" : "abc" } `, nil, &struct {
@@ -87,7 +87,7 @@ func TestValDecoder_Native_Struct_Mapping(t *testing.T) {
 
 func TestValDecoder_Native_Struct(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	t.Run("nil receiver", func(t *testing.T) {
 		f(t, "null", NilPointerReceiverError, nil, nil)
@@ -215,7 +215,7 @@ type testStruct struct {
 
 func TestValDecoder_Native_Struct_Nested(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	t.Run("nested", func(t *testing.T) {
 		f(t, `{"a":null,"c":1,"b":{}}`, nil, &testStruct{
@@ -228,20 +228,20 @@ func TestValDecoder_Native_Struct_Nested(t *testing.T) {
 }
 
 func TestValDecoder_Native_Struct_CustomTag(t *testing.T) {
-	decoder := NewDecoder(&DecoderOption{
+	decCfg := NewDecoderConfig(&DecoderOption{
 		Tag: "jzon",
 	})
 	var p struct {
 		A string `jzon:"b"`
 	}
-	err := decoder.Unmarshal([]byte(` { "b" : "c" }`), &p)
+	err := decCfg.Unmarshal([]byte(` { "b" : "c" }`), &p)
 	require.NoError(t, err)
 	require.Equal(t, "c", p.A)
 }
 
 func TestValDecoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	t.Run("not embedded", func(t *testing.T) {
 		type inner struct{}
@@ -300,38 +300,38 @@ func TestValDecoder_Native_Struct_Embedded_Unexported(t *testing.T) {
 }
 
 func TestValDecoder_Native_Struct_DisallowUnknownFields(t *testing.T) {
-	dec := NewDecoder(&DecoderOption{
+	decCfg := NewDecoderConfig(&DecoderOption{
 		DisallowUnknownFields: true,
 	})
 	t.Run("zero field", func(t *testing.T) {
 		t.Run("eof", func(t *testing.T) {
 			var st struct{}
-			err := dec.Unmarshal([]byte(""), &st)
+			err := decCfg.Unmarshal([]byte(""), &st)
 			checkError(t, io.EOF, err)
 		})
 		t.Run("invalid", func(t *testing.T) {
 			var st struct{}
-			err := dec.Unmarshal([]byte("["), &st)
+			err := decCfg.Unmarshal([]byte("["), &st)
 			checkError(t, UnexpectedByteError{}, err)
 		})
 		t.Run("null", func(t *testing.T) {
 			var st struct{}
-			err := dec.Unmarshal([]byte("null"), &st)
+			err := decCfg.Unmarshal([]byte("null"), &st)
 			require.NoError(t, err)
 		})
 		t.Run("eof after bracket", func(t *testing.T) {
 			var st struct{}
-			err := dec.Unmarshal([]byte("{"), &st)
+			err := decCfg.Unmarshal([]byte("{"), &st)
 			checkError(t, io.EOF, err)
 		})
 		t.Run("non empty", func(t *testing.T) {
 			var st struct{}
-			err := dec.Unmarshal([]byte(`{"a":1}`), &st)
+			err := decCfg.Unmarshal([]byte(`{"a":1}`), &st)
 			checkError(t, UnexpectedByteError{}, err)
 		})
 		t.Run("empty", func(t *testing.T) {
 			var st struct{}
-			err := dec.Unmarshal([]byte(` { } `), &st)
+			err := decCfg.Unmarshal([]byte(` { } `), &st)
 			require.NoError(t, err)
 		})
 	})
@@ -340,14 +340,14 @@ func TestValDecoder_Native_Struct_DisallowUnknownFields(t *testing.T) {
 			var st struct {
 				A int
 			}
-			err := dec.Unmarshal([]byte(` { } `), &st)
+			err := decCfg.Unmarshal([]byte(` { } `), &st)
 			require.NoError(t, err)
 		})
 		t.Run("non empty", func(t *testing.T) {
 			var st struct {
 				A int
 			}
-			err := dec.Unmarshal([]byte(` { "b" : 1 } `), &st)
+			err := decCfg.Unmarshal([]byte(` { "b" : 1 } `), &st)
 			checkError(t, UnknownFieldError(""), err)
 		})
 	})
@@ -355,7 +355,7 @@ func TestValDecoder_Native_Struct_DisallowUnknownFields(t *testing.T) {
 
 func TestValDecoder_Native_Struct_Quoted(t *testing.T) {
 	f := func(t *testing.T, data string, ex error, p1, p2 interface{}) {
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 	}
 	t.Run("string", func(t *testing.T) {
 		type st struct {

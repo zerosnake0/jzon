@@ -99,7 +99,7 @@ func TestValDecoder_Native_Interface(t *testing.T) {
 		printValue(t, "p1", p1)
 		printValue(t, "p2", p2)
 		t.Log(">>>>>>>>>>>>>>>>>>>>>>")
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 		t.Log("<<<<< initValues <<<<<")
 		printValue(t, "p1", p1)
 		printValue(t, "p2", p2)
@@ -324,7 +324,7 @@ func TestValDecoder_Native_Interface_Loop(t *testing.T) {
 		printValue(t, "p1", p1)
 		printValue(t, "p2", p2)
 		t.Log(">>>>>>>>>>>>>>>>>>>>>>")
-		checkDecodeWithStandard(t, DefaultDecoder, data, ex, p1, p2)
+		checkDecodeWithStandard(t, DefaultDecoderConfig, data, ex, p1, p2)
 		t.Log("<<<<< initValues <<<<<")
 		printValue(t, "p1", p1)
 		printValue(t, "p2", p2)
@@ -346,7 +346,7 @@ func TestValDecoder_Native_Interface_Loop(t *testing.T) {
 		type iface interface{}
 		var o1 iface
 		o1 = &o1
-		err := DefaultDecoder.Unmarshal([]byte(`1`), o1)
+		err := DefaultDecoderConfig.Unmarshal([]byte(`1`), o1)
 		checkError(t, EfaceLoopingError, err)
 	})
 	t.Run("loop 2", func(t *testing.T) {
@@ -356,24 +356,24 @@ func TestValDecoder_Native_Interface_Loop(t *testing.T) {
 		var o1o crossIface
 		o1 = &o1o
 		o1o = &o1
-		err := DefaultDecoder.Unmarshal([]byte(`1`), o1)
+		err := DefaultDecoderConfig.Unmarshal([]byte(`1`), o1)
 		checkError(t, EfaceLoopingError, err)
 	})
 }
 
-func TestValDecoder_Native_Interface_Loop_WithDecoder(t *testing.T) {
+func TestValDecoder_Native_Interface_Loop_WithDecoderConfig(t *testing.T) {
 	t.Run("eface decoder", func(t *testing.T) {
 		type crossIface interface{}
 		var o1 interface{}
 		var o1o crossIface
 		o1 = &o1o
 		o1o = &o1
-		dec := NewDecoder(&DecoderOption{
+		decCfg := NewDecoderConfig(&DecoderOption{
 			ValDecoders: map[reflect.Type]ValDecoder{
 				reflect.TypeOf((*interface{})(nil)).Elem(): (*testIfaceDecoder)(nil),
 			},
 		})
-		err := dec.Unmarshal([]byte(`"abc"`), o1)
+		err := decCfg.Unmarshal([]byte(`"abc"`), o1)
 		require.NoError(t, err)
 		printValue(t, ">>", o1)
 		require.Equal(t, "abc", o1)
@@ -384,12 +384,12 @@ func TestValDecoder_Native_Interface_Loop_WithDecoder(t *testing.T) {
 		var o1o crossIface
 		o1 = &o1o
 		o1o = &o1
-		dec := NewDecoder(&DecoderOption{
+		decCfg := NewDecoderConfig(&DecoderOption{
 			ValDecoders: map[reflect.Type]ValDecoder{
 				reflect.TypeOf((*crossIface)(nil)).Elem(): (*testIfaceDecoder)(nil),
 			},
 		})
-		err := dec.Unmarshal([]byte(`"abc"`), o1)
+		err := decCfg.Unmarshal([]byte(`"abc"`), o1)
 		require.NoError(t, err)
 		printValue(t, ">>", o1)
 		require.Equal(t, "abc", o1o)

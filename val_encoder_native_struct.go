@@ -10,8 +10,8 @@ type structEncoderBuilder struct {
 	fields  structFields
 }
 
-func (enc *Encoder) newStructEncoder(typ reflect.Type) *structEncoderBuilder {
-	fields := describeStruct(typ, enc.tag, enc.onlyTaggedField)
+func (encCfg *EncoderConfig) newStructEncoder(typ reflect.Type) *structEncoderBuilder {
+	fields := describeStruct(typ, encCfg.tag, encCfg.onlyTaggedField)
 	if len(fields) == 0 {
 		return nil
 	}
