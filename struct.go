@@ -1,14 +1,14 @@
 package jzon
 
-/* see encoding/json
- * - some additional comments may be added
- * - some code may be slightly modified
- */
-
 import (
 	"reflect"
 	"sort"
 )
+
+/* see encoding/json
+ * - some additional comments may be added
+ * - some code may be slightly modified
+ */
 
 func describeStruct(st reflect.Type, tagKey string, onlyTaggedField bool) structFields {
 	// Anonymous fields to explore at the current level and the next.

@@ -1,14 +1,14 @@
 package jzon
 
-/* see encoding/json
- * - some additional comments may be added
- * - some code may be slightly modified
- */
-
 import (
 	"strings"
 	"unicode"
 )
+
+/* see encoding/json
+ * - some additional comments may be added
+ * - some code may be slightly modified
+ */
 
 // tagOptions is the string following a comma in a struct field's "json"
 // tag, or the empty string. It does not include the leading comma.
