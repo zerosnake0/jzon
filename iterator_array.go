@@ -21,13 +21,13 @@ func (it *Iterator) ReadArrayBegin() (ret bool, err error) {
 	if c != '[' {
 		return false, UnexpectedByteError{got: c, exp: '['}
 	}
-	it.head += 1
+	it.head++
 	c, err = it.nextToken()
 	if err != nil {
 		return false, err
 	}
 	if c == ']' {
-		it.head += 1
+		it.head++
 		return false, nil
 	}
 	return true, nil
@@ -40,10 +40,10 @@ func (it *Iterator) ReadArrayMore() (ret bool, err error) {
 	}
 	switch c {
 	case ',':
-		it.head += 1
+		it.head++
 		return true, nil
 	case ']':
-		it.head += 1
+		it.head++
 		return false, nil
 	default:
 		return false, UnexpectedByteError{got: c, exp: ',', exp2: ']'}
@@ -58,13 +58,13 @@ func (it *Iterator) ReadArrayCB(cb func(*Iterator) error) error {
 	if c != '[' {
 		return UnexpectedByteError{got: c, exp: '['}
 	}
-	it.head += 1
+	it.head++
 	c, err = it.nextToken()
 	if err != nil {
 		return err
 	}
 	if c == ']' {
-		it.head += 1
+		it.head++
 		return nil
 	}
 	for {
@@ -77,9 +77,9 @@ func (it *Iterator) ReadArrayCB(cb func(*Iterator) error) error {
 		}
 		switch c {
 		case ',':
-			it.head += 1
+			it.head++
 		case ']':
-			it.head += 1
+			it.head++
 			return nil
 		default:
 			return UnexpectedByteError{got: c, exp: ',', exp2: ']'}

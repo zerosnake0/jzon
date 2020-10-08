@@ -40,7 +40,7 @@ func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		if err = it.expectBytes("ull"); err != nil {
 			return err
 		}
@@ -54,7 +54,7 @@ func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 		if dec.elemKind != reflect.Uint8 {
 			return UnexpectedByteError{got: c, exp: '[', exp2: 'n'}
 		}
-		it.head += 1
+		it.head++
 		// TODO: improve by checking only base64 characters
 		begin := it.head
 		oldCapture := it.capture
@@ -74,14 +74,14 @@ func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 	if c != '[' {
 		return UnexpectedByteError{got: c, exp: '[', exp2: 'n'}
 	}
-	it.head += 1
+	it.head++
 	c, err = it.nextToken()
 	if err != nil {
 		return err
 	}
 	newPtr := unsafeMakeSlice(dec.elemRType, 0, 0)
 	if c == ']' {
-		it.head += 1
+		it.head++
 	} else {
 		for length := 1; ; length++ {
 			newPtr = unsafeGrowSlice(dec.elemRType, newPtr, length)
@@ -94,7 +94,7 @@ func (dec *sliceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 			if err != nil {
 				return err
 			}
-			it.head += 1
+			it.head++
 			if c == ']' {
 				break
 			}

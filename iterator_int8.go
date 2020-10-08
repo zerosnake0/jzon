@@ -16,7 +16,7 @@ func (it *Iterator) ReadUint8() (uint8, error) {
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readUint8(c)
 }
 
@@ -42,7 +42,7 @@ func (it *Iterator) readUint8(c byte) (ret uint8, err error) {
 		return
 	}
 	ret = (ret << 3) + (ret << 1) + uint8(u)
-	it.head += 1
+	it.head++
 	if it.head == it.tail {
 		if err = it.readMore(); err != nil {
 			if err == io.EOF {
@@ -55,7 +55,7 @@ func (it *Iterator) readUint8(c byte) (ret uint8, err error) {
 	if u == invalidDigit {
 		return
 	}
-	it.head += 1
+	it.head++
 	if ret > maxUint8Div10 ||
 		(ret == maxUint8Div10 && u > maxUint8Mod10) {
 		err = IntOverflowError{}
@@ -71,7 +71,7 @@ func (it *Iterator) readInt8(c byte) (int8, error) {
 		if err != nil {
 			return 0, err
 		}
-		it.head += 1
+		it.head++
 		v, err := it.readUint8(c)
 		if err != nil {
 			return 0, err
@@ -103,6 +103,6 @@ func (it *Iterator) ReadInt8() (int8, error) {
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readInt8(c)
 }

@@ -17,7 +17,7 @@ func (it *Iterator) ReadUint64() (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readUint64(c)
 }
 
@@ -67,7 +67,7 @@ func (it *Iterator) readInt64(c byte) (int64, error) {
 		if err != nil {
 			return 0, err
 		}
-		it.head += 1
+		it.head++
 		v, err := it.readUint64(c)
 		if err != nil {
 			return 0, err
@@ -99,6 +99,6 @@ func (it *Iterator) ReadInt64() (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readInt64(c)
 }

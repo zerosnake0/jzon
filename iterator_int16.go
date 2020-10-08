@@ -17,7 +17,7 @@ func (it *Iterator) ReadUint16() (uint16, error) {
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readUint16(c)
 }
 
@@ -66,7 +66,7 @@ func (it *Iterator) readInt16(c byte) (int16, error) {
 		if err != nil {
 			return 0, err
 		}
-		it.head += 1
+		it.head++
 		v, err := it.readUint16(c)
 		if err != nil {
 			return 0, err
@@ -98,6 +98,6 @@ func (it *Iterator) ReadInt16() (int16, error) {
 	if err != nil {
 		return 0, err
 	}
-	it.head += 1
+	it.head++
 	return it.readInt16(c)
 }

@@ -64,7 +64,7 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		if err = it.expectBytes("ull"); err != nil {
 			return err
 		}
@@ -74,13 +74,13 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 	if c != '{' {
 		return UnexpectedByteError{got: c, exp: '{', exp2: 'n'}
 	}
-	it.head += 1
+	it.head++
 	c, err = it.nextToken()
 	if err != nil {
 		return err
 	}
 	if c == '}' {
-		it.head += 1
+		it.head++
 		if *(*unsafe.Pointer)(ptr) == nil {
 			typedmemmove(dec.rtype, ptr, unsafeMakeMap(dec.rtype, 0))
 		}
@@ -104,7 +104,7 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 		if c != ':' {
 			return UnexpectedByteError{got: c, exp: ':'}
 		}
-		it.head += 1
+		it.head++
 		val := unsafe_New(dec.valRType)
 		if err = dec.valDec.Decode(val, it, nil); err != nil {
 			return err
@@ -116,10 +116,10 @@ func (dec *mapDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) erro
 		}
 		switch c {
 		case '}':
-			it.head += 1
+			it.head++
 			return nil
 		case ',':
-			it.head += 1
+			it.head++
 		default:
 			return UnexpectedByteError{got: c, exp: '}', exp2: ','}
 		}

@@ -58,26 +58,26 @@ func (dec *smallStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOp
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		err = it.expectBytes("ull")
 		return
 	}
 	if c != '{' {
 		return UnexpectedByteError{got: c, exp2: 'n', exp: '{'}
 	}
-	it.head += 1
+	it.head++
 	c, err = it.nextToken()
 	if err != nil {
 		return
 	}
 	if c == '}' {
-		it.head += 1
+		it.head++
 		return
 	}
 	if c != '"' {
 		return UnexpectedByteError{got: c, exp: '}', exp2: '"'}
 	}
-	it.head += 1
+	it.head++
 	for {
 		field, err := it.readObjectFieldAsSlice()
 		if err != nil {
@@ -117,10 +117,10 @@ func (dec *smallStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOp
 		}
 		switch c {
 		case '}':
-			it.head += 1
+			it.head++
 			return nil
 		case ',':
-			it.head += 1
+			it.head++
 			c, err = it.nextToken()
 			if err != nil {
 				return err
@@ -128,7 +128,7 @@ func (dec *smallStructDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOp
 			if c != '"' {
 				return UnexpectedByteError{got: c, exp: '"'}
 			}
-			it.head += 1
+			it.head++
 		default:
 			return UnexpectedByteError{got: c, exp: '}', exp2: ','}
 		}

@@ -75,7 +75,7 @@ func (dec *efaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 	}
 	ptrElemType := typ.Elem()
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		if err := it.expectBytes("ull"); err != nil {
 			return err
 		}
@@ -120,7 +120,7 @@ func (dec *ifaceDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) er
 		return err
 	}
 	if c == 'n' {
-		it.head += 1
+		it.head++
 		if err = it.expectBytes("ull"); err != nil {
 			return err
 		}

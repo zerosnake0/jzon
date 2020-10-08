@@ -9,7 +9,7 @@ func (it *Iterator) SkipRaw() ([]byte, error) {
 	oldCapture := it.capture
 	it.capture = true
 	begin := it.head
-	it.head += 1
+	it.head++
 	err = skipFunctions[c](it, c)
 	it.capture = oldCapture
 	if err != nil {
