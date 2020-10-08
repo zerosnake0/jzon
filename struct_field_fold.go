@@ -1,14 +1,14 @@
 package jzon
 
-/* see encoding/json
- * - some additional comments may be added
- * - some code may be slightly modified
- */
-
 import (
 	"bytes"
 	"unicode/utf8"
 )
+
+/* see encoding/json
+ * - some additional comments may be added
+ * - some code may be slightly modified
+ */
 
 const (
 	caseMask     = ^byte(0x20) // Mask to ignore case in ASCII.

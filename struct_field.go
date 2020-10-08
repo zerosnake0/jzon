@@ -1,13 +1,13 @@
 package jzon
 
+import (
+	"reflect"
+)
+
 /* see encoding/json
  * - some additional comments may be added
  * - some code may be slightly modified
  */
-
-import (
-	"reflect"
-)
 
 type offset struct {
 	val   uintptr
