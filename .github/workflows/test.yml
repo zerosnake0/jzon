@@ -27,7 +27,7 @@ jobs:
       uses: actions/checkout@v1
 
     - name: Test
-      run: go test -tags debug -race ./...
+      run: go test -tags debug -race -coverprofile=coverage.txt -covermode=atomic ./...
 
     - name: CodeCov
       run: bash <(curl -s https://codecov.io/bash)
