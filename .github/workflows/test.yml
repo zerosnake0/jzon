@@ -8,7 +8,7 @@ on:
     branches:
       - master
   schedule:
-    - cron: '0 12 * * *'
+    - cron: '0 12 * * 1'
 jobs:
   test:
     strategy:
@@ -28,3 +28,6 @@ jobs:
 
     - name: Test
       run: go test -tags debug -race ./...
+
+    - name: CodeCov
+      run: bash <(curl -s https://codecov.io/bash)
