@@ -8,6 +8,25 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestIterator_readObjectFieldAsSlice(t *testing.T) {
+	t.Run("stream reading", func(t *testing.T) {
+		withIterator("", func(it *Iterator) {
+			for step := 1; step < 8; step++ {
+				it.Reset(&stepByteReader{
+					b:    `{"a":1}`,
+					step: step, // consume the entire field A
+				})
+				var s struct {
+					A int `json:"a"`
+				}
+				err := it.ReadVal(&s)
+				require.NoError(t, err)
+				require.Equal(t, 1, s.A)
+			}
+		})
+	})
+}
+
 func TestIterator_Object_ReadObjectBegin(t *testing.T) {
 	t.Run("eof", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {

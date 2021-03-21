@@ -257,17 +257,19 @@ func TestIterator_Str_readStringAsSlice(t *testing.T) {
 	})
 	t.Run("reader 2", func(t *testing.T) {
 		withIterator("", func(it *Iterator) {
-			it.Reset(&stepByteReader{
-				b:    `"abc"`,
-				step: 2,
-			})
-			vt, err := it.NextValueType()
-			require.NoError(t, err)
-			require.Equal(t, StringValue, vt)
+			for step := 2; step < 6; step++ {
+				it.Reset(&stepByteReader{
+					b:    `"abc"`,
+					step: step,
+				})
+				vt, err := it.NextValueType()
+				require.NoError(t, err)
+				require.Equal(t, StringValue, vt)
 
-			s, err := it.ReadString()
-			require.NoError(t, err)
-			require.Equal(t, "abc", s)
+				s, err := it.ReadString()
+				require.NoError(t, err)
+				require.Equal(t, "abc", s)
+			}
 		})
 	})
 }
