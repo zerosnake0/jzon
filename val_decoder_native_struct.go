@@ -64,6 +64,7 @@ func (df *decoderFields) add(f *field, dec ValDecoder) {
 	df.list = append(df.list, dfi)
 }
 
+// key and buf
 func (df *decoderFields) find(key, buf []byte, caseSensitive bool) (*decoderFieldInfo, []byte) {
 	if i, ok := df.nameIndex[localByteToString(key)]; ok {
 		return &df.list[i], buf
@@ -126,7 +127,7 @@ func (dec *structDecoder) Decode(ptr unsafe.Pointer, it *Iterator, _ *DecOpts) (
 		if err != nil {
 			return err
 		}
-		stField, fieldOut := dec.fields.find(field, it.tmpBuffer, it.cfg.caseSensitive)
+		stField, fieldOut := dec.fields.find(field, field, it.cfg.caseSensitive)
 		it.tmpBuffer = fieldOut
 		if stField != nil {
 			curPtr := add(ptr, stField.offsets[0].val, "struct field")

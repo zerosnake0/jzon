@@ -128,8 +128,7 @@ Retry:
 }
 
 // internal, call only after a '"' is consumed
-// the result is either a part of the original data
-// or a part of the temp buffer, should be copied if
+// the result is a part of the temp buffer, should be copied if
 // the data needs to be saved
 func (it *Iterator) readStringAsSlice() (_ []byte, err error) {
 	for i := it.head; i < it.tail; i++ {
@@ -138,9 +137,9 @@ func (it *Iterator) readStringAsSlice() (_ []byte, err error) {
 			return nil, InvalidStringCharError{c: c}
 		}
 		if c == '"' {
-			buf := it.buffer[it.head:i]
+			it.tmpBuffer = append(it.tmpBuffer[:0], it.buffer[it.head:i]...)
 			it.head = i + 1
-			return buf, nil
+			return it.tmpBuffer, nil
 		} else if c == '\\' {
 			buf := append(it.tmpBuffer[:0], it.buffer[it.head:i]...)
 			it.head = i + 1
@@ -158,6 +157,7 @@ func (it *Iterator) readStringAsSlice() (_ []byte, err error) {
 	buf := append(it.tmpBuffer[:0], it.buffer[it.head:it.tail]...)
 	it.head = it.tail
 	if err := it.readMore(); err != nil {
+		it.tmpBuffer = buf
 		return nil, err
 	}
 	buf, err = it.readStringAsSliceSlow(buf)
