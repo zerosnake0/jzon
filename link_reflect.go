@@ -42,13 +42,22 @@ func maplen(m unsafe.Pointer) int
 func ifaceIndir(t rtype) bool
 
 type hiter struct {
-	key   unsafe.Pointer
-	value unsafe.Pointer
+	key         unsafe.Pointer
+	elem        unsafe.Pointer
+	t           unsafe.Pointer
+	h           unsafe.Pointer
+	buckets     unsafe.Pointer
+	bptr        unsafe.Pointer
+	overflow    unsafe.Pointer
+	oldoverflow unsafe.Pointer
+	startBucket uintptr
+	offset      uint8
+	wrapped     bool
+	B           uint8
+	i           uint8
+	bucket      uintptr
+	checkBucket uintptr
 }
-
-//go:noescape
-//go:linkname mapiterinit reflect.mapiterinit
-func mapiterinit(rtype rtype, m unsafe.Pointer) *hiter
 
 //go:noescape
 //go:linkname mapiternext reflect.mapiternext
