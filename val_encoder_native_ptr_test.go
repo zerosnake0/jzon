@@ -16,13 +16,13 @@ func TestValEncoder_Ptr(t *testing.T) {
 	t.Run("true", func(t *testing.T) {
 		b := true
 		log.Printf("&pb %x", (unsafe.Pointer)(&b))
-		log.Printf("*(&pb) %x", *(*unsafe.Pointer)((unsafe.Pointer)(&b)))
+		//log.Printf("*(&pb) %x", *(*unsafe.Pointer)((unsafe.Pointer)(&b)))
 		f(t, &b)
 	})
 	t.Run("false", func(t *testing.T) {
 		b := false
 		log.Printf("&pb %p", (unsafe.Pointer)(&b))
-		log.Printf("*(&pb) %x", *(*unsafe.Pointer)((unsafe.Pointer)(&b)))
+		//log.Printf("*(&pb) %x", *(*unsafe.Pointer)((unsafe.Pointer)(&b)))
 		f(t, &b)
 	})
 	t.Run("pptr", func(t *testing.T) {
