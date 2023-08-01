@@ -14,7 +14,8 @@ var (
 
 // EncoderOption can be used to customize the encoder config
 type EncoderOption struct {
-	ValEncoders map[reflect.Type]ValEncoder
+	ValEncoders   map[reflect.Type]ValEncoder
+	IfaceEncoders []IfaceValEncoderConfig
 
 	EscapeHTML      bool
 	Tag             string
@@ -47,6 +48,9 @@ type EncoderConfig struct {
 	encoderCache atomic.Value
 	// the internal cache
 	internalCache encoderCache
+	// iface encoders
+	ifaceEncoderMap map[rtype]ValEncoder
+	ifaceEncoder    []IfaceValEncoderConfig
 
 	tag             string
 	onlyTaggedField bool
@@ -55,12 +59,28 @@ type EncoderConfig struct {
 	escapeHTML bool
 }
 
+func (encCfg *EncoderConfig) addIfaceEncoder(cfg IfaceValEncoderConfig) {
+	rt := rtypeOfType(cfg.Type)
+	if encCfg.ifaceEncoderMap[rt] != nil {
+		return
+	}
+
+	// get the pointer type
+	ptrRt := rtypeOfType(reflect.New(cfg.Type).Type())
+	encCfg.ifaceEncoderMap[rt] = &dynamicIfaceValEncoder{
+		rtype:   ptrRt,
+		encoder: cfg.Encoder,
+	}
+	encCfg.ifaceEncoder = append(encCfg.ifaceEncoder, cfg)
+}
+
 // NewEncoderConfig returns a new encoder config
 // If the input option is nil, the default option will be applied
 func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 	encCfg := EncoderConfig{
-		tag:        "json",
-		escapeHTML: true,
+		tag:             "json",
+		escapeHTML:      true,
+		ifaceEncoderMap: map[rtype]ValEncoder{},
 	}
 	cache := encoderCache{}
 	internalCache := encoderCache{}
@@ -75,7 +95,22 @@ func NewEncoderConfig(opt *EncoderOption) *EncoderConfig {
 			encCfg.tag = opt.Tag
 		}
 		encCfg.onlyTaggedField = opt.OnlyTaggedField
+
+		// iface
+		encCfg.ifaceEncoder = make([]IfaceValEncoderConfig, 0, len(opt.IfaceEncoders))
+		for _, enc := range opt.IfaceEncoders {
+			encCfg.addIfaceEncoder(enc)
+		}
 	}
+	encCfg.addIfaceEncoder(IfaceValEncoderConfig{
+		Type:    jsonMarshalerType,
+		Encoder: jsonMarshalerValEncoder{},
+	})
+	encCfg.addIfaceEncoder(IfaceValEncoderConfig{
+		Type:    textMarshalerType,
+		Encoder: textMarshalerValEncoder{},
+	})
+
 	encCfg.encoderCache.Store(cache)
 	encCfg.internalCache = internalCache
 	return &encCfg
@@ -132,9 +167,17 @@ func (encCfg *EncoderConfig) createEncoder(rtype rtype, typ reflect.Type) ValEnc
 
 func (encCfg *EncoderConfig) createEncoderInternal(cache, internalCache encoderCache, typesToCreate typeQueue) {
 	rebuildMap := map[rtype]interface{}{}
+OuterLoop:
 	for typ := typesToCreate.pop(); typ != nil; typ = typesToCreate.pop() {
 		rType := rtypeOfType(typ)
 		if internalCache.has(rType) { // check if visited
+			continue
+		}
+
+		// check local encoders
+		if v, ok := encCfg.ifaceEncoderMap[rType]; ok {
+			internalCache[rType] = v
+			cache[rType] = v
 			continue
 		}
 
@@ -147,75 +190,115 @@ func (encCfg *EncoderConfig) createEncoderInternal(cache, internalCache encoderC
 
 		kind := typ.Kind()
 
-		// check json.Marshaler interface
-		if typ.Implements(jsonMarshalerType) {
-			if ifaceIndir(rType) {
-				v := &jsonMarshalerEncoder{
+		for _, ienc := range encCfg.ifaceEncoder {
+			if typ.Implements(ienc.Type) {
+				if ifaceIndir(rType) {
+					v := &ifaceValEncoder{
+						isEmpty: isEmptyFunctions[kind],
+						encoder: ienc.Encoder,
+						rtype:   rType,
+					}
+					internalCache[rType] = v
+					cache[rType] = v
+					continue OuterLoop
+				}
+				if typ.Kind() == reflect.Ptr {
+					elemType := typ.Elem()
+					if elemType.Implements(ienc.Type) {
+						typesToCreate.push(elemType)
+						w := newPointerEncoder(elemType)
+						internalCache[rType] = w.encoder
+						rebuildMap[rType] = w
+					} else {
+						v := &pointerIfaceValEncoder{
+							encoder: ienc.Encoder,
+							rtype:   rType,
+						}
+						internalCache[rType] = v
+						cache[rType] = &directEncoder{v}
+					}
+					continue OuterLoop
+				}
+				v := &directIfaceValEncoder{
 					isEmpty: isEmptyFunctions[kind],
+					encoder: ienc.Encoder,
 					rtype:   rType,
 				}
 				internalCache[rType] = v
-				cache[rType] = v
-				continue
+				cache[rType] = &directEncoder{v}
+				continue OuterLoop
 			}
-			if typ.Kind() == reflect.Ptr {
-				elemType := typ.Elem()
-				if elemType.Implements(jsonMarshalerType) {
-					// treat as a pointer encoder
-					typesToCreate.push(elemType)
-					w := newPointerEncoder(elemType)
-					internalCache[rType] = w.encoder
-					rebuildMap[rType] = w
-				} else {
-					v := pointerJSONMarshalerEncoder(rType)
-					internalCache[rType] = v
-					cache[rType] = &directEncoder{v}
-				}
-				continue
-			}
-			v := &directJSONMarshalerEncoder{
-				isEmpty: isEmptyFunctions[kind],
-				rtype:   rType,
-			}
-			internalCache[rType] = v
-			cache[rType] = &directEncoder{v}
-			continue
 		}
 
-		// check encoding.TextMarshaler interface
-		if typ.Implements(textMarshalerType) {
-			if ifaceIndir(rType) {
-				v := &textMarshalerEncoder{
-					isEmpty: isEmptyFunctions[kind],
-					rtype:   rType,
-				}
-				internalCache[rType] = v
-				cache[rType] = v
-				continue
-			}
-			if typ.Kind() == reflect.Ptr {
-				elemType := typ.Elem()
-				if elemType.Implements(textMarshalerType) {
-					// treat as a pointer encoder
-					typesToCreate.push(elemType)
-					w := newPointerEncoder(elemType)
-					internalCache[rType] = w.encoder
-					rebuildMap[rType] = w
-				} else {
-					v := pointerTextMarshalerEncoder(rType)
-					internalCache[rType] = v
-					cache[rType] = &directEncoder{v}
-				}
-				continue
-			}
-			v := &directTextMarshalerEncoder{
-				isEmpty: isEmptyFunctions[kind],
-				rtype:   rType,
-			}
-			internalCache[rType] = v
-			cache[rType] = &directEncoder{v}
-			continue
-		}
+		//// check json.Marshaler interface
+		//if typ.Implements(jsonMarshalerType) {
+		//	if ifaceIndir(rType) {
+		//		v := &jsonMarshalerEncoder{
+		//			isEmpty: isEmptyFunctions[kind],
+		//			rtype:   rType,
+		//		}
+		//		internalCache[rType] = v
+		//		cache[rType] = v
+		//		continue
+		//	}
+		//	if typ.Kind() == reflect.Ptr {
+		//		elemType := typ.Elem()
+		//		if elemType.Implements(jsonMarshalerType) {
+		//			// treat as a pointer encoder
+		//			typesToCreate.push(elemType)
+		//			w := newPointerEncoder(elemType)
+		//			internalCache[rType] = w.encoder
+		//			rebuildMap[rType] = w
+		//		} else {
+		//			v := pointerJSONMarshalerEncoder(rType)
+		//			internalCache[rType] = v
+		//			cache[rType] = &directEncoder{v}
+		//		}
+		//		continue
+		//	}
+		//	v := &directJSONMarshalerEncoder{
+		//		isEmpty: isEmptyFunctions[kind],
+		//		rtype:   rType,
+		//	}
+		//	internalCache[rType] = v
+		//	cache[rType] = &directEncoder{v}
+		//	continue
+		//}
+		//
+		//// check encoding.TextMarshaler interface
+		//if typ.Implements(textMarshalerType) {
+		//	if ifaceIndir(rType) {
+		//		v := &textMarshalerEncoder{
+		//			isEmpty: isEmptyFunctions[kind],
+		//			rtype:   rType,
+		//		}
+		//		internalCache[rType] = v
+		//		cache[rType] = v
+		//		continue
+		//	}
+		//	if typ.Kind() == reflect.Ptr {
+		//		elemType := typ.Elem()
+		//		if elemType.Implements(textMarshalerType) {
+		//			// treat as a pointer encoder
+		//			typesToCreate.push(elemType)
+		//			w := newPointerEncoder(elemType)
+		//			internalCache[rType] = w.encoder
+		//			rebuildMap[rType] = w
+		//		} else {
+		//			v := pointerTextMarshalerEncoder(rType)
+		//			internalCache[rType] = v
+		//			cache[rType] = &directEncoder{v}
+		//		}
+		//		continue
+		//	}
+		//	v := &directTextMarshalerEncoder{
+		//		isEmpty: isEmptyFunctions[kind],
+		//		rtype:   rType,
+		//	}
+		//	internalCache[rType] = v
+		//	cache[rType] = &directEncoder{v}
+		//	continue
+		//}
 
 		if kindRType := encoderKindMap[kind]; kindRType != 0 {
 			// TODO: shall we make this an option?

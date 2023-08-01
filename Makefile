@@ -1,0 +1,3 @@
+.PHONY: test
+test:
+	go test -tags debug -race ./...
